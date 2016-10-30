@@ -1,0 +1,22 @@
+{
+  "name": "mapzen-ar-demo",
+  "main": "index.js",
+  "authors": [
+    "Clark Van Oyen <clark@countable.ca>"
+  ],
+  "description": "",
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "three.js": "^0.81.0",
+    "turf": "^3.5.2"
+  }
+}
