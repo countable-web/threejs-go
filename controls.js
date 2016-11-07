@@ -78,7 +78,7 @@ var onKeyDown = function ( event ) {
       moveRight = true;
       break;
     case 32: // space
-      if ( canJump === true ) velocity.y += 350;
+      if ( canJump === true ) velocity.y += 50;
       canJump = false;
       break;
   }
@@ -105,3 +105,12 @@ var onKeyUp = function ( event ) {
 };
 document.addEventListener( 'keydown', onKeyDown, false );
 document.addEventListener( 'keyup', onKeyUp, false );
+
+var mouse = THREE.Vector2;
+
+function onDocumentMouseMove( event ) {
+  event.preventDefault();
+  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+}
+document.addEventListener( 'mousemove', onDocumentMouseMove, false );
