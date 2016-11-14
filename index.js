@@ -63,7 +63,16 @@ function init() {
   raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
   touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 25 );
 
-  addSDF(scene);
+  onFontLoad(function(){
+    for (var i=0;i<100;i++) {
+
+      var sdf = writeSDF("abcdefg\njfdaskjf\nkdjlas");
+      sdf.position.z = Math.random()*300-150;
+      sdf.position.x = Math.random()*300-150;
+      sdf.position.y = Math.random()*300-150;
+      scene.add(sdf);
+    }
+  });
   
   window.addEventListener( 'resize', onWindowResize, false );
 }
