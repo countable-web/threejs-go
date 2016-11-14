@@ -15,3 +15,17 @@ var arrow_icon = L.divIcon({
     });
 
 var arrow_marker = L.marker([player.lat, player.lng], {icon: arrow_icon}).addTo(minimap);
+
+setInterval(function(){
+  // update the map arrow.
+  var vector = controls.getObject().getWorldDirection();
+  var theta = -Math.atan2(vector.x,vector.z) + Math.PI/2;
+  $('.arrow-marker-inner').css({
+    'transform': 'rotateZ(' + theta + 'rad)'
+  });
+  arrow_marker.setLatLng(new L.LatLng(player.lat, player.lng));
+},100);
+
+setInterval(function(){
+  minimap.panTo(new L.LatLng(player.lat, player.lng), {animate: false});
+}, 1000);

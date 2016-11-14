@@ -4,8 +4,6 @@ var camera, scene, renderer, raycaster, touch_raycaster, INTERSECTED;
 init();
 animate();
 
-
-
 function toScreenPosition(obj, camera)
 {
     var vector = new THREE.Vector3();
@@ -63,16 +61,6 @@ function init() {
   raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
   touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 25 );
 
-  onFontLoad(function(){
-    for (var i=0;i<100;i++) {
-
-      var sdf = writeSDF("abcdefg\njfdaskjf\nkdjlas");
-      sdf.position.z = Math.random()*300-150;
-      sdf.position.x = Math.random()*300-150;
-      sdf.position.y = Math.random()*300-150;
-      scene.add(sdf);
-    }
-  });
   
   window.addEventListener( 'resize', onWindowResize, false );
 }
@@ -83,36 +71,73 @@ function onWindowResize() {
   renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
+var getFeatureDesc = function(feat){
+  return feat.name || feat.properties.name || feat.properties.address
+    || (feat.dataset==='landuse' && feat.properties.landuse_kind) || feat.properties.kind;
+};
+
+function clearIntersected(){
+  if ( INTERSECTED ) {
+    INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    scene.remove(INTERSECTED.sdf);
+    if (INTERSECTED.feature.dataset == 'roads') INTERSECTED.scale.y -= .1;
+    INTERSECTED = null;
+  }
+}
+
+var vector;
 function animate() {
   requestAnimationFrame( animate );
 
   if ( controlsEnabled ) {
 
     // touching stuff.
-    var vector = new THREE.Vector3(); // create once and reuse it!
+    vector = new THREE.Vector3(); // create once and reuse it!
     camera.getWorldDirection( vector );
     touch_raycaster.ray.origin.copy( controls.getObject().position );
+    touch_raycaster.ray.origin.y -= 3;
     touch_raycaster.ray.direction = vector;
 
     var intersects = touch_raycaster.intersectObjects( scene.children );
-    if ( intersects.length > 0 ) {
 
-      if ( INTERSECTED != intersects[ 0 ].object ) {
-        if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-        INTERSECTED = intersects[ 0 ].object;
+    var closest = intersects.shift();
+    while (closest && !closest.object.feature) closest = intersects.shift();
+
+    if ( closest ) {
+
+      if ( INTERSECTED != closest.object ) {
+        clearIntersected();
+
+        INTERSECTED = closest.object;
+
         INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-        INTERSECTED.material.emissive.setHex( 0xff0000 );
-        console.log(INTERSECTED.feature);
+        INTERSECTED.material.emissive.setHex( 0x333333 );  
+        
+        if (INTERSECTED.feature.dataset == 'roads') INTERSECTED.scale.y += .1;
+
+        console.log(closest, getFeatureDesc(INTERSECTED.feature));
+
+        var desc = getFeatureDesc(INTERSECTED.feature);
+        if (desc) {
+
+          var sdf = writeSDF(desc);
+          scene.add(sdf);
+          INTERSECTED.sdf = sdf;
+        }
       }
     } else {
-      if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-      INTERSECTED = null;
+      clearIntersected();
     }
+
 
     //standing on stuff.
     raycaster.ray.origin.copy( controls.getObject().position );
     raycaster.ray.origin.y -= 5;
-    var intersections = raycaster.intersectObjects( scene_objects );
+
+    var intersections = raycaster.intersectObjects( scene_objects ).filter(function(obj){
+      return !!obj.feature;
+    });
+
     var isOnObject = intersections.length > 0;
 
     var time = performance.now();
@@ -120,8 +145,8 @@ function animate() {
     velocity.x -= velocity.x * 10.0 * delta;
     velocity.z -= velocity.z * 10.0 * delta;
     velocity.y -= 9.8 * 10.0 * delta; // 100.0 = mass
-    if ( moveForward ) {
-      if (INTERSECTED) {
+    if ( moveForward ) { 
+      if (INTERSECTED && false) { //spidermode
         if (velocity.y < 1000)
         velocity.y += 1.5 * 9.8 * 10.0 * delta;
       } else {
@@ -148,8 +173,29 @@ function animate() {
       controls.getObject().position.y = 5;
       canJump = true;
     }
+    
+    if (INTERSECTED && INTERSECTED.sdf){
+      var sdf = INTERSECTED.sdf;
+      sdf.scale.set(0.02, 0.02, 0.02);
+      
+      //position
+      vector = new THREE.Vector3();
+      vector.copy(camera.getWorldPosition())
+      var offset = new THREE.Vector3();
+      offset.copy(camera.getWorldDirection());
+      offset.multiplyScalar(4);
+      vector.add(offset);
+      sdf.position.copy(vector);
+
+      //rotation
+      var vector2 = sdf.parent.worldToLocal( camera.getWorldPosition() );
+      sdf.lookAt( vector2 );
+      sdf.rotateX(Math.PI);      
+    }  
+
     prevTime = time;
   }
+
 
   renderer.render( scene, camera );
 }

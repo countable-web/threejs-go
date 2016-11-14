@@ -4073,7 +4073,7 @@ function loadFont (_font, _texture) {
     map: font_texture,
     side: THREE.DoubleSide,
     transparent: false,
-    color: 'rgb(230, 230, 230)'
+    color: 'rgb(0, 0, 0)'
   }));
 
   olf_callback && olf_callback();
@@ -4104,7 +4104,6 @@ global.writeSDF = function(copy){
   });
   var layout = geom.layout;
   var text = new THREE.Mesh(geom, font_material);
-  text.scale.set(0.5,0.5,0.5);
   text.rotateX(Math.PI);
   return text;
 

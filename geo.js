@@ -1,6 +1,8 @@
 
+var textureLoader = new THREE.TextureLoader();
+
 var player = {
-  lng: -122.9110, lat: 49.2067
+  lng: -122.9110, lat: 49.2065
 };
 var world = {
   scale: 200000
@@ -20,7 +22,6 @@ var MAP_CACHE = {};
 
 setInterval(function(){
   load_tiles(player.lat, player.lng)
-  minimap.panTo(new L.LatLng(player.lat, player.lng), {animate: false});
 }, 1000);
 
 var load_tile = (function(tx, ty) {
@@ -56,6 +57,7 @@ var add_buildings = function(geojson){
   add_geojson({
     geojson: geojson,
     color: 0x999999,
+    dataset: 'buildings',
     height: 'a'
   })
 };
@@ -64,6 +66,7 @@ var add_roads = function(geojson){
   add_geojson({
     geojson: geojson,
     color: 0x333333,
+    dataset: 'roads',
     height: 1
   });
 };
@@ -72,6 +75,7 @@ var add_pois = function(geojson){
   add_geojson({
     geojson: geojson,
     color: 0xFF0000,
+    dataset: 'poi',
     height: 20
   });
 }
@@ -80,6 +84,7 @@ var add_landuse = function(geojson){
   add_geojson({
     geojson: geojson,
     color: 0xFFFF00,
+    dataset: 'landuse',
     height: 0.5
   });
 }
@@ -88,23 +93,11 @@ var add_water = function(geojson){
   add_geojson({
     geojson: geojson,
     color: 0x6688FF,
+    dataset: 'water',
     height: 0.1
   });
 }
 
-
-
-
-
-setInterval(function(){
-  // update the map arrow.
-  var vector = controls.getObject().getWorldDirection();
-  var theta = -Math.atan2(vector.x,vector.z) + Math.PI/2;
-  $('.arrow-marker-inner').css({
-    'transform': 'rotateZ(' + theta + 'rad)'
-  });
-  arrow_marker.setLatLng(new L.LatLng(player.lat, player.lng));
-},100);
 
 
 if (window.location.host === "countable-web.github.io") {
@@ -282,9 +275,20 @@ FEATURE_INFO = {
 
 var scene_objects = [];
 
+/*
+var roads_tex = {
+  specularMap: textureLoader.load('textures/cobblestone/specular.png'),
+  normalMap: textureLoader.load('textures/cobblestone/normal.jpg'),
+  map: textureLoader.load('textures/cobblestone/diffuse.jpg'),
+  displacementMap: textureLoader.load('textures/cobblestone/height.png')
+};
+*/
+
 var add_geojson = function(opts){
 
   opts.geojson.features.forEach(function(feature) {
+
+    feature.dataset = opts.dataset;
 
     var kind_prop = function(property) {
       var key='kind';
@@ -343,11 +347,20 @@ var add_geojson = function(opts){
 
     var opacity = kind_prop('opacity') || 1;
 
-    var material = new THREE.MeshLambertMaterial( {
-      color: kind_prop('color'),
-      opacity: opacity,
-      transparent: (opacity < 1)
-    } );
+    /*if (opts.dataset === 'roads') {
+      var material = new THREE.MeshPhongMaterial({
+        specularMap: roads_tex.specularMap,
+        normalMap: roads_tex.normalMap,
+        map: roads_tex.map,
+        displacementMap: roads_tex.displacementMap
+      });
+    } else {*/
+      var material = new THREE.MeshLambertMaterial({
+        color: kind_prop('color'),
+        opacity: opacity,
+        transparent: (opacity < 1)
+      });
+    //}
     var mesh = new THREE.Mesh( geometry, material ) ;
     scene.add( mesh );
     mesh.feature = feature;
