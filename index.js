@@ -28,7 +28,7 @@ function toScreenPosition(obj, camera)
 
 function init() {
 
-  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
+  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
 
   scene = new THREE.Scene();
 
@@ -46,7 +46,7 @@ function init() {
   var plane = new THREE.Mesh( geometry, material );
   scene.add( plane );
 
-  scene.fog = new THREE.FogExp2( 0xccddee, 0.0025 );
+  scene.fog = new THREE.FogExp2( 0xccddee, 0.00025 );
 
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio( window.devicePixelRatio );
@@ -73,7 +73,9 @@ function onWindowResize() {
 
 var getFeatureDesc = function(feat){
   return feat.name || feat.properties.name || feat.properties.address
-    || (feat.dataset==='landuse' && feat.properties.landuse_kind) || feat.properties.kind;
+    || (feat.dataset==='landuse' && feat.properties.landuse_kind)
+    || (feat.properties.addr_street ? feat.properties.addr_street + ' - ' + feat.properties.addr_housenumber : null)
+    || feat.properties.kind;
 };
 
 function clearIntersected(){

@@ -2,7 +2,8 @@
 var textureLoader = new THREE.TextureLoader();
 
 var player = {
-  lng: -122.9110, lat: 49.2065
+  lng: -74.0059, lat: 40.712
+//  lng: -122.9110, lat: 49.2065
 };
 var world = {
   scale: 200000
@@ -10,7 +11,7 @@ var world = {
 player.start_lng = player.lng, player.start_lat = player.lat;
 
 
-var TILE_ZOOM = 16;
+var TILE_ZOOM = 17;
 
 function long2tile(lon,zoom) {
   return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
@@ -276,12 +277,20 @@ FEATURE_INFO = {
 var scene_objects = [];
 
 /*
-var roads_tex = {
+var cobble_tex = {
   specularMap: textureLoader.load('textures/cobblestone/specular.png'),
   normalMap: textureLoader.load('textures/cobblestone/normal.jpg'),
   map: textureLoader.load('textures/cobblestone/diffuse.jpg'),
   displacementMap: textureLoader.load('textures/cobblestone/height.png')
 };
+
+for (var k in cobble_tex) {
+
+  var texture = cobble_tex[k];
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set( 40, 40 );
+}
 */
 
 var add_geojson = function(opts){
@@ -332,6 +341,8 @@ var add_geojson = function(opts){
 
     if (opts.height === 'a') {
       var height = Math.sqrt(feature.properties.area);
+    } else if (feature.properties.height) {
+      var height = feature.properties.height;
     } else {
       var height = kind_prop('height');
     }
@@ -347,12 +358,12 @@ var add_geojson = function(opts){
 
     var opacity = kind_prop('opacity') || 1;
 
-    /*if (opts.dataset === 'roads') {
+    /*if (opts.dataset === 'buildings') {
       var material = new THREE.MeshPhongMaterial({
-        specularMap: roads_tex.specularMap,
-        normalMap: roads_tex.normalMap,
-        map: roads_tex.map,
-        displacementMap: roads_tex.displacementMap
+        specularMap: cobble_tex.specularMap,
+        normalMap: cobble_tex.normalMap,
+        map: cobble_tex.map,
+        displacementMap: cobble_tex.displacementMap
       });
     } else {*/
       var material = new THREE.MeshLambertMaterial({
