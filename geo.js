@@ -202,9 +202,12 @@ FEATURE_INFO = {
     width: 3
   },
   minor_road: {
-    width: 6
+    width: 5
   },
   major_road: {
+    width: 7
+  },
+  highway: {
     width: 9
   },
   pedestrian: {
@@ -230,7 +233,7 @@ FEATURE_INFO = {
   },
   park: {
     color: 0x008800,
-    opacity: 0.8,
+    opacity: 1,
     height: 0.6
   },
   forest: {
@@ -293,9 +296,13 @@ for (var k in cobble_tex) {
 }
 */
 
+var _drawn = {}; // avoid duplicate renderings.
 var add_geojson = function(opts){
 
   opts.geojson.features.forEach(function(feature) {
+
+    if (_drawn[feature.properties.id]) return;// avoid duplicate renderings.
+    _drawn[feature.properties.id] = true;
 
     feature.dataset = opts.dataset;
 
@@ -371,6 +378,9 @@ var add_geojson = function(opts){
         opacity: opacity,
         transparent: (opacity < 1)
       });
+      material.polygonOffset = true;
+      material.polygonOffsetFactor = Math.random() - 0.5; // TODO, a better z-fighting avoidance algorithm.
+      material.polygonOffsetUnits = 1;
     //}
     var mesh = new THREE.Mesh( geometry, material ) ;
     scene.add( mesh );
