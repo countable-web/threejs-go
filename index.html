@@ -80,6 +80,34 @@
     <script src="vendor/turf.min.js"></script> <!-- used only for turf.buffer currently -->
     <script src="bower_components/jquery/dist/jquery.js"></script><!-- used only for ajax currently -->
     
+    <script id="fragmentShader" type="x-shader/x-fragment">
+
+      uniform vec2 resolution;
+      uniform float time;
+      varying vec3 worldPos;
+      void main(void)
+      {
+
+        gl_FragColor=vec4(sin(worldPos.y),1.0,1.0,1.0);
+
+      }
+
+    </script>
+
+    <script id="vertexShader" type="x-shader/x-vertex">
+
+      uniform float time;
+      varying vec3 worldPos;
+      void main()
+      {
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        worldPos = position;
+        mvPosition.x += sin(mvPosition.y);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+
+    </script>
+
     <script src="controls.js"></script>
     <script src="tbmf.js"></script>
     <script src="geo.js"></script>

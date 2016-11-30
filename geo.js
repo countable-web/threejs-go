@@ -2,7 +2,7 @@
 var textureLoader = new THREE.TextureLoader();
 
 var player = {
-  lng: -74.0059, lat: 40.712
+  lng: -74.0159, lat: 40.712
 //  lng: -122.9110, lat: 49.2065
 };
 var world = {
@@ -29,10 +29,10 @@ var load_tile = (function(tx, ty) {
   MAP_CACHE[tx + '_' + ty] = 1;
   $.getJSON( "http://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY,function( data ) {
     add_buildings(data.buildings);
-    add_roads(data.roads);
+    /*add_roads(data.roads);
     add_pois(data.pois);
     add_landuse(data.landuse);
-    add_water(data.water);
+    add_water(data.water);*/
   });
 });
 
@@ -355,7 +355,7 @@ var add_geojson = function(opts){
     }
 
     var extrudeSettings = {
-      steps: 1,
+      steps: 10,
       amount: height || 1,
       bevelEnabled: false
     };
@@ -364,24 +364,20 @@ var add_geojson = function(opts){
     geometry.rotateX( - Math.PI / 2 );
 
     var opacity = kind_prop('opacity') || 1;
-
-    /*if (opts.dataset === 'buildings') {
-      var material = new THREE.MeshPhongMaterial({
-        specularMap: cobble_tex.specularMap,
-        normalMap: cobble_tex.normalMap,
-        map: cobble_tex.map,
-        displacementMap: cobble_tex.displacementMap
-      });
-    } else {*/
-      var material = new THREE.MeshLambertMaterial({
+    var material;
+    if (opts.dataset === 'buildings') {
+      material = shader_material;
+    } else {
+      throw new Error('AAA')
+      material = new THREE.MeshLambertMaterial({
         color: kind_prop('color'),
         opacity: opacity,
         transparent: (opacity < 1)
       });
-      material.polygonOffset = true;
-      material.polygonOffsetFactor = Math.random() - 0.5; // TODO, a better z-fighting avoidance algorithm.
-      material.polygonOffsetUnits = 1;
-    //}
+    }
+    material.polygonOffset = true;
+    material.polygonOffsetFactor = Math.random() - 0.5; // TODO, a better z-fighting avoidance algorithm.
+    material.polygonOffsetUnits = 1;
     var mesh = new THREE.Mesh( geometry, material ) ;
     scene.add( mesh );
     mesh.feature = feature;

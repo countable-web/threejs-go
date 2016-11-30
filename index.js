@@ -1,8 +1,6 @@
 var camera, scene, renderer, raycaster, touch_raycaster, INTERSECTED;
 
 
-init();
-animate();
 
 function toScreenPosition(obj, camera)
 {
@@ -25,6 +23,15 @@ function toScreenPosition(obj, camera)
 
 };
 
+
+var shader_material;
+function setup_shaders(){
+  shader_material = new THREE.ShaderMaterial( {
+    uniforms: shader_uniforms,
+    vertexShader: document.getElementById( 'vertexShader' ).textContent,
+    fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+  });
+}
 
 function init() {
 
@@ -58,14 +65,18 @@ function init() {
   controls = new THREE.PointerLockControls( camera );
   scene.add( controls.getObject() );
 
+  setup_shaders();
+  
   raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
   touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 25 );
 
-  
+  onWindowResize();
   window.addEventListener( 'resize', onWindowResize, false );
 }
 
 function onWindowResize() {
+  shader_uniforms.resolution.value.x = window.innerWidth;
+  shader_uniforms.resolution.value.y = window.innerHeight;
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize( window.innerWidth, window.innerHeight );
@@ -80,7 +91,7 @@ var getFeatureDesc = function(feat){
 
 function clearIntersected(){
   if ( INTERSECTED ) {
-    INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    //INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
     scene.remove(INTERSECTED.sdf);
     if (INTERSECTED.feature.dataset == 'roads') INTERSECTED.scale.y -= .1;
     INTERSECTED = null;
@@ -109,8 +120,8 @@ var update_player_focus = function() {
         INTERSECTED = closest.object;
         console.log(INTERSECTED);
 
-        INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-        INTERSECTED.material.emissive.setHex( 0x333333 );  
+        //INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+        //INTERSECTED.material.emissive.setHex( 0x333333 );  
         
         if (INTERSECTED.feature.dataset == 'roads') INTERSECTED.scale.y += .1;
 
@@ -128,10 +139,20 @@ var update_player_focus = function() {
     }
 }
 
+var shader_uniforms = {
+  time:       { value: 1.0 },
+  resolution: { value: new THREE.Vector2() }
+};
+console.log('SU',shader_uniforms);
+
+var clock = new THREE.Clock();
+
 function animate() {
   requestAnimationFrame( animate );
   var time = performance.now();
   var delta = ( time - prevTime ) / 1000;
+
+  shader_uniforms.time.value += clock.getDelta() * 5;
 
   if ( controlsEnabled ) {
 
@@ -218,3 +239,8 @@ var update_scene_label = function(){
   }
 
 }
+
+
+
+init();
+animate();
