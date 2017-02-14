@@ -1,8 +1,6 @@
-var camera, scene, renderer, raycaster, touch_raycaster, INTERSECTED;
+var camera, scene, renderer, fall_raycaster, touch_raycaster, INTERSECTED;
 
-
-
-function toScreenPosition(obj, camera)
+function to_screen_position(obj, camera)
 {
     var vector = new THREE.Vector3();
 
@@ -23,20 +21,44 @@ function toScreenPosition(obj, camera)
 
 };
 
-
-var shader_material;
-function setup_shaders(){
-  shader_material = new THREE.ShaderMaterial( {
+/**
+ * create a shader material from shader programs/snippets.
+ * @param fs_part just modifies vec3 color and float opacity.
+ * @param vs_part just modifies mvPosition.
+ */
+function setup_shader(opts){
+  return new THREE.ShaderMaterial( {
+    transparent: true,
     uniforms: shader_uniforms,
-    vertexShader: document.getElementById( 'vertexShader' ).textContent,
-    fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+    vertexShader: opts.vertex_shader ||
+       "uniform float time;\n"
+      +"varying vec3 worldPos;\n"
+      +"void main()\n"
+      +"{\n"
+      +"  vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n"
+      +"  worldPos = position;\n"
+      +opts.vs_part || ""
+      +"  gl_Position = projectionMatrix * mvPosition;\n"
+      +"}\n",
+    fragmentShader: opts.fragment_shader ||
+       "uniform vec2 resolution;\n"
+      +"uniform float time;\n"
+      +"varying vec3 worldPos;\n"
+      +"void main(void)\n"
+      +"{\n"
+      +"  float opacity = 1.0;\n"
+      +"  vec3 color = vec3(1.0,1.0,1.0);"
+      +opts.fs_part || ""
+      +"  gl_FragColor=vec4(color,opacity);\n"
+      +"}\n",
   });
 }
 
-function init() {
+var feature_styles = {}; // global eature styling object.
+function r3world(styles) {
 
+  /* Standard THREE.JS stuff */
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-
   scene = new THREE.Scene();
 
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
@@ -46,32 +68,48 @@ function init() {
   var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
   directionalLight.position.set( 1, 1, 1 );
   scene.add( directionalLight );
+  
 
+  renderer = new THREE.WebGLRenderer();
+  renderer.setPixelRatio( window.devicePixelRatio );
+  renderer.setSize( window.innerWidth, window.innerHeight ); 
+  renderer.setClearColor( 0xddeeff );
+  document.body.appendChild( renderer.domElement );
+
+  // Ground.
   var geometry = new THREE.PlaneBufferGeometry( 3000, 3000);
   geometry.rotateX( - Math.PI / 2 );
   var material = new THREE.MeshPhongMaterial( {color: 0x888888, side: THREE.DoubleSide} );
   var plane = new THREE.Mesh( geometry, material );
   scene.add( plane );
 
-  scene.fog = new THREE.FogExp2( 0xccddee, 0.005 );
-
-  renderer = new THREE.WebGLRenderer();
-  renderer.setPixelRatio( window.devicePixelRatio );
-  renderer.setSize( window.innerWidth, window.innerHeight ); 
-  renderer.setClearColor( 0xddeeff );
-
-  document.body.appendChild( renderer.domElement );
-
-  controls = new THREE.PointerLockControls( camera );
-  scene.add( controls.getObject() );
-
-  setup_shaders();
-  
-  raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
-  touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 25 );
-
   onWindowResize();
   window.addEventListener( 'resize', onWindowResize, false );
+
+  // Fog to obscure distant tiling.
+  scene.fog = new THREE.FogExp2( 0xccddee, 0.005 );
+
+  // first person controls.
+  controls = new THREE.PointerLockControls( camera );
+  // raycasters for collisions.
+  scene.add( controls.getObject() );
+  fall_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+  touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 25 );
+
+  // map feature styles.
+  styles = styles || {};
+
+  for (var k in DEFAULT_FEATURE_STYLES){
+    feature_styles[k] = styles[k] || DEFAULT_FEATURE_STYLES[k]
+  }
+
+  for (var kind in feature_styles) {
+    if (feature_styles[kind].fragment_shader || feature_styles[kind].vertex_shader) {
+      feature_styles[kind].shader_material = setup_shader(feature_styles[kind]);
+    }
+  }
+
+  animate();
 }
 
 function onWindowResize() {
@@ -118,7 +156,6 @@ var update_player_focus = function() {
         clearIntersected();
 
         INTERSECTED = closest.object;
-        console.log(INTERSECTED);
 
         //INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
         //INTERSECTED.material.emissive.setHex( 0x333333 );  
@@ -143,7 +180,6 @@ var shader_uniforms = {
   time:       { value: 1.0 },
   resolution: { value: new THREE.Vector2() }
 };
-console.log('SU',shader_uniforms);
 
 var clock = new THREE.Clock();
 
@@ -159,9 +195,10 @@ function animate() {
     update_player_focus();
 
     //standing on stuff.
-    raycaster.ray.origin.copy( controls.getObject().position );
-    raycaster.ray.origin.y -= 5;
-    var intersections = raycaster.intersectObjects( scene_objects ).filter(function(intersection){
+    fall_raycaster.ray.origin.copy( controls.getObject().position );
+    fall_raycaster.ray.origin.y -= 5;
+
+    var intersections = fall_raycaster.intersectObjects( feature_meshes ).filter(function(intersection){
       return !!intersection.object.feature;
     });
     var isOnObject = intersections.length > 0;
@@ -240,7 +277,3 @@ var update_scene_label = function(){
 
 }
 
-
-
-init();
-animate();

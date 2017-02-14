@@ -29,10 +29,10 @@ var load_tile = (function(tx, ty) {
   MAP_CACHE[tx + '_' + ty] = 1;
   $.getJSON( "http://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY,function( data ) {
     add_buildings(data.buildings);
-    /*add_roads(data.roads);
+    add_roads(data.roads);
     add_pois(data.pois);
     add_landuse(data.landuse);
-    add_water(data.water);*/
+    add_water(data.water);
   });
 });
 
@@ -113,171 +113,11 @@ if (window.location.host === "countable-web.github.io") {
   load_tiles(player.lat, player.lng);
 }
 
+// count the kinds of featues we see.
 var kinds = {};
 
-/*
-address:44
-alcohol:5
-artwork:3
-attraction:3
-bank:5
-bar:4
-beach:2
-bench:3
-bicycle_repair_station:2
-books:2
-building:457
-building_part:3
-bus_stop:6
-cafe:5
-car_repair:5
-cinema:2
-clinic:3
-clothes:3
-college:4
-commercial:2
-convenience:2
-courthouse:2
-drinking_water:4
-fast_food:11
-fence:21
-fitness:2
-florist:2
-footway:4
-gate:2
-government:3
-grass:12
-greengrocer:2
-hedge:18
-hotel:2
-kindergarten:2
-level_crossing:16
-major_road:46
-mall:2
-military:2
-mini_roundabout:2
-minor_road:253
-monument:4
-museum:3
-park:10
-parking:25
-path:168
-pedestrian:18
-pharmacy:3
-pier:4
-pitch:12
-place_of_worship:2
-platform:3
-playground:13
-police:2
-post_box:5
-post_office:2
-power_pole:3
-pub:2
-rail:48
-railway:8
-residential:16
-restaurant:20
-retail:8
-river:5
-riverbank:15
-school:3
-scrub:2
-station:3
-subway_entrance:2
-supermarket:3
-toilets:4
-townhall:2
-traffic_signals:3
-tree:11
-viewpoint:2
-waste_basket:2
-*/
-
-FEATURE_INFO = {
-  address: {
-    color: 0xFFFFFF
-  },
-  path: {
-    width: 3
-  },
-  minor_road: {
-    width: 5
-  },
-  major_road: {
-    width: 7
-  },
-  highway: {
-    width: 9
-  },
-  pedestrian: {
-    color: 0xFFFFFF
-  },
-  playground: {
-    height: 10,
-    color: 0xFFFF00,
-    opacity: 0.5
-  },
-  tree: {
-    color: 0x00FF00,
-    height: 40,
-    width: 3
-  },
-  grass: {
-    color: 0x00FF00,
-    height: 0.7
-  },
-  hedge: {
-    color: 0x006600,
-    height: 8
-  },
-  park: {
-    color: 0x008800,
-    opacity: 1,
-    height: 0.6
-  },
-  forest: {
-    color: 0x008800,
-    opacity: 0.8,
-    height: 4
-  },
-  pitch: {
-    color: 0x88FF88,
-    height: 0.8
-  },
-  parking: {
-    color: 0x555555,
-    opacity: 0.8,
-    height: 0.2
-  },
-  fence: {
-    color: 0xFF0000,
-    height: 9
-  },
-  railway: {
-    color: 0x888800,
-    height: 1.5
-  },
-  retail: {
-    height: 0.8,
-    color: 0xCC44CC
-  },
-  military: {
-    color: 0x448800
-  },
-  place_of_worship: {
-    color: 0x000000
-  },
-  residential: {
-    color: 0xCC8800
-  },
-  commercial: {
-    color:0x880088
-  }
-
-}
-
-var scene_objects = [];
+// keep a reference to everything we add to the scene from map data.
+var feature_meshes = [];
 
 /*
 var cobble_tex = {
@@ -287,7 +127,7 @@ var cobble_tex = {
   displacementMap: textureLoader.load('textures/cobblestone/height.png')
 };
 
-for (var k in cobble_tex) {
+for (var k izn cobble_tex) {
 
   var texture = cobble_tex[k];
   texture.wrapS = THREE.RepeatWrapping;
@@ -296,41 +136,22 @@ for (var k in cobble_tex) {
 }
 */
 
-var _drawn = {}; // avoid duplicate renderings.
-var add_geojson = function(opts){
+/**
+ * Takes a 2d geojson, converts it to a ThreeJS Geometry, and extrudes it to a height suitable for 3d viewing.
+ */
+var extrude_feature_shape = function(feature, opts){
 
-  opts.geojson.features.forEach(function(feature) {
+    var shape = new THREE.Shape();
 
-    if (_drawn[feature.properties.id]) return;// avoid duplicate renderings.
-    _drawn[feature.properties.id] = true;
-
-    feature.dataset = opts.dataset;
-
-    var kind_prop = function(property) {
-      var key='kind';
-      if (feature.properties && feature.properties.kind === 'building') {
-        key='landuse_kind';
-        if (property === 'height') return 'a'; // use area to estimate height for all buildings.
-      }
-      return (
-        feature.properties &&
-        feature.properties[key] && 
-        FEATURE_INFO[feature.properties[key]] &&
-        FEATURE_INFO[feature.properties[key]][property]) || opts[property];
-    };
-
-    // tally kinds.
-    kinds[feature.properties.kind] = kinds[feature.properties.kind] || 1;
-    kinds[feature.properties.kind] ++;
-
+    // Buffer the linestrings so they have some thickness (uses turf.js)
     if (feature.geometry.type === 'LineString' || feature.geometry.type === 'Point' || feature.geometry.type === 'MultiLineString') {
-      var width = kind_prop('width') || 1;
+      var width = get_feature_style_property('width') || 1;
       var buf = turf.buffer(feature, width, 'meters');
       feature.geometry = buf.geometry;
     }
-    var shape = new THREE.Shape();
+
     if (feature.geometry.type === 'MultiPolygon') {
-      var coords = feature.geometry.coordinates[0][0]; // TODO: all coords.
+      var coords = feature.geometry.coordinates[0][0]; // TODO: add all multipolygon coords.
     } else {
       var coords = feature.geometry.coordinates[0];
     }
@@ -342,7 +163,6 @@ var add_geojson = function(opts){
       var point = to_scene_coords(coord);
       shape.lineTo(point[0], point[1]);
     });
-
     var point = to_scene_coords(coords[0]);
     shape.lineTo(point[0], point[1]);
 
@@ -351,7 +171,7 @@ var add_geojson = function(opts){
     } else if (feature.properties.height) {
       var height = feature.properties.height;
     } else {
-      var height = kind_prop('height');
+      var height = get_feature_style_property('height') || opts.height || 1;
     }
 
     var extrudeSettings = {
@@ -363,30 +183,80 @@ var add_geojson = function(opts){
     var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
     geometry.rotateX( - Math.PI / 2 );
 
-    var opacity = kind_prop('opacity') || 1;
+    return geometry;
+
+};
+
+
+/**
+ * get_feature_style_property(property)
+ * Look up a style_property for a feature, like the color.
+ * First consult the user defined styles, then default styles, then default for this feature set (building, road, etc).
+ */
+var get_feature_style_property = function(feature, property) {
+
+  // The key to use for finding a property specific to this feature.
+  // Many features have a 'kind' property that can be used for styling.
+  var key='kind';
+  if (feature.properties && feature.properties.kind === 'building') { // special case for buildings.
+    key='landuse_kind'; // fall back to landuse if the building doesn't have a 'kind'
+    if (property === 'height') return 'a'; // use area to estimate height for all buildings.
+  }
+
+  if (
+    feature.properties &&
+    feature.properties[key] && 
+    feature_styles[feature.properties[key]] &&
+    feature_styles[feature.properties[key]][property]
+  ) {
+    return feature_styles[feature.properties[key]][property]
+  } else {
+    return null;
+  }
+};
+
+
+var _drawn = {}; // avoid duplicate renderings.
+var add_geojson = function(opts){
+
+  opts.geojson.features.forEach(function(feature) {
+
+    if (_drawn[feature.properties.id]) return;// avoid duplicate renderings. features might show up in 2 tiles.
+    _drawn[feature.properties.id] = true;
+
+    feature.dataset = opts.dataset;
+    dataset_style = feature_styles[opts.dataset] || {};
+
+    // tally feature "kind" (descriptive tags). used for debugging/enumerating available features and building stylesheets.
+    kinds[feature.properties.kind] = kinds[feature.properties.kind] || 1;
+    kinds[feature.properties.kind] ++;
+
+    var geometry = extrude_feature_shape(feature, opts);
+
+    var opacity = get_feature_style_property('opacity') || opts.opacity || 1;
     var material;
-    if (opts.dataset === 'buildings') {
-      material = shader_material;
+    if (dataset_style.shader_material) {
+      material = dataset_style.shader_material;
     } else {
-      throw new Error('AAA')
       material = new THREE.MeshLambertMaterial({
-        color: kind_prop('color'),
+        color: get_feature_style_property('color') || opts.color || 0xFFFFFF,
         opacity: opacity,
         transparent: (opacity < 1)
       });
     }
     material.polygonOffset = true;
-    material.polygonOffsetFactor = Math.random() - 0.5; // TODO, a better z-fighting avoidance algorithm.
+    material.polygonOffsetFactor = Math.random() - 0.5; // TODO, a better z-fighting avoidance method.
     material.polygonOffsetUnits = 1;
+
     var mesh = new THREE.Mesh( geometry, material ) ;
     scene.add( mesh );
     mesh.feature = feature;
-    scene_objects.push(mesh);
+    feature_meshes.push(mesh);
 
     var name = feature.name || feature.properties.name;
 
     if (name){
-      var spos = toScreenPosition(mesh, camera);
+      var spos = to_screen_position(mesh, camera);
     }
 
   });

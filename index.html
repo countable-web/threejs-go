@@ -60,7 +60,7 @@
     <div id="blocker">
 
       <div id="instructions">
-        <span style="font-size:40px">Exploring Real Map Data from New Westminister, Canada.</span>
+        <span style="font-size:40px">Exploring Real Map Data.</span>
         <br />
         You don't have AR sensors (compass, accelerometer) so we're using keyboard/mouse controls.
         <br />
@@ -80,39 +80,17 @@
     <script src="vendor/turf.min.js"></script> <!-- used only for turf.buffer currently -->
     <script src="bower_components/jquery/dist/jquery.js"></script><!-- used only for ajax currently -->
     
-    <script id="fragmentShader" type="x-shader/x-fragment">
-
-      uniform vec2 resolution;
-      uniform float time;
-      varying vec3 worldPos;
-      void main(void)
-      {
-
-        gl_FragColor=vec4(sin(worldPos.y),1.0,1.0,1.0);
-
-      }
-
-    </script>
-
-    <script id="vertexShader" type="x-shader/x-vertex">
-
-      uniform float time;
-      varying vec3 worldPos;
-      void main()
-      {
-        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-        worldPos = position;
-        mvPosition.x += sin(mvPosition.y);
-        gl_Position = projectionMatrix * mvPosition;
-      }
-
-    </script>
+    <script src="styles.js"></script>
 
     <script src="controls.js"></script>
     <script src="tbmf.js"></script>
     <script src="geo.js"></script>
     <script src="index.js"></script>
     <script src="minimap.js"></script>
+
+    <script>
+      r3world({});
+    </script>
 
   </body>
 </html>
