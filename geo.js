@@ -107,11 +107,13 @@ if (window.location.host === "countable-web.github.io") {
     player.lng = position.coords.longitude;
     player.start_lng = player.lng, player.start_lat = player.lat;
     load_tiles(player.lat, player.lng);
+    setup_minimap();
   });
   
 } else {
   load_tiles(player.lat, player.lng);
   player.start_lng = player.lng, player.start_lat = player.lat;
+  setup_minimap();
 }
 
 // count the kinds of featues we see.
