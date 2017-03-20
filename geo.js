@@ -102,7 +102,6 @@ var add_water = function(geojson){
 if (window.location.host === "countable-web.github.io") {
 
   navigator.geolocation.getCurrentPosition(function(position) {
-    alert(position.coords.latitude);
     player.lat = position.coords.latitude;
     player.lng = position.coords.longitude;
     player.start_lng = player.lng, player.start_lat = player.lat;
