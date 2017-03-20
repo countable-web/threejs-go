@@ -2,13 +2,10 @@
 var textureLoader = new THREE.TextureLoader();
 
 var player = {
-  lng: -74.0159, lat: 40.712
-//  lng: -122.9110, lat: 49.2065
 };
 var world = {
   scale: 200000
 }
-player.start_lng = player.lng, player.start_lat = player.lat;
 
 
 var TILE_ZOOM = 17;
@@ -22,6 +19,7 @@ function lat2tile(lat,zoom) {
 var MAP_CACHE = {};
 
 setInterval(function(){
+  if (!player.lat) return;
   load_tiles(player.lat, player.lng)
 }, 1000);
 
@@ -104,13 +102,16 @@ var add_water = function(geojson){
 if (window.location.host === "countable-web.github.io") {
 
   navigator.geolocation.getCurrentPosition(function(position) {
+    alert(position.coords.latitude);
     player.lat = position.coords.latitude;
     player.lng = position.coords.longitude;
+    player.start_lng = player.lng, player.start_lat = player.lat;
     load_tiles(player.lat, player.lng);
   });
   
 } else {
   load_tiles(player.lat, player.lng);
+  player.start_lng = player.lng, player.start_lat = player.lat;
 }
 
 // count the kinds of featues we see.
