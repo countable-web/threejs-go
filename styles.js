@@ -80,7 +80,7 @@ waste_basket:2
 
 DEFAULT_FEATURE_STYLES = {
   buildings: {
-    fragment_shader: 
+    /*fragment_shader: 
        "uniform vec2 resolution;\n"
       +"uniform float time;\n"
       +"varying vec3 worldPos;\n"
@@ -100,7 +100,7 @@ DEFAULT_FEATURE_STYLES = {
       +"  worldPos = position;\n"
       +"  mvPosition.x += sin(mvPosition.y);\n"
       +"  gl_Position = projectionMatrix * mvPosition;\n"
-      +"}\n"
+      +"}\n"*/
   },
   address: {
     color: 0xFFFFFF
