@@ -27,7 +27,7 @@ setInterval(function(){
 
 var load_tile = (function(tx, ty) {
   MAP_CACHE[tx + '_' + ty] = 1;
-  $.getJSON( "http://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY,function( data ) {
+  $.getJSON( "https://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY,function( data ) {
     add_buildings(data.buildings);
     add_roads(data.roads);
     add_pois(data.pois);
