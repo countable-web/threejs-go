@@ -1,0 +1,32 @@
+{
+  "name": "@turf/tin",
+  "version": "3.7.0",
+  "description": "turf tin module",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Turfjs/turf.git"
+  },
+  "keywords": [
+    "turf",
+    "tin",
+    "triangulate"
+  ],
+  "author": "morganherlocker",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Turfjs/turf/issues"
+  },
+  "homepage": "https://github.com/Turfjs/turf",
+  "devDependencies": {
+    "benchmark": "^1.0.0",
+    "tape": "^3.5.0"
+  },
+  "dependencies": {
+    "@turf/helpers": "^3.6.3"
+  },
+  "types": "index.d.ts"
+}

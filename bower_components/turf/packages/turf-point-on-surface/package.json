@@ -1,0 +1,39 @@
+{
+  "name": "@turf/point-on-surface",
+  "version": "3.7.0",
+  "description": "turf point-on-surface module",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Turfjs/turf.git"
+  },
+  "keywords": [
+    "turf",
+    "centroid",
+    "geojson",
+    "point",
+    "surface",
+    "polygon"
+  ],
+  "author": "morganherlocker",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Turfjs/turf/issues"
+  },
+  "homepage": "https://github.com/Turfjs/turf",
+  "devDependencies": {
+    "tape": "^3.5.0",
+    "benchmark": "^1.0.0"
+  },
+  "dependencies": {
+    "@turf/center": "^3.7.0",
+    "@turf/distance": "^3.7.0",
+    "@turf/explode": "^3.7.0",
+    "@turf/inside": "^3.7.0",
+    "@turf/helpers": "^3.6.3"
+  },
+  "types": "index.d.ts"
+}

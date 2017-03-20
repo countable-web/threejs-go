@@ -1,0 +1,34 @@
+{
+  "name": "@turf/distance",
+  "version": "3.7.0",
+  "description": "turf distance module",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Turfjs/turf.git"
+  },
+  "keywords": [
+    "turf",
+    "distance",
+    "miles",
+    "km"
+  ],
+  "author": "morganherlocker",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Turfjs/turf/issues"
+  },
+  "homepage": "https://github.com/Turfjs/turf",
+  "devDependencies": {
+    "benchmark": "^1.0.0",
+    "tape": "^3.5.0"
+  },
+  "dependencies": {
+    "@turf/invariant": "^3.7.0",
+    "@turf/helpers": "^3.6.3"
+  },
+  "types": "index.d.ts"
+}
