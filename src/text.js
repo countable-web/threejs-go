@@ -4048,8 +4048,8 @@ var dragcontrols;
 
 // load up a 'fnt' and texture
 require('./load')({
-  font: 'fnt/DejaVu-sdf.fnt',
-  image: 'fnt/DejaVu-sdf.png'
+  font: '/fonts/DejaVu-sdf.fnt',
+  image: '/fonts/DejaVu-sdf.png'
 }, loadFont)
 
 var font_texture = null, font_material = null, font = null;
@@ -4089,7 +4089,7 @@ global.onFontLoad = function(cb){
   }
 };
 
-global.writeSDF = function(copy){
+ARTHREE.ARText = function(copy){
 
   if (!font_material) {
     console.error('Font not loaded yet, cant write SDF');
@@ -4105,7 +4105,7 @@ global.writeSDF = function(copy){
   var layout = geom.layout;
   var text = new THREE.Mesh(geom, font_material);
   text.rotateX(Math.PI);
-  return text;
+  this.text = text;
 
   /* // ANCHOR object.
   var textAnchor = new THREE.Object3D()
