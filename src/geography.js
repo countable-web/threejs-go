@@ -141,7 +141,7 @@ ARTHREE.ARMapzenGeography = function(opts){
   */
 
 
-
+  /*
   if (window.location.host === "countable-web.github.io") {
 
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -152,11 +152,11 @@ ARTHREE.ARMapzenGeography = function(opts){
       if (this.opts.minimap) this.minimap = new ARTHREE.ARMiniMap(this);
     });
     
-  } else {
+  } else {*/
     load_tiles(player.lat, player.lng);
     player.start_lng = player.lng, player.start_lat = player.lat;
     if (this.opts.minimap) this.minimap = new ARTHREE.ARMiniMap(this);
-  }
+  //}
 
 
 };
