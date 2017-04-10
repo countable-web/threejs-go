@@ -4048,8 +4048,8 @@ var dragcontrols;
 
 // load up a 'fnt' and texture
 require('./load')({
-  font: '../fonts/DejaVu-sdf.fnt',
-  image: '../fonts/DejaVu-sdf.png'
+  font: '../../fonts/DejaVu-sdf.fnt',
+  image: '../../fonts/DejaVu-sdf.png'
 }, loadFont)
 
 var font_texture = null, font_material = null, font = null;
