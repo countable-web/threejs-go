@@ -78,36 +78,6 @@ var init_ar = function(){
 
   // AR Stuff
 
-  var styles = {
-    buildings: {
-      color: 0x448800,
-      height_scale: 0.1,
-      //opacity: 0.3,
-      extrude: 'rounded'
-    },
-    roads: {
-        color: 0xDDAA00,
-        height: 0.2,
-        extrude: 'flat'
-    },
-    "McDonald's": {
-      color: 0xffdd00,
-      height_scale: 1
-    },
-    path: {
-      width: 2
-    },
-    minor_road: {
-      width: 3
-    },
-    major_road: {
-      width: 4
-    },
-    highway: {
-      width: 5
-    },
-  };
-
   ar_world = new ARTHREE.ARWorld({
     ground: true,
     camera: camera,
@@ -125,6 +95,7 @@ var init_ar = function(){
   });
 
 };
+
 
 var outlets = [];
 var init_mcd = function(){
@@ -179,21 +150,21 @@ var init_mcd = function(){
       scene.add( outlet );
       outlets.push(outlet);
 
-      var geometry = new THREE.CylinderGeometry( 60, 60, 60, 32 );
+      var geometry = new THREE.CylinderGeometry( 60, 60, 30, 32 );
       var cylinder = new THREE.Mesh( geometry, deco_material );
       cylinder.position.x = coords[0];
       cylinder.position.z = coords[1];
       cylinder.position.y = 0;
       scene.add( cylinder );
 
-      var geometry2 = new THREE.CylinderGeometry( 20, 20, 10, 32 );
+      var geometry2 = new THREE.CylinderGeometry( 20, 20, 5, 32 );
       var cylinder2 = new THREE.Mesh( geometry2, deco_material );
       cylinder2.position.x = coords[0];
       cylinder2.position.z = coords[1];
       cylinder2.position.y = 200;
       scene.add( cylinder2 );
 
-      var geometry3 = new THREE.CylinderGeometry( 40, 40, 10, 32 );
+      var geometry3 = new THREE.CylinderGeometry( 40, 40, 5, 32 );
       var cylinder3 = new THREE.Mesh( geometry3, deco_material );
       cylinder3.position.x = coords[0];
       cylinder3.position.z = coords[1];
@@ -207,7 +178,7 @@ var init_mcd = function(){
 
 var init_events = function() {
   var button = document.getElementById('walk');
-  button.addEventListener('mousedown', function(){
+  /*button.addEventListener('mousedown', function(){
     ar_world.moveForward = true;
     button.className = 'depressed';
   });
@@ -215,6 +186,15 @@ var init_events = function() {
   button.addEventListener('mouseup', function(){
     ar_world.moveForward = false;
     button.className = '';
+  });*/
+
+  button.addEventListener('click', function(){
+    navigator.geolocation.getCurrentPosition(function(position) {
+      ar_geo.player.lat = position.coords.latitude;
+      ar_geo.player.lng = position.coords.longitude;
+      ar_geo.player.start_lng = ar_geo.player.lng, ar_geo.player.start_lat = ar_geo.player.lat;
+      load_tiles(ar_geo.player.lat, ar_geo.player.lng);
+    });
   });
 };
 
@@ -264,7 +244,7 @@ var init_burgler = function(){
           child.scale.z = 2;
           child.position.y = 1;
         } else if (child.name.indexOf('iris') > -1) {
-          console.log('riris')
+          console.log('iris')
           child.material = new THREE.MeshLambertMaterial( {
             color: 0x000000,
             side: THREE.DoubleSide,
@@ -288,10 +268,10 @@ var init_burgler = function(){
 
     } );
 
-    object.scale.x = 20;
-    object.scale.y = 20;
-    object.scale.z = 20;
-    object.position.y = 0
+    object.scale.x = 15;
+    object.scale.y = 15;
+    object.scale.z = 15;
+    object.position.y = 0;
 
     // shadow.
     var shadow_material = new THREE.MeshLambertMaterial( {
@@ -303,7 +283,7 @@ var init_burgler = function(){
     var cylinder4 = new THREE.Mesh( geometry4, shadow_material );
     cylinder4.position.x = 0;
     cylinder4.position.z = 0;
-    cylinder4.position.y = 0.01; //1/20;
+    cylinder4.position.y = 0.1; //1/20;
     object.add( cylinder4 );
 
     scene.add( object );
