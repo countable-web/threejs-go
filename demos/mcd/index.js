@@ -146,30 +146,27 @@ var init_mcd = function(){
       coords = ar_geo.to_scene_coords([point.lng, point.lat]);
       outlet.position.x = coords[0];
       outlet.position.z = coords[1];
-      outlet.position.y = 90;
+      outlet.position.y = 80;
+
       scene.add( outlet );
       outlets.push(outlet);
+      outlet.cylinders = [];
 
-      var geometry = new THREE.CylinderGeometry( 60, 60, 30, 32 );
-      var cylinder = new THREE.Mesh( geometry, deco_material );
-      cylinder.position.x = coords[0];
-      cylinder.position.z = coords[1];
-      cylinder.position.y = 0;
-      scene.add( cylinder );
+      [
+        [60,25,0],
+        [20,5,200],
+        [40,5,160]
+      ].forEach(function(params){
+        var geometry = new THREE.CylinderGeometry( params[0], params[0], params[1], 32 );
+        var cylinder = new THREE.Mesh( geometry, deco_material );
+        cylinder.position.x = coords[0];
+        cylinder.position.z = coords[1];
+        cylinder.position.y = params[2];
+        cylinder.start_position = cylinder.position.clone();
+        scene.add( cylinder );
+        outlet.cylinders.push(cylinder);
+      });
 
-      var geometry2 = new THREE.CylinderGeometry( 20, 20, 5, 32 );
-      var cylinder2 = new THREE.Mesh( geometry2, deco_material );
-      cylinder2.position.x = coords[0];
-      cylinder2.position.z = coords[1];
-      cylinder2.position.y = 200;
-      scene.add( cylinder2 );
-
-      var geometry3 = new THREE.CylinderGeometry( 40, 40, 5, 32 );
-      var cylinder3 = new THREE.Mesh( geometry3, deco_material );
-      cylinder3.position.x = coords[0];
-      cylinder3.position.z = coords[1];
-      cylinder3.position.y = 150;
-      scene.add( cylinder3 );
 
     });
   });
@@ -293,21 +290,39 @@ var init_burgler = function(){
 };
 
 
+var prevTime = performance.now();
+
 var animate = function() {
+  var time = performance.now();
+  var delta = ( time - prevTime ) / 1000;
+
   requestAnimationFrame( animate );
+
   controls.update();
+
   ar_world.update({
     feature_meshes: ar_geo.feature_meshes
   });
-  renderer.render( scene, camera );
+
   outlets.forEach(function(outlet){
     outlet.rotateZ(.03);
+    outlet.cylinders.forEach(function(cylinder, i){
+      cylinder.position.y = cylinder.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
+    })
   });
+
   if (typeof burglar !== 'undefined'){
     burglar.position.x = controls.target.x;
     burglar.position.z = controls.target.z;
-    burglar.rotation.y = camera.rotation.y;
+    burglar.rotation.y = camera.rotation.y + Math.cos(time/900);
+    burglar.scale.x = 15 + 1 * Math.sin(time/500);
+    burglar.scale.z = 15 + 1 * Math.sin(time/500);
+    burglar.scale.y = 15 + .5 * Math.cos(time/500);
   }
+
+  renderer.render( scene, camera );
+
+  prevTime = time;
 }
 
 
