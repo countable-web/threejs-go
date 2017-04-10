@@ -320,6 +320,13 @@ var animate = function() {
     burglar.scale.y = 15 + .5 * Math.cos(time/500);
   }
 
+  heart.position.y = 65 + Math.cos(time/1500) * 5;
+  heart.scale.x = (1 - 0.1*Math.cos(time/200) );
+  heart.scale.y = (1 - 0.1*Math.cos(time/200) );
+  heart.scale.z = (1 - 0.1*Math.cos(time/200) );
+  
+
+
   renderer.render( scene, camera );
 
   prevTime = time;
@@ -342,9 +349,11 @@ heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
 
 var geometry = new THREE.ShapeGeometry( heartShape );
 var material = new THREE.MeshBasicMaterial( { color: 0xff4488 , side: THREE.DoubleSide} );
-var mesh = new THREE.Mesh( geometry, material ) ;
-mesh.position.y = 80;
-mesh.rotation.z = Math.PI;
-scene.add( mesh );
+var heart = new THREE.Mesh( geometry, material ) ;
+heart.position.y = 60;
+heart.position.x = 5;
+heart.position.z = 0;
+heart.rotation.z = Math.PI;
+scene.add( heart );
 
 animate();
