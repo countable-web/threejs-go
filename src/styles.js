@@ -101,7 +101,31 @@ DEFAULT_FEATURE_STYLES = {
       +"  mvPosition.x += sin(mvPosition.y);\n"
       +"  gl_Position = projectionMatrix * mvPosition;\n"
       +"}\n"*/
+
+      color: 0x999999,
+      height: 'a'
   },
+
+  roads: {
+      color: 0x333333,
+      height: 1
+  },
+
+  pois: {
+      color: 0xFF0000,
+      height: 20
+  },
+
+  landuse: {
+      color: 0xFFFF00,
+      height: 0.5
+  },
+
+  water: {
+      color: 0x6688FF,
+      height: 0.1
+  },
+
   address: {
     color: 0xFFFFFF
   },
@@ -117,6 +141,7 @@ DEFAULT_FEATURE_STYLES = {
   highway: {
     width: 9
   },
+  
   pedestrian: {
     color: 0xFFFFFF
   },
