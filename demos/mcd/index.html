@@ -1,14 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>McDonalds AP App</title>
+    <title>McDonalds AR App</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../../src/arthree.css">
+    <style>
+    #walk {
+        position: fixed;
+        width: 20vh;
+        height: 20vh;
+        right: 5vh;
+        bottom: 5vh;
+        background: #ffdd00;
+        border: 0.5vh solid black;
+        border-radius: 50%;
+        box-shadow: 1vh 1vh 10vh rgba(0,0,0,0.5);
+        font-size: 5vh;
+        text-align: center;
+        box-sizing: border-box;
+        padding-top: 7vh;
+    }
+    #walk:hover {
+        background: white;
+    }
+    #walk.depressed {
+        box-shadow: 1vh 0 5vh rgba(0,0,0,0.5);
+        bottom: 4vh;
+    }
+    </style>
   </head>
   <body>
 
-
+    <div id="walk">walk</div>
     <div id="mapid" style="width: 500px; height: 300px; position: absolute; top:0; right: 0; z-index:100"></div>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />

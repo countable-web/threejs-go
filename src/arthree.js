@@ -26,10 +26,10 @@ ARTHREE.to_screen_position = function(obj, camera)
 };
 
 
-ARTHREE.ARWorld = (function(styles){
+ARTHREE.ARWorld = (function(opts){
 
-  
-  var fall_raycaster, touch_raycaster, INTERSECTED;
+
+  var fall_raycaster, INTERSECTED;
 
   ARTHREE.isMobile = function () {
     var check = false;
@@ -50,94 +50,96 @@ ARTHREE.ARWorld = (function(styles){
 
   var ARWorld = function(opts) {
 
+    this.opts = opts;
+
+    if (!this.opts.camera){
+      throw new Error("opts.camera is required.");
+    }
     ARTHREE.onWindowResize();
     window.addEventListener( 'resize', ARTHREE.onWindowResize, false );
 
-    if (opts.ground) {
-      var init_ground = function(){
-        // Ground.
-        var geometry = new THREE.PlaneBufferGeometry( 3000, 3000);
-        geometry.rotateX( - Math.PI / 2 );
-        var material = new THREE.MeshPhongMaterial( {color: 0x888888, side: THREE.DoubleSide} );
-        var plane = new THREE.Mesh( geometry, material );
-        scene.add( plane );
-      }
-      init_ground();
-    }
 
     // raycasters for collisions.
     fall_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
-    touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 25 );
+    this.touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 25 );
 
   }
 
+  var velocity = new THREE.Vector3();
 
-
-  ARWorld.prototype.update = function() {
+  ARWorld.prototype.update = function(params) {
     var time = performance.now();
     var delta = ( time - prevTime ) / 1000;
 
     shader_uniforms.time.value += clock.getDelta() * 5;
 
-    /*
-    if ( controls && controlsEnabled ) {
+    // touching stuff.
+    this.update_player_focus();
 
-      update_player_focus();
-
+    if ( this.opts.ground ) {
 
       //standing on stuff.
-      fall_raycaster.ray.origin.copy( camera.position );
+      fall_raycaster.ray.origin.copy( this.opts.camera.position );
       fall_raycaster.ray.origin.y -= 5;
 
-      var intersections = fall_raycaster.intersectObjects( feature_meshes ).filter(function(intersection){
+      var intersections = fall_raycaster.intersectObjects( params.feature_meshes ).filter(function(intersection){
         return !!intersection.object.feature;
       });
       var isOnObject = intersections.length > 0;
+    }
 
-      // friction.
-      velocity.x -= velocity.x * 10.0 * delta;
-      velocity.z -= velocity.z * 10.0 * delta;
-      // gravity
+    // friction.
+    velocity.x -= velocity.x * 10.0 * delta;
+    velocity.z -= velocity.z * 10.0 * delta;
+    
+    // gravity
+    if (this.opts.gravity) {
       velocity.y -= 9.8 * 3.0 * delta;
+    }
 
-      if ( moveForward ) { 
-        if (INTERSECTED && INTERSECTED.distance < 5) {
-          velocity.x = 0;
-          velocity.z = 0;
+    if ( this.moveForward ) { 
+      if (this.opts.collisions && INTERSECTED && INTERSECTED.distance < 5) {
+        velocity.x = 0;
+        velocity.z = 0;
+        if (this.opts.gravity) {
           velocity.y = 1500 * delta;
-          //velocity.y += 1.5 * 9.8 * 10.0 * delta;
-        } else {
-          velocity.z -= 400.0 * delta;
         }
+        //velocity.y += 1.5 * 9.8 * 10.0 * delta;
+      } else {
+        velocity.z -= 400.0 * delta;
       }
-      if ( moveBackward ) velocity.z += 400.0 * delta;
-      if ( moveLeft ) velocity.x -= 400.0 * delta;
-      if ( moveRight ) velocity.x += 400.0 * delta;
+    }
+    
+    if ( this.moveBackward ) velocity.z += 400.0 * delta;
+    if ( this.moveLeft ) velocity.x -= 400.0 * delta;
+    if ( this.moveRight ) velocity.x += 400.0 * delta;
+
+    if (this.opts.gravity) {
       if ( isOnObject === true ) {
         velocity.y = Math.max( 0, velocity.y );
         canJump = true;
       }
-
-      // apply velocity to position dx/dt dy/dt dz/dt
-      camera.translateX( velocity.x * delta );
-      camera.translateY( velocity.y * delta );
-      camera.translateZ( velocity.z * delta );
-
-      // keep latitude and longitude up to date for tile loading.
-      player.lng = player.start_lng + cam.position.x / world.scale;
-      player.lat = player.start_lat - cam.position.z / world.scale;
-
       // no falling through the ground.
-      if ( cam.position.y < 5 ) {
+      if ( this.opts.camera.position.y < 5 ) {
         velocity.y = 0;
-        camera.position.y = 5;
+        this.opts.camera.position.y = 5;
         canJump = true;
       }
       
-      update_scene_label();
+    }
 
-      prevTime = time;
-    }*/
+    // apply velocity to position dx/dt dy/dt dz/dt
+    this.opts.camera.translateX( velocity.x * delta );
+    this.opts.camera.translateY( velocity.y * delta );
+    this.opts.camera.translateZ( velocity.z * delta );
+    // apply velocity to position dx/dt dy/dt dz/dt
+    this.opts.controls.target.x += velocity.x * delta;
+    this.opts.controls.target.y += velocity.y * delta;
+    this.opts.controls.target.z += velocity.z * delta;
+    this.update_scene_label();
+
+    prevTime = time;
+    
 
   }
 
@@ -157,18 +159,18 @@ ARTHREE.ARWorld = (function(styles){
     }
   }
 
-  var update_player_focus = function() {
+  ARWorld.prototype.update_player_focus = function() {
 
       // touching stuff.
       if (controls) {
         var vector = new THREE.Vector3(); // create once and reuse it!
-        camera.getWorldDirection( vector );
-        touch_raycaster.ray.origin.copy( camera.position );
-        touch_raycaster.ray.origin.y -= 3;
-        touch_raycaster.ray.direction = vector;
+        this.opts.camera.getWorldDirection( vector );
+        this.touch_raycaster.ray.origin.copy( this.opts.camera.position );
+        this.touch_raycaster.ray.origin.y -= 3;
+        this.touch_raycaster.ray.direction = vector;
 
         // get closest object in target ray.
-        var intersects = touch_raycaster.intersectObjects( scene.children );
+        var intersects = this.touch_raycaster.intersectObjects( scene.children );
         var closest = intersects.shift();
         while (closest && !closest.object.feature) closest = intersects.shift();
 
@@ -208,7 +210,7 @@ ARTHREE.ARWorld = (function(styles){
 
   var prevTime = performance.now();
 
-  var update_scene_label = function(){
+  ARWorld.prototype.update_scene_label = function(){
 
     if (INTERSECTED && INTERSECTED.sdf){
       var sdf = INTERSECTED.sdf;
@@ -216,9 +218,9 @@ ARTHREE.ARWorld = (function(styles){
       
       //position
       var vector = new THREE.Vector3();
-      vector.copy(camera.getWorldPosition())
+      vector.copy(this.opts.camera.getWorldPosition())
       var offset = new THREE.Vector3();
-      offset.copy(camera.getWorldDirection());
+      offset.copy(this.opts.camera.getWorldDirection());
       offset.multiplyScalar(3);
       vector.add(offset);
       vector.multiplyScalar(0.2);
@@ -226,12 +228,13 @@ ARTHREE.ARWorld = (function(styles){
       sdf.text.position.add(vector);
 
       //rotation
-      var vector2 = sdf.text.parent.worldToLocal( camera.getWorldPosition() );
+      var vector2 = sdf.text.parent.worldToLocal( this.opts.camera.getWorldPosition() );
       sdf.text.lookAt( vector2 );
-      sdf.text.rotateX(Math.PI);      
+      sdf.text.rotateX(Math.PI);
+
     }
 
-  }
+  };
 
   return ARWorld;
 

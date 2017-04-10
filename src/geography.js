@@ -3,7 +3,7 @@
 ARTHREE.kinds = {};
 ARTHREE.kind_details = {};
 
-ARTHREE.extend = function ( defaults, o1, o2 ) {
+ARTHREE.extend = function ( defaults, o1, o2, o3 ) {
     var extended = {};
     var prop;
     for (prop in defaults) {
@@ -20,7 +20,12 @@ ARTHREE.extend = function ( defaults, o1, o2 ) {
         if (Object.prototype.hasOwnProperty.call(o2, prop)) {
             extended[prop] = o2[prop];
         }
-    }    
+    }
+    for (prop in o3 || {}) {
+        if (Object.prototype.hasOwnProperty.call(o3, prop)) {
+            extended[prop] = o3[prop];
+        }
+    }
     return extended;
 };
 
@@ -52,8 +57,6 @@ ARTHREE.ARMapzenGeography = function(opts){
   this.feature_styles = {}; // global eature styling object.
   var feature_styles = this.feature_styles;
 
-  console.log(this);
-
   this.init_feature_styles(opts.styles || {});
 
   function long2tile(lon,zoom) {
@@ -66,37 +69,51 @@ ARTHREE.ARMapzenGeography = function(opts){
 
   setInterval(function(){
     if (!player.lat) return;
+
+    // keep latitude and longitude up to date for tile loading.
+    this.player.lng = this.player.start_lng + this.opts.controls.target.x / this.scale;
+    this.player.lat = this.player.start_lat - this.opts.controls.target.z / this.scale;
+
     load_tiles(player.lat, player.lng)
-  }, 1000);
+  }.bind(this), 1000);
 
   var that = this;
 
-  var load_tile = (function(tx, ty) {
-    MAP_CACHE[tx + '_' + ty] = 1;
-    $.getJSON( "https://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY,function( data ) {
-
-      that.opts.layers.forEach(function(featureset_name){
-        if (feature_styles[featureset_name]) {
-          that.add_geojson(data, featureset_name);
-        }
-      });
-      /*that.add_geojson(data, 'buildings');
-      that.add_geojson(data, 'roads');
-      that.add_geojson(data, 'pois');
-      that.add_geojson(data, 'landuse');
-      that.add_geojson(data, 'water');*/
-
+  var handle_data = function(data) {
+    that.opts.layers.forEach(function(featureset_name){
+      if (feature_styles[featureset_name]) {
+        that.add_geojson(data, featureset_name);
+      }
     });
+  };
+
+  var load_tile = (function(tx, ty) {
+    var key = tx + '_' + ty + '_' + TILE_ZOOM
+    MAP_CACHE[key] = 1;
+    var cached_data = localStorage['mz_' + key];
+    if (cached_data) {
+      setTimeout(function(){
+        handle_data(JSON.parse(cached_data));
+      }, 200);
+    } else {
+      $.getJSON( "https://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY,function(data){
+        localStorage['mz_' + key] = JSON.stringify(data);
+        handle_data(data);
+      });
+    }
   });
+
 
   load_tiles = function(lat, lng) {
     var tile_x0 = long2tile(lng, TILE_ZOOM);
     var tile_y0 = lat2tile(lat, TILE_ZOOM);
-    for (var i=-1;i<=1;i++) {
-      for (var j=-1;j<=1;j++) {
+    var N = 1;
+    for (var i=-N;i<=N;i++) {
+      for (var j=-N;j<=N;j++) {
         var tile_x = tile_x0 + i;
-        var tile_y = tile_y0 + j; 
-        if (!MAP_CACHE[tile_x + '_' + tile_y]) {
+        var tile_y = tile_y0 + j;
+        if (!tile_x || !tile_y) continue;
+        if (!MAP_CACHE[tile_x + '_' + tile_y + '_' + TILE_ZOOM]) {
           load_tile(tile_x, tile_y);
         }
       }
@@ -181,21 +198,42 @@ ARTHREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, st
   if (styles.height === 'a') {
     if (feature.properties.height) {
       height = feature.properties.height;
-    } else {
+    } else if (feature.properties.area) {
       height = Math.sqrt(feature.properties.area);
+    } else {
+      // ignore standalone building labels.
+      return;
     }
     height *= styles.height_scale || 1;
   } else {
     var height = styles.height || 1;
   }
 
-  var extrudeSettings = {
-    steps: 10,
-    amount: height || 1,
-    bevelEnabled: false
-  };
+  if (styles.extrude === 'flat') {
 
-  var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+    var geometry = new THREE.ShapeGeometry( shape );
+
+
+  } else if (styles.extrude === 'rounded') {
+    var extrudeSettings = {
+      steps: 1,
+      amount: height || 1,
+      bevelEnabled: true,
+      bevelThickness: 8,
+      bevelSize: 16,
+      bevelSegments: 16
+    };
+
+    var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+  } else {
+    var extrudeSettings = {
+      steps: 1,
+      amount: height || 1,
+      bevelEnabled: false
+    };
+
+    var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+  }
   geometry.rotateX( - Math.PI / 2 );
 
   return geometry;
@@ -222,13 +260,13 @@ ARTHREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_n
   // Many features have a 'kind' property that can be used for styling.
   var styles = ARTHREE.extend(feature_styles[featureset_name],
                               feature_styles[feature.properties.kind || {}],
-                              feature_styles[feature.properties.kind_detail || {}]);
+                              feature_styles[feature.properties.kind_detail || {}],
+                              feature_styles[feature.properties.name || {}]);
+
 
   if (feature.properties && feature.properties.kind === 'building') { // special case for buildings.
     styles = ARTHREE.extend(styles, feature_styles[feature.properties.landuse_kind || {}])
   }
-
-  //console.log(featureset_name, styles);
 
   // tally feature "kind" (descriptive tags). used for debugging/enumerating available features and building stylesheets.
   ARTHREE.kinds[feature.properties.kind] = ARTHREE.kinds[feature.properties.kind] || 1;
@@ -246,7 +284,8 @@ ARTHREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_n
     material = new THREE.MeshLambertMaterial({
       color: styles.color || 0xFFFFFF,
       opacity: opacity,
-      transparent: (opacity < 1)
+      transparent: (opacity < 1),
+      shading: THREE.SmoothShading
     });
   }
   material.polygonOffset = true;
@@ -254,6 +293,7 @@ ARTHREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_n
   material.polygonOffsetUnits = 1;
 
   var mesh = new THREE.Mesh( geometry, material ) ;
+  mesh.position.y = 1;
   scene.add( mesh );
   mesh.feature = feature;
   this.feature_meshes.push(mesh);
@@ -280,7 +320,6 @@ ARTHREE.ARMapzenGeography.prototype.init_feature_styles = function (styles) {
       this.feature_styles[kind].shader_material = this.setup_shader(this.feature_styles[kind]);
     }
   }
-  console.log(this.feature_styles.buildings.height);
 
 }
 
