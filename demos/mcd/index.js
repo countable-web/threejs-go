@@ -31,7 +31,7 @@ var init = function() {
   document.body.appendChild( renderer.domElement );
 
   // Fog to obscure distant tiling.
-  if (hour > 7 && hour < 8) {
+  if (hour > 7 && hour < 20) {
     scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
   } else {
     // night.
