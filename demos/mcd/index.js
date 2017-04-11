@@ -293,7 +293,7 @@ var init_skyball = function(){
   var geometry = new THREE.SphereGeometry( 5000, 60, 40 );
   geometry.scale( - 1, 1, 1 );
   var material = new THREE.MeshBasicMaterial( {
-    map: new THREE.TextureLoader().load( 'imgpsh_fullsize.jpg' ),
+    map: new THREE.TextureLoader().load( 'imgpsh_fullsize.png' ),
     fog: false
   } );
   mesh = new THREE.Mesh( geometry, material );
