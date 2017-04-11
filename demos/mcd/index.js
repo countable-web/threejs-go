@@ -29,13 +29,11 @@ var init = function() {
   document.body.appendChild( renderer.domElement );
 
   // Fog to obscure distant tiling.
-  scene.fog = new THREE.FogExp2( 0x0066, 0.0015 );
+  scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
 
-  // first person controls.
-  //controls = new THREE.PointerLockControls( camera );
-  // if (is_mobile) {
-  //   deviceorientation_controls = new THREE.DeviceOrientationControls(camera);
-  // }
+  // night.
+  //scene.fog = new THREE.FogExp2( 0x000066, 0.0015 );
+
   controls = new THREE.OrbitControls( camera );
   controls.minDistance = 100;
   controls.maxDistance = 200;
@@ -56,6 +54,7 @@ var init = function() {
   onWindowResize();
   window.addEventListener( 'resize', onWindowResize, false );
 
+  init_skyball();
   init_ground();
   init_ar();
   init_burgler();
@@ -69,7 +68,7 @@ var init_ground = function(){
   geometry.rotateX( - Math.PI / 2 );
   var material = new THREE.MeshPhongMaterial( {color: 0x55AA00, side: THREE.DoubleSide} );
   var plane = new THREE.Mesh( geometry, material );
-  plane.position.y = -1;
+  plane.position.y = -2;
   scene.add( plane );
 }
 
@@ -221,7 +220,7 @@ var init_burgler = function(){
   // model
   var burlgar;
   var loader = new THREE.OBJLoader( );
-  loader.load( 'burglar.obj', function ( object ) {
+  loader.load( 'hamburglar_OBJ.obj', function ( object ) {
     burglar = object;
     object.traverse( function ( child ) {
 
@@ -230,44 +229,11 @@ var init_burgler = function(){
         child.material.map = texture;
         child.material.side = THREE.DoubleSide;
 
-        if (child.name.indexOf('hat')> -1) {
-          console.log('hat')
-          child.material = new THREE.MeshLambertMaterial( {
-            color: 0x000000,
-            side: THREE.DoubleSide
-          } );
-          child.scale.x = 2;
-          child.scale.y = 2;
-          child.scale.z = 2;
-          child.position.y = 1;
-        } else if (child.name.indexOf('iris') > -1) {
-          console.log('iris')
-          child.material = new THREE.MeshLambertMaterial( {
-            color: 0x000000,
-            side: THREE.DoubleSide,
-            transparent: true
-          } );
-        } else if (child.name.indexOf('eyeball') > -1) {
-          console.log('eye')
-          child.material = new THREE.MeshLambertMaterial( {
-            color: 0x000000,
-            side: THREE.DoubleSide,
-            transparent: true
-          } );
-          child.scale.x = 2;
-          child.scale.y = 2;
-          child.scale.z = 2;
-          child.position.y = 1;
-        } else {
 
-        }
       }
 
     } );
 
-    object.scale.x = 15;
-    object.scale.y = 15;
-    object.scale.z = 15;
     object.position.y = 0;
 
     // shadow.
@@ -289,6 +255,16 @@ var init_burgler = function(){
   }, onProgress, onError );             
 };
 
+var init_skyball = function(){
+  var geometry = new THREE.SphereGeometry( 10000, 60, 40 );
+  geometry.scale( - 1, 1, 1 );
+  var material = new THREE.MeshBasicMaterial( {
+    map: new THREE.TextureLoader().load( 'imgpsh_fullsize.jpg' ),
+    fog: false
+  } );
+  mesh = new THREE.Mesh( geometry, material );
+  scene.add( mesh );
+};
 
 var prevTime = performance.now();
 
@@ -315,17 +291,15 @@ var animate = function() {
     burglar.position.x = controls.target.x;
     burglar.position.z = controls.target.z;
     burglar.rotation.y = camera.rotation.y + Math.cos(time/900);
-    burglar.scale.x = 15 + 1 * Math.sin(time/500);
-    burglar.scale.z = 15 + 1 * Math.sin(time/500);
-    burglar.scale.y = 15 + .5 * Math.cos(time/500);
+    burglar.scale.x = .6 + .06 * Math.sin(time/500);
+    burglar.scale.z = .6 + .06 * Math.sin(time/500);
+    burglar.scale.y = .6 + .03 * Math.cos(time/500);
   }
 
   heart.position.y = 65 + Math.cos(time/1500) * 5;
   heart.scale.x = (1 - 0.1*Math.cos(time/200) );
   heart.scale.y = (1 - 0.1*Math.cos(time/200) );
   heart.scale.z = (1 - 0.1*Math.cos(time/200) );
-  
-
 
   renderer.render( scene, camera );
 
