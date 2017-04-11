@@ -10,6 +10,8 @@ var init = function() {
 
   scene = new THREE.Scene();
 
+  var hour = (new Date()).getHours();
+
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add( light );
@@ -29,10 +31,13 @@ var init = function() {
   document.body.appendChild( renderer.domElement );
 
   // Fog to obscure distant tiling.
-  scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
+  if (hour > 7 && hour < 8) {
+    scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
+  } else {
+    // night.
+    scene.fog = new THREE.FogExp2( 0x000066, 0.0015 );
+  }
 
-  // night.
-  //scene.fog = new THREE.FogExp2( 0x000066, 0.0015 );
 
   controls = new THREE.OrbitControls( camera );
   controls.minDistance = 100;
@@ -54,7 +59,8 @@ var init = function() {
   onWindowResize();
   window.addEventListener( 'resize', onWindowResize, false );
 
-  init_skyball();
+  if (hour > 7 && hour < 8)
+    init_skyball();
   init_ground();
   init_burgers();
   init_ar();
@@ -262,6 +268,7 @@ var init_burgler = function(){
 
         child.material.map = texture;
         child.material.side = THREE.DoubleSide;
+        child.material.shading = THREE.SmoothShading;
 
 
       }
