@@ -1,5 +1,6 @@
 
 var camera, scene, renderer, controls;
+var is_day;
 
 var init = function() {
   /* Standard THREE.JS stuff */
@@ -11,7 +12,7 @@ var init = function() {
   scene = new THREE.Scene();
 
   var hour = (new Date()).getHours();
-
+  is_day = (hour > 7 && hour < 20);
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add( light );
@@ -27,17 +28,15 @@ var init = function() {
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight ); 
-  renderer.setClearColor( 0x000066 );
-  document.body.appendChild( renderer.domElement );
-
-  // Fog to obscure distant tiling.
-  if (hour > 7 && hour < 20) {
+  if (is_day) {
+    renderer.setClearColor( 0xddeeff );
     scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
   } else {
     // night.
+    renderer.setClearColor( 0x000066 );
     scene.fog = new THREE.FogExp2( 0x000066, 0.0015 );
   }
-
+  document.body.appendChild( renderer.domElement );
 
   controls = new THREE.OrbitControls( camera );
   controls.minDistance = 100;
@@ -59,8 +58,9 @@ var init = function() {
   onWindowResize();
   window.addEventListener( 'resize', onWindowResize, false );
 
-  if (hour > 7 && hour < 8)
+  if (is_day) {
     init_skyball();
+  }
   init_ground();
   init_burgers();
   init_ar();
