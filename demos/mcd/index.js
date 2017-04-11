@@ -56,6 +56,7 @@ var init = function() {
 
   init_skyball();
   init_ground();
+  init_burgers();
   init_ar();
   init_burgler();
   init_mcd();
@@ -66,10 +67,34 @@ var init_ground = function(){
   // Ground.
   var geometry = new THREE.PlaneBufferGeometry( 3000, 3000);
   geometry.rotateX( - Math.PI / 2 );
-  var material = new THREE.MeshPhongMaterial( {color: 0x55AA00, side: THREE.DoubleSide} );
+  var material = new THREE.MeshPhongMaterial( {
+    color: 0x55AA00,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.8
+  } );
   var plane = new THREE.Mesh( geometry, material );
   plane.position.y = -2;
   scene.add( plane );
+}
+
+var init_burgers = function(){
+  var textureLoader = new THREE.TextureLoader();
+  var geometry = new THREE.PlaneGeometry( 25, 25, 1, 1);  
+  var plane_tex = textureLoader.load("burger.png");
+  var plane_material = new THREE.MeshBasicMaterial( {
+    map: plane_tex,
+    side: THREE.DoubleSide,
+    transparent: true
+  } );
+  var plane = new THREE.Mesh( geometry, plane_material );
+  plane.rotation.x = Math.PI/2;
+  plane.position.y = 1;
+  plane.position.x = 30;
+  plane.position.z = -50;
+  plane.renderOrder = 3;
+  scene.add(plane);
+  return plane;
 }
 
 var ar_world, ar_geo;
@@ -124,7 +149,7 @@ var init_mcd = function(){
 
   var deco_material = new THREE.MeshLambertMaterial( {
     fog: false,
-    color: 0xffdd00
+    color: 0xddbb33
   } );
 
   var loader = new THREE.OBJLoader();
@@ -150,6 +175,7 @@ var init_mcd = function(){
       scene.add( outlet );
       outlets.push(outlet);
       outlet.cylinders = [];
+      outlet.spheres = [];
 
       [
         [60,25,0],
@@ -166,6 +192,14 @@ var init_mcd = function(){
         outlet.cylinders.push(cylinder);
       });
 
+      var geo = new THREE.SphereGeometry( 15, 10, 10);
+      var sphere = new THREE.Mesh( geo, deco_material );
+      sphere.position.x = coords[0];
+      sphere.position.z = coords[1];
+      sphere.position.y = 220;
+      sphere.start_position = sphere.position.clone();
+      outlet.spheres.push(sphere);
+      scene.add(sphere);
 
     });
   });
@@ -256,7 +290,7 @@ var init_burgler = function(){
 };
 
 var init_skyball = function(){
-  var geometry = new THREE.SphereGeometry( 10000, 60, 40 );
+  var geometry = new THREE.SphereGeometry( 5000, 60, 40 );
   geometry.scale( - 1, 1, 1 );
   var material = new THREE.MeshBasicMaterial( {
     map: new THREE.TextureLoader().load( 'imgpsh_fullsize.jpg' ),
@@ -284,6 +318,11 @@ var animate = function() {
     outlet.rotateZ(.03);
     outlet.cylinders.forEach(function(cylinder, i){
       cylinder.position.y = cylinder.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
+    })
+    outlet.spheres.forEach(function(sphere, i){
+      sphere.position.y = sphere.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
+      /*sphere.position.x = sphere.start_position.x + Math.cos(time/300) * (Math.sin(time/500) * 3 + 6)
+      sphere.position.z = sphere.start_position.z + Math.sin(time/300) * (Math.sin(time/500) * 3 + 6)*/
     })
   });
 
