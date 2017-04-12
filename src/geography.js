@@ -95,7 +95,7 @@ THREE.ARMapzenGeography = function(opts){
   var load_tile = (function(tx, ty) {
     var key = tx + '_' + ty + '_' + TILE_ZOOM
     MAP_CACHE[key] = 1;
-    var cached_data = localStorage['mz_' + key];
+    var cached_data = null; //localStorage['mz_' + key];
     if (cached_data) {
       setTimeout(function(){
         handle_data(JSON.parse(cached_data));
@@ -145,23 +145,9 @@ THREE.ARMapzenGeography = function(opts){
   }
   */
 
-
-  
-  if (window.location.host === "countable-web.github.io") {
-    var that=this;
-    navigator.geolocation.getCurrentPosition(function(position) {
-      player.lat = position.coords.latitude;
-      player.lng = position.coords.longitude;
-      player.start_lng = player.lng, player.start_lat = player.lat;
-      load_tiles(player.lat, player.lng);
-      if (that.opts.minimap) that.minimap = new THREE.ARMiniMap(that);
-    });
-    
-  } else {
-    load_tiles(player.lat, player.lng);
-    player.start_lng = player.lng, player.start_lat = player.lat;
-    if (this.opts.minimap) this.minimap = new THREE.ARMiniMap(this);
-  }
+  load_tiles(player.lat, player.lng);
+  player.start_lng = player.lng, player.start_lat = player.lat;
+  if (this.opts.minimap) this.minimap = new THREE.ARMiniMap(this); 
 
 
 };

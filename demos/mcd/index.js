@@ -1,6 +1,7 @@
 
 var camera, scene, renderer, controls;
 var is_day;
+var lat, lng;
 
 var init = function() {
   /* Standard THREE.JS stuff */
@@ -68,10 +69,17 @@ var init = function() {
   }
   init_ground();
   init_burgers();
-  init_ar();
-  init_burgler();
-  init_mcd();
-  init_events();
+  navigator.geolocation.getCurrentPosition(function(position) {
+    lat = position.coords.latitude;
+    lng = position.coords.longitude;
+    init_ar();
+    init_burgler();
+    init_mcd();
+    init_events();
+    init_heart();
+    animate();
+  });
+
 };
 
 var init_ground = function(){
@@ -123,8 +131,8 @@ var init_ar = function(){
     styles: styles,
     camera: camera,
     controls: controls,
-    lat: 41.886811,
-    lng: -87.626186,
+    lat: lat,
+    lng: lng,
     minimap: false,
     layers: ['buildings','roads','water','landuse']
   });
@@ -138,16 +146,16 @@ var init_mcd = function(){
 
   var mcds = [
     {
-      lat: 41.883662,
-      lng: -87.626041
+      lat: lat + .001,
+      lng: lng + .001
     },
     {
-      lat: 41.884704,
-      lng: -87.629247
+      lat: lat - .001,
+      lng: lng + .001
     },
     {
-      lat: 41.886972,
-      lng: -87.623054
+      lat: lat + .001,
+      lng: lng - .001
     }
   ];
 
@@ -364,28 +372,33 @@ var animate = function() {
   prevTime = time;
 }
 
+var heart;
+init_heart = function(){
+  var x = 0, y = 0;
+
+  var heartShape = new THREE.Shape();
+
+  heartShape.moveTo( x + 5, y + 5 );
+  heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
+  heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
+  heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
+  heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
+  heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
+  heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
+
+  var geometry = new THREE.ShapeGeometry( heartShape );
+  var material = new THREE.MeshBasicMaterial( { color: 0xff4488 , side: THREE.DoubleSide} );
+  heart = new THREE.Mesh( geometry, material ) ;
+  heart.position.y = 60;
+  heart.position.x = 5;
+  heart.position.z = 0;
+  heart.rotation.z = Math.PI;
+  scene.add( heart );
+}
+
+
+if (window.location.host === "countable-web.github.io") {
+
+}
 
 init();
-
-var x = 0, y = 0;
-
-var heartShape = new THREE.Shape();
-
-heartShape.moveTo( x + 5, y + 5 );
-heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
-heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
-heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
-heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
-heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
-heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
-
-var geometry = new THREE.ShapeGeometry( heartShape );
-var material = new THREE.MeshBasicMaterial( { color: 0xff4488 , side: THREE.DoubleSide} );
-var heart = new THREE.Mesh( geometry, material ) ;
-heart.position.y = 60;
-heart.position.x = 5;
-heart.position.z = 0;
-heart.rotation.z = Math.PI;
-scene.add( heart );
-
-animate();
