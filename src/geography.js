@@ -1,9 +1,7 @@
 
-// tally feature tags.
-ARTHREE.kinds = {};
-ARTHREE.kind_details = {};
 
-ARTHREE.extend = function ( defaults, o1, o2, o3 ) {
+
+THREE.extend = function ( defaults, o1, o2, o3 ) {
     var extended = {};
     var prop;
     for (prop in defaults) {
@@ -30,11 +28,16 @@ ARTHREE.extend = function ( defaults, o1, o2, o3 ) {
 };
 
 
-ARTHREE.ARMapzenGeography = function(opts){
+THREE.ARMapzenGeography = function(opts){
 
   this.opts = opts = opts || {};
-
   this.opts.layers = this.opts.layers || ['buildings','roads','pois','water','landuse'];
+
+  // tally feature tags.
+  this.names = {};
+  this.kinds = {};
+  this.kind_details = {};
+
 
   var player = this.player = opts.player || {};
 
@@ -71,8 +74,10 @@ ARTHREE.ARMapzenGeography = function(opts){
     if (!player.lat) return;
 
     // keep latitude and longitude up to date for tile loading.
-    this.player.lng = this.player.start_lng + this.opts.controls.target.x / this.scale;
-    this.player.lat = this.player.start_lat - this.opts.controls.target.z / this.scale;
+    if (this.opts.controls.target) {
+      this.player.lng = this.player.start_lng + this.opts.controls.target.x / this.scale;
+      this.player.lat = this.player.start_lat - this.opts.controls.target.z / this.scale;
+    }
 
     load_tiles(player.lat, player.lng)
   }.bind(this), 1000);
@@ -141,7 +146,7 @@ ARTHREE.ARMapzenGeography = function(opts){
   */
 
 
-  /*
+  
   if (window.location.host === "countable-web.github.io") {
 
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -149,14 +154,14 @@ ARTHREE.ARMapzenGeography = function(opts){
       player.lng = position.coords.longitude;
       player.start_lng = player.lng, player.start_lat = player.lat;
       load_tiles(player.lat, player.lng);
-      if (this.opts.minimap) this.minimap = new ARTHREE.ARMiniMap(this);
+      if (this.opts.minimap) this.minimap = new THREE.ARMiniMap(this);
     });
     
-  } else {*/
+  } else {
     load_tiles(player.lat, player.lng);
     player.start_lng = player.lng, player.start_lat = player.lat;
-    if (this.opts.minimap) this.minimap = new ARTHREE.ARMiniMap(this);
-  //}
+    if (this.opts.minimap) this.minimap = new THREE.ARMiniMap(this);
+  }
 
 
 };
@@ -165,7 +170,7 @@ ARTHREE.ARMapzenGeography = function(opts){
 /**
  * Takes a 2d geojson, converts it to a ThreeJS Geometry, and extrudes it to a height suitable for 3d viewing.
  */
-ARTHREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styles){
+THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styles){
 
   var shape = new THREE.Shape();
 
@@ -241,7 +246,7 @@ ARTHREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, st
 };
 
 
-ARTHREE.ARMapzenGeography.prototype.add_geojson = function(data, featureset_name){
+THREE.ARMapzenGeography.prototype.add_geojson = function(data, featureset_name){
   geojson = data[featureset_name];
   var that = this;
   geojson.features.forEach(function(feature){
@@ -250,7 +255,7 @@ ARTHREE.ARMapzenGeography.prototype.add_geojson = function(data, featureset_name
 };
 
 
-ARTHREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_name) {
+THREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_name) {
 
   var feature_styles = this.feature_styles;
 
@@ -258,21 +263,23 @@ ARTHREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_n
   this._drawn[feature.properties.id] = true;
 
   // Many features have a 'kind' property that can be used for styling.
-  var styles = ARTHREE.extend(feature_styles[featureset_name],
+  var styles = THREE.extend(feature_styles[featureset_name],
                               feature_styles[feature.properties.kind || {}],
                               feature_styles[feature.properties.kind_detail || {}],
                               feature_styles[feature.properties.name || {}]);
 
 
   if (feature.properties && feature.properties.kind === 'building') { // special case for buildings.
-    styles = ARTHREE.extend(styles, feature_styles[feature.properties.landuse_kind || {}])
+    styles = THREE.extend(styles, feature_styles[feature.properties.landuse_kind || {}])
   }
 
   // tally feature "kind" (descriptive tags). used for debugging/enumerating available features and building stylesheets.
-  ARTHREE.kinds[feature.properties.kind] = ARTHREE.kinds[feature.properties.kind] || 1;
-  ARTHREE.kind_details[feature.properties.kind_detail] = ARTHREE.kind_details[feature.properties.kind_detail] || 1;
-  ARTHREE.kinds[feature.properties.kind] ++;
-  ARTHREE.kind_details[feature.properties.kind_detail] ++;
+  this.kinds[feature.properties.kind] = this.kinds[feature.properties.kind] || 1;
+  this.names[feature.properties.name] = this.names[feature.properties.name] || 1;
+  this.kind_details[feature.properties.kind_detail] = this.kind_details[feature.properties.kind_detail] || 1;
+  this.kinds[feature.properties.kind] ++;
+  this.names[feature.properties.name] ++;
+  this.kind_details[feature.properties.kind_detail] ++;
 
   var geometry = this.extrude_feature_shape(feature, styles);
 
@@ -300,11 +307,11 @@ ARTHREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_n
 
 }
 
-ARTHREE.ARMapzenGeography.prototype.to_scene_coords = function(coord){
+THREE.ARMapzenGeography.prototype.to_scene_coords = function(coord){
   return [(coord[0] - this.player.start_lng) * this.scale, (coord[1] - this.player.start_lat) * this.scale];
 };
 
-ARTHREE.ARMapzenGeography.prototype.init_feature_styles = function (styles) {
+THREE.ARMapzenGeography.prototype.init_feature_styles = function (styles) {
   // map feature styles.
 
   for (var k in DEFAULT_FEATURE_STYLES){
@@ -312,7 +319,7 @@ ARTHREE.ARMapzenGeography.prototype.init_feature_styles = function (styles) {
   }
 
   for (var k in styles){
-    this.feature_styles[k] = ARTHREE.extend(this.feature_styles[k] || {}, styles[k]);
+    this.feature_styles[k] = THREE.extend(this.feature_styles[k] || {}, styles[k]);
   }
 
   for (var kind in this.feature_styles) {
@@ -328,7 +335,7 @@ ARTHREE.ARMapzenGeography.prototype.init_feature_styles = function (styles) {
  * @param fs_part just modifies vec3 color and float opacity.
  * @param vs_part just modifies mvPosition.
  */
-ARTHREE.ARMapzenGeography.prototype.setup_shader = function(opts){
+THREE.ARMapzenGeography.prototype.setup_shader = function(opts){
   return new THREE.ShaderMaterial( {
     transparent: true,
     uniforms: shader_uniforms,

@@ -4089,7 +4089,7 @@ global.onFontLoad = function(cb){
   }
 };
 
-ARTHREE.ARText = function(copy){
+THREE.ARText = function(copy){
 
   if (!font_material) {
     console.error('Font not loaded yet, cant write SDF');

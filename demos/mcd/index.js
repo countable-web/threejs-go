@@ -38,16 +38,21 @@ var init = function() {
   }
   document.body.appendChild( renderer.domElement );
 
-  controls = new THREE.OrbitControls( camera );
-  controls.minDistance = 100;
-  controls.maxDistance = 200;
-  controls.enableDamping = true;
-  controls.dampingFactor = .25;
-  controls.enablePan = false;
-  controls.maxPolarAngle = Math.PI*.45;
-  controls.minPolarAngle = Math.PI*.2;
-  controls.target = new THREE.Vector3(0,0,0);
-
+  if (THREE.is_mobile) {
+    //controls = new THREE.DragMouseControls(camera);
+    //controls.orientation.y = 5.3; //+ Math.PI;
+    controls = new THREE.DeviceOrientationControls(camera);
+  } else {
+    controls = new THREE.OrbitControls( camera );
+    controls.minDistance = 100;
+    controls.maxDistance = 200;
+    controls.enableDamping = true;
+    controls.dampingFactor = .25;
+    controls.enablePan = false;
+    controls.maxPolarAngle = Math.PI*.45;
+    controls.minPolarAngle = Math.PI*.2;
+    controls.target = new THREE.Vector3(0,0,0);
+  }
   scene.add( camera);
 
   onWindowResize = function() {
@@ -108,13 +113,13 @@ var init_ar = function(){
 
   // AR Stuff
 
-  ar_world = new ARTHREE.ARWorld({
+  ar_world = new THREE.ARWorld({
     ground: true,
     camera: camera,
     controls: controls
   });
 
-  ar_geo = new ARTHREE.ARMapzenGeography({
+  ar_geo = new THREE.ARMapzenGeography({
     styles: styles,
     camera: camera,
     controls: controls,
@@ -316,6 +321,11 @@ var animate = function() {
   requestAnimationFrame( animate );
 
   controls.update();
+  if (THREE.is_mobile) {
+    //orientationcontrols.updateAlphaOffsetAngle(controls.orientation.y);
+  } else {
+    //dragcontrols.update();
+  }
 
   ar_world.update({
     feature_meshes: ar_geo.feature_meshes
@@ -334,9 +344,11 @@ var animate = function() {
   });
 
   if (typeof burglar !== 'undefined'){
+    /*
     burglar.position.x = controls.target.x;
     burglar.position.z = controls.target.z;
     burglar.rotation.y = camera.rotation.y + Math.cos(time/900);
+    */
     burglar.scale.x = .6 + .06 * Math.sin(time/500);
     burglar.scale.z = .6 + .06 * Math.sin(time/500);
     burglar.scale.y = .6 + .03 * Math.cos(time/500);

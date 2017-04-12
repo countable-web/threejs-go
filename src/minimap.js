@@ -1,5 +1,5 @@
 
-ARTHREE.ARMiniMap = (function(){
+THREE.ARMiniMap = (function(){
 
   var ARMiniMap = function(geography){
 

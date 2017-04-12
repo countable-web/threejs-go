@@ -94,8 +94,8 @@ THREE.DeviceOrientationControls = function( object ) {
 
 		setObjectQuaternion( scope.object.quaternion, alpha, beta, gamma, orient );
 		
-		object.position.z = Math.sin(object.rotation.y) * 150;
-		object.position.y = - Math.cos(object.rotation.y) * 100 + 50;		
+		//object.position.z = Math.sin(object.rotation.y) * 150;
+		//object.position.y = - Math.cos(object.rotation.y) * 100 + 50;		
 		this.alpha = alpha;
 
 	};
