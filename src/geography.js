@@ -148,13 +148,13 @@ THREE.ARMapzenGeography = function(opts){
 
   
   if (window.location.host === "countable-web.github.io") {
-
+    var that=this;
     navigator.geolocation.getCurrentPosition(function(position) {
       player.lat = position.coords.latitude;
       player.lng = position.coords.longitude;
       player.start_lng = player.lng, player.start_lat = player.lat;
       load_tiles(player.lat, player.lng);
-      if (this.opts.minimap) this.minimap = new THREE.ARMiniMap(this);
+      if (that.opts.minimap) that.minimap = new THREE.ARMiniMap(that);
     });
     
   } else {
