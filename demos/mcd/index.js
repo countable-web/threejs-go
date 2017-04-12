@@ -69,17 +69,23 @@ var init = function() {
   }
   init_ground();
   init_burgers();
-  navigator.geolocation.getCurrentPosition(function(position) {
-    lat = position.coords.latitude;
-    lng = position.coords.longitude;
-    init_ar();
-    init_burgler();
-    init_mcd();
-    init_events();
-    init_heart();
-    animate();
-  });
+  if (THREE.is_mobile) {
+    navigator.geolocation.getCurrentPosition(init_geo);
+  } else {
+    init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
+  }
 
+};
+
+var init_geo = function(position) {
+  lat = position.coords.latitude;
+  lng = position.coords.longitude;
+  init_ar();
+  init_burgler();
+  init_mcd();
+  init_events();
+  init_heart();
+  animate();
 };
 
 var init_ground = function(){
