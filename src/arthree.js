@@ -40,7 +40,7 @@ THREE.ARWorld = (function(opts){
     return check;
   };
 
-  THREE.is_mobile = false; //isMobile();
+  THREE.is_mobile = isMobile();
 
   THREE.onWindowResize = function() {
       shader_uniforms.resolution.value.x = window.innerWidth;
