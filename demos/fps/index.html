@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>McDonalds AR App</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../../src/arthree.css">
+    <style>
+    </style>
+  </head>
+  <body>
+
+    <div id="blocker">
+
+      <div id="instructions">
+        <span style="font-size:40px">Exploring Real Map Data.</span>
+        <br />
+        You don't have AR sensors (compass, accelerometer) so we're using keyboard/mouse controls.
+        <br />
+        (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
+      </div>
+    </div>
+
+    <div id="mapid" style="width: 500px; height: 300px; position: absolute; top:0; right: 0; z-index:100"></div>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+    <script src="../../src/mapzen-api-key.js"></script>
+    
+    <script src="../../bower_components/three.js/three.js"></script>
+    <script src="../../bower_components/jquery/dist/jquery.js"></script><!-- used only for ajax currently -->
+    <script src="../../vendor/turf.min.js"></script> <!-- used only for turf.buffer currently -->
+    <script src="../../vendor/OBJLoader.js"></script> <!-- used only for turf.buffer currently -->
+
+    <script src="../../src/controls/WASDControls.js"></script>
+    <script src="../../src/arthree.js"></script>
+    <script src="../../src/text.js"></script>
+    <script src="../../src/minimap.js"></script>
+    <script src="../../src/geography.js"></script>
+    <script src="../../src/styles.js"></script>
+
+    <script>
+  var styles = {
+    buildings: {
+      color: 0x00AA55,
+      opacity: 0.4,
+      height_scale: 0.6
+    },
+    roads: {
+      color: 0xDDAA00,
+      extrude: 'flat'
+    },
+    path: {
+      width: 2
+    },
+    minor_road: {
+      width: 3
+    },
+    major_road: {
+      width: 4
+    },
+    highway: {
+      width: 5
+    },
+  };
+
+    </script>
+    <script src="index.js"></script>
+
+  </body>
+</html>

@@ -60,7 +60,7 @@ THREE.ARWorld = (function(opts){
 
     // raycasters for collisions.
     fall_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
-    this.touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 25 );
+    this.touch_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 1, 0, 0 ), 0, 325 );
 
   }
 
@@ -73,7 +73,7 @@ THREE.ARWorld = (function(opts){
     shader_uniforms.time.value += clock.getDelta() * 5;
 
     // touching stuff.
-    this.update_player_focus();
+    //this.update_player_focus();
 
     if ( this.opts.ground ) {
 
@@ -116,23 +116,25 @@ THREE.ARWorld = (function(opts){
     if (this.opts.gravity) {
       if ( isOnObject === true ) {
         velocity.y = Math.max( 0, velocity.y );
-        canJump = true;
+        this.canJump = true;
       }
       // no falling through the ground.
       if ( this.opts.camera.position.y < 5 ) {
         velocity.y = 0;
         this.opts.camera.position.y = 5;
-        canJump = true;
+        this.canJump = true;
       }
       
     }
 
+    // apply velocity to position dx/dt dy/dt dz/dt
+    if (this.opts.gravity) {
+      this.opts.camera.translateX( velocity.x * delta );
+      this.opts.camera.translateY( velocity.y * delta );
+      this.opts.camera.translateZ( velocity.z * delta );
+    }
+    // apply velocity to position dx/dt dy/dt dz/dt
     /*
-    // apply velocity to position dx/dt dy/dt dz/dt
-    this.opts.camera.translateX( velocity.x * delta );
-    this.opts.camera.translateY( velocity.y * delta );
-    this.opts.camera.translateZ( velocity.z * delta );
-    // apply velocity to position dx/dt dy/dt dz/dt
     this.opts.controls.target.x += velocity.x * delta;
     this.opts.controls.target.y += velocity.y * delta;
     this.opts.controls.target.z += velocity.z * delta;
@@ -142,11 +144,11 @@ THREE.ARWorld = (function(opts){
 
     prevTime = time;
     
-
   }
 
   var getFeatureDesc = function(feat){
-    return feat.name || feat.properties.name || feat.properties.address
+    return feat.name || feat.properties.name || feat.properties.kind_detail
+      || feat.properties.address
       || (feat.dataset==='landuse' && feat.properties.landuse_kind)
       || (feat.properties.addr_street ? feat.properties.addr_street + ' - ' + feat.properties.addr_housenumber : null)
       || feat.properties.kind;
@@ -166,18 +168,21 @@ THREE.ARWorld = (function(opts){
       // touching stuff.
       if (controls) {
         var vector = new THREE.Vector3(); // create once and reuse it!
-        this.opts.camera.getWorldDirection( vector );
-        this.touch_raycaster.ray.origin.copy( this.opts.camera.position );
+        
+        // update for WASD controls.
+        //this.opts.camera.getWorldDirection( vector );
+        /*this.touch_raycaster.ray.origin.copy( this.opts.camera.position );
         this.touch_raycaster.ray.origin.y -= 3;
-        this.touch_raycaster.ray.direction = vector;
+        this.touch_raycaster.ray.direction = vector;*/
 
         // get closest object in target ray.
         var intersects = this.touch_raycaster.intersectObjects( scene.children );
+        console.log(intersects);
+
         var closest = intersects.shift();
         while (closest && !closest.object.feature) closest = intersects.shift();
 
         if ( closest ) {
-
           if ( INTERSECTED !== closest.object ) {
             clearIntersected();
 
@@ -188,12 +193,24 @@ THREE.ARWorld = (function(opts){
             
             if (INTERSECTED.feature.dataset == 'roads') INTERSECTED.scale.y += .1;
 
+            console.log(INTERSECTED.feature);
+
             var desc = getFeatureDesc(INTERSECTED.feature);
             if (desc) {
 
               var sdf = new THREE.ARText(desc);
               scene.add(sdf.text);
+              sdf.text.position.copy(closest.point);
               INTERSECTED.sdf = sdf;
+
+              var deco_material = new THREE.MeshLambertMaterial( {
+                fog: false,
+                color: 0xddbb33
+              } );
+              var geo = new THREE.SphereGeometry( 15, 10, 10);
+              var sphere = new THREE.Mesh( geo, deco_material );
+              sphere.position.copy(closest.point);
+              scene.add(sphere);
             }
           }
           INTERSECTED.distance = closest.distance;
@@ -216,10 +233,8 @@ THREE.ARWorld = (function(opts){
 
     if (INTERSECTED && INTERSECTED.sdf){
       var sdf = INTERSECTED.sdf;
-      sdf.text.scale.set(0.01, 0.01, 0.01);
-      
       //position
-      var vector = new THREE.Vector3();
+      /*var vector = new THREE.Vector3();
       vector.copy(this.opts.camera.getWorldPosition())
       var offset = new THREE.Vector3();
       offset.copy(this.opts.camera.getWorldDirection());
@@ -227,7 +242,7 @@ THREE.ARWorld = (function(opts){
       vector.add(offset);
       vector.multiplyScalar(0.2);
       sdf.text.position.multiplyScalar(0.8);
-      sdf.text.position.add(vector);
+      sdf.text.position.add(vector);*/
 
       //rotation
       var vector2 = sdf.text.parent.worldToLocal( this.opts.camera.getWorldPosition() );

@@ -69,8 +69,9 @@ var init = function() {
   }
   init_ground();
   init_burgers();
-  if (THREE.is_mobile) {
-    navigator.geolocation.getCurrentPosition(init_geo);
+  if (THREE.is_mobile || true) {
+    init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
+    // navigator.geolocation.getCurrentPosition(init_geo);
   } else {
     init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
   }
@@ -402,6 +403,15 @@ init_heart = function(){
   scene.add( heart );
 }
 
+function onClick( event ) {
+  event.preventDefault();
+  var mouse = new THREE.Vector2();
+  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  ar_world.touch_raycaster.setFromCamera( mouse, camera );
+  ar_world.update_player_focus();
+}
+document.addEventListener( 'click', onClick );
 
 if (window.location.host === "countable-web.github.io") {
 
