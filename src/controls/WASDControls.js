@@ -3,6 +3,8 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
+var controlsEnabled;
+
 THREE.WASDControls = function ( camera ) {
 
   var scope = this;
@@ -105,14 +107,6 @@ THREE.WASDControls = function ( camera ) {
   document.addEventListener( 'keydown', onKeyDown, false );
   document.addEventListener( 'keyup', onKeyUp, false );
 
-  function onDocumentMouseMove( event ) {
-    event.preventDefault();
-    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-  }
-  document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-
-
   camera.rotation.set( 0, 0, 0 );
 
   var pitchObject = new THREE.Object3D();
@@ -134,7 +128,6 @@ THREE.WASDControls = function ( camera ) {
     pitchObject.rotation.x -= movementY * 0.002;
 
     pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
-
   };
 
   this.dispose = function() {

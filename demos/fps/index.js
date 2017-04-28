@@ -6,9 +6,6 @@ var lat, lng;
 var init = function() {
   /* Standard THREE.JS stuff */
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-  camera.position.x = 10;
-  camera.position.y = 85;
-  camera.position.z = 150;
 
   scene = new THREE.Scene();
 
@@ -45,16 +42,8 @@ var init = function() {
     controls = new THREE.DeviceOrientationControls(camera);
   } else {
     controls = new THREE.WASDControls( camera );
-    controls.minDistance = 100;
-    controls.maxDistance = 200;
-    controls.enableDamping = true;
-    controls.dampingFactor = .25;
-    controls.enablePan = false;
-    controls.maxPolarAngle = Math.PI*.45;
-    controls.minPolarAngle = Math.PI*.2;
-    controls.target = new THREE.Vector3(0,0,0);
   }
-  scene.add( camera);
+  scene.add( controls.getObject() );
 
   onWindowResize = function() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -146,3 +135,4 @@ var animate = function() {
 }
 
 init();
+
