@@ -109,6 +109,7 @@ var init_ar = function(){
 
 };
 
+var fall_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
 var prevTime = performance.now();
 
@@ -128,6 +129,65 @@ var animate = function() {
   ar_world.update({
     feature_meshes: ar_geo.feature_meshes
   });
+
+  // touching stuff.
+  //this.update_player_focus();
+
+  //standing on stuff.
+  /*
+  fall_raycaster.ray.origin.copy( controls.getObject().position );
+  fall_raycaster.ray.origin.y -= 5;
+
+  var intersections = fall_raycaster.intersectObjects( params.feature_meshes ).filter(function(intersection){
+    return !!intersection.object.feature;
+  });
+
+  var isOnObject = intersections.length > 0;
+  */
+  var isOnObject = true;
+
+  // friction.
+  velocity.x -= velocity.x * 10.0 * delta;
+  velocity.z -= velocity.z * 10.0 * delta;
+  
+  // gravity
+  if (this.opts.gravity) {
+    velocity.y -= 9.8 * 3.0 * delta;
+  }
+
+  if ( this.moveForward ) { 
+    if (this.opts.collisions && INTERSECTED && INTERSECTED.distance < 5) {
+      velocity.x = 0;
+      velocity.z = 0;
+      if (this.opts.gravity) {
+        velocity.y = 1500 * delta;
+      }
+      //velocity.y += 1.5 * 9.8 * 10.0 * delta;
+    } else {
+      velocity.z -= 400.0 * delta;
+    }
+  }
+  
+  if ( this.moveBackward ) velocity.z += 400.0 * delta;
+  if ( this.moveLeft ) velocity.x -= 400.0 * delta;
+  if ( this.moveRight ) velocity.x += 400.0 * delta;
+
+  if ( isOnObject === true ) {
+    velocity.y = Math.max( 0, velocity.y );
+    this.canJump = true;
+  }
+  // no falling through the ground.
+  if ( this.opts.camera.position.y < 5 ) {
+    velocity.y = 0;
+    this.opts.camera.position.y = 5;
+    this.canJump = true;
+  }
+
+  // apply velocity to position dx/dt dy/dt dz/dt
+  var proxy = controls.getObject();
+  proxy.translateX( velocity.x * delta );
+  proxy.translateY( velocity.y * delta );
+  proxy.translateZ( velocity.z * delta );
 
   renderer.render( scene, camera );
 

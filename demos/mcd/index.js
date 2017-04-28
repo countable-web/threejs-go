@@ -68,7 +68,7 @@ var init = function() {
     init_skyball();
   }
   init_ground();
-  init_burgers();
+  //init_burgers();
   if (THREE.is_mobile || true) {
     init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
     // navigator.geolocation.getCurrentPosition(init_geo);
@@ -409,7 +409,7 @@ function onClick( event ) {
   mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   ar_world.touch_raycaster.setFromCamera( mouse, camera );
-  ar_world.update_player_focus();
+  ar_world.updateSelection();
 }
 document.addEventListener( 'click', onClick );
 
