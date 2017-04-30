@@ -102,7 +102,10 @@ THREE.ARMapzenGeography = function(opts){
         handle_data(JSON.parse(cached_data));
       }, 200);
     } else {
-      $.getJSON( "https://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY,function(data){
+      var url = "https://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY
+      fetch(url).then(function(response){
+        return response.json();
+      }).then(function(data){
         localStorage['mz_' + key] = JSON.stringify(data);
         handle_data(data);
       });
