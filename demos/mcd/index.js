@@ -1,7 +1,7 @@
 
 var camera, scene, renderer, controls;
-var is_day;
-var lat, lng;
+
+THREE.is_daytime = true;
 
 var init = function() {
   /* Standard THREE.JS stuff */
@@ -18,6 +18,7 @@ var init = function() {
   light.position.set( 0.5, 1, 0.75 );
   scene.add( light );
 
+  
   var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
   directionalLight.position.set( 1000, 1000, 1000 );
   scene.add( directionalLight );
@@ -25,11 +26,12 @@ var init = function() {
   var directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.5 );
   directionalLight2.position.set( -1000, 1000, 1000 );
   scene.add( directionalLight );
+  
 
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight ); 
-  if (is_day) {
+  if (THREE.is_daytime) {
     renderer.setClearColor( 0xddeeff );
     scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
   } else {
@@ -39,11 +41,11 @@ var init = function() {
   }
   document.body.appendChild( renderer.domElement );
 
-  if (THREE.is_mobile) {
+  /*if (THREE.is_mobile) {
     //controls = new THREE.DragMouseControls(camera);
     //controls.orientation.y = 5.3; //+ Math.PI;
     controls = new THREE.DeviceOrientationControls(camera);
-  } else {
+  } else {*/
     controls = new THREE.OrbitControls( camera );
     controls.minDistance = 100;
     controls.maxDistance = 200;
@@ -53,7 +55,7 @@ var init = function() {
     controls.maxPolarAngle = Math.PI*.45;
     controls.minPolarAngle = Math.PI*.2;
     controls.target = new THREE.Vector3(0,0,0);
-  }
+  //}
   scene.add( camera);
 
   onWindowResize = function() {
@@ -64,16 +66,19 @@ var init = function() {
   onWindowResize();
   window.addEventListener( 'resize', onWindowResize, false );
 
-  if (is_day) {
+  if (THREE.is_daytime) {
     init_skyball();
   }
   init_ground();
+
   //init_burgers();
-  if (THREE.is_mobile || true) {
-    init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
-    // navigator.geolocation.getCurrentPosition(init_geo);
+
+  if (THREE.is_mobile) {
+    alert('mob');
+    navigator.geolocation.getCurrentPosition(init_geo);
   } else {
-    init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
+    init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
+    //init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
   }
 
 };
@@ -94,13 +99,13 @@ var init_ground = function(){
   var geometry = new THREE.PlaneBufferGeometry( 3000, 3000);
   geometry.rotateX( - Math.PI / 2 );
   var material = new THREE.MeshPhongMaterial( {
-    color: 0x55AA00,
+    color: 0x448888,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8
+    opacity: 1
   } );
   var plane = new THREE.Mesh( geometry, material );
-  plane.position.y = -2;
+  plane.position.y = -3;
   scene.add( plane );
 }
 
@@ -131,21 +136,31 @@ var init_ar = function(){
   ar_world = new THREE.ARWorld({
     ground: true,
     camera: camera,
-    controls: controls
   });
 
   ar_geo = new THREE.ARMapzenGeography({
     styles: styles,
-    camera: camera,
-    controls: controls,
     lat: lat,
     lng: lng,
-    minimap: false,
     layers: ['buildings','roads','water','landuse']
   });
 
 };
 
+
+
+var outlet_material = new THREE.MeshLambertMaterial( {
+  //emissive: 0xFFFF00,
+  color: 0xFFDD00,
+  fog: false
+} );
+
+// shadow.
+var shadow_material = new THREE.MeshLambertMaterial( {
+  color: 0x000000,
+  opacity: 0.3,
+  transparent: true
+} );
 
 var outlets = [];
 var init_mcd = function(){
@@ -153,30 +168,18 @@ var init_mcd = function(){
 
   var mcds = [
     {
-      lat: lat + .001,
-      lng: lng + .001
+      lat: lat + .0015,
+      lng: lng + .0015
     },
     {
-      lat: lat - .001,
-      lng: lng + .001
+      lat: lat - .0015,
+      lng: lng + .0015
     },
     {
-      lat: lat + .001,
-      lng: lng - .001
+      lat: lat + .0015,
+      lng: lng - .0015
     }
   ];
-
-
-  var outlet_material = new THREE.MeshLambertMaterial( {
-    //emissive: 0xFFFF00,
-    color: 0xFFDD00,
-    fog: false
-  } );
-
-  var deco_material = new THREE.MeshLambertMaterial( {
-    fog: false,
-    color: 0xddbb33
-  } );
 
   var loader = new THREE.OBJLoader();
   loader.load( 'mcdo_arc_single.obj', function ( object ) {
@@ -192,11 +195,10 @@ var init_mcd = function(){
       var outlet = object.clone();
       outlet.rotateX(Math.PI/2);
       outlet.scale.set(1.2,1.2,1.2);
-      outlet.position.y = 5;
       coords = ar_geo.to_scene_coords([point.lng, point.lat]);
       outlet.position.x = coords[0];
       outlet.position.z = coords[1];
-      outlet.position.y = 80;
+      outlet.position.y = 50;
 
       scene.add( outlet );
       outlets.push(outlet);
@@ -204,25 +206,24 @@ var init_mcd = function(){
       outlet.spheres = [];
 
       [
-        [60,25,0],
-        [20,5,200],
-        [40,5,160]
+        [60,1,4]
       ].forEach(function(params){
         var geometry = new THREE.CylinderGeometry( params[0], params[0], params[1], 32 );
-        var cylinder = new THREE.Mesh( geometry, deco_material );
+        var cylinder = new THREE.Mesh( geometry, shadow_material );
         cylinder.position.x = coords[0];
         cylinder.position.z = coords[1];
         cylinder.position.y = params[2];
+        cylinder.renderOrder = 4;
         cylinder.start_position = cylinder.position.clone();
         scene.add( cylinder );
         outlet.cylinders.push(cylinder);
       });
 
       var geo = new THREE.SphereGeometry( 15, 10, 10);
-      var sphere = new THREE.Mesh( geo, deco_material );
+      var sphere = new THREE.Mesh( geo, outlet_material );
       sphere.position.x = coords[0];
       sphere.position.z = coords[1];
-      sphere.position.y = 220;
+      sphere.position.y = 120;
       sphere.start_position = sphere.position.clone();
       outlet.spheres.push(sphere);
       scene.add(sphere);
@@ -270,7 +271,7 @@ var init_burgler = function(){
 
 
   var tloader = new THREE.ImageLoader( );
-  tloader.load( 'hamburglar_diff.png', function ( image ) {
+  tloader.load( 'hamburglar_diff_small.png', function ( image ) {
 
     texture.image = image;
     texture.needsUpdate = true;
@@ -289,29 +290,20 @@ var init_burgler = function(){
         child.material.map = texture;
         child.material.side = THREE.DoubleSide;
         child.material.shading = THREE.SmoothShading;
-
-
       }
 
     } );
 
     object.position.y = 0;
 
-    // shadow.
-    var shadow_material = new THREE.MeshLambertMaterial( {
-      color: 0x000000,
-      opacity: 0.4,
-      transparent: true
-    } );
-    var geometry4 = new THREE.CylinderGeometry( 13/20, 13/20, 1/20, 32 );
+    var geometry4 = new THREE.CylinderGeometry( 17, 17, 1, 32 );
     var cylinder4 = new THREE.Mesh( geometry4, shadow_material );
     cylinder4.position.x = 0;
     cylinder4.position.z = 0;
-    cylinder4.position.y = 0.1; //1/20;
+    cylinder4.position.y = 4; //1/20;
+    cylinder4.renderorder = 4;
     object.add( cylinder4 );
-
     scene.add( object );
-
 
   }, onProgress, onError );             
 };
@@ -335,35 +327,34 @@ var animate = function() {
 
   requestAnimationFrame( animate );
 
-  controls.update();
-  if (THREE.is_mobile) {
-    //orientationcontrols.updateAlphaOffsetAngle(controls.orientation.y);
-  } else {
-    //dragcontrols.update();
-  }
-
-  ar_world.update({
-    feature_meshes: ar_geo.feature_meshes
+  /*
+  ar_geo.feature_meshes.forEach(function(fm){
+    if (fm.feature.layername == 'buildings') {
+      fm.scale.y = Math.cos(time/500 + (fm.feature.properties.area || 0)) + 1.5;
+    }
   });
+  */
+
+  controls.update();
+
+  ar_world.update();
 
   outlets.forEach(function(outlet){
-    outlet.rotateZ(.03);
+    outlet.rotateZ(.015);
     outlet.cylinders.forEach(function(cylinder, i){
-      cylinder.position.y = cylinder.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
+      //cylinder.position.y = cylinder.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
     })
     outlet.spheres.forEach(function(sphere, i){
       sphere.position.y = sphere.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
+      sphere.scale.y=Math.cos(time/600/(i+1));
+      sphere.scale.z=Math.cos(time/600/(i+1));
+      sphere.scale.x=Math.cos(time/600/(i+1));
       /*sphere.position.x = sphere.start_position.x + Math.cos(time/300) * (Math.sin(time/500) * 3 + 6)
       sphere.position.z = sphere.start_position.z + Math.sin(time/300) * (Math.sin(time/500) * 3 + 6)*/
     })
   });
 
   if (typeof burglar !== 'undefined'){
-    /*
-    burglar.position.x = controls.target.x;
-    burglar.position.z = controls.target.z;
-    burglar.rotation.y = camera.rotation.y + Math.cos(time/900);
-    */
     burglar.scale.x = .6 + .06 * Math.sin(time/500);
     burglar.scale.z = .6 + .06 * Math.sin(time/500);
     burglar.scale.y = .6 + .03 * Math.cos(time/500);
@@ -394,7 +385,7 @@ init_heart = function(){
   heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
 
   var geometry = new THREE.ShapeGeometry( heartShape );
-  var material = new THREE.MeshBasicMaterial( { color: 0xff4488 , side: THREE.DoubleSide} );
+  var material = new THREE.MeshBasicMaterial( { color: 0xff4400 , side: THREE.DoubleSide} );
   heart = new THREE.Mesh( geometry, material ) ;
   heart.position.y = 60;
   heart.position.x = 5;

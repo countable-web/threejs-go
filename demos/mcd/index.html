@@ -38,53 +38,52 @@
 
     <script src="../../src/mapzen-api-key.js"></script>
     
-    <script src="../../bower_components/three.js/three.js"></script>
-    <script src="../../bower_components/jquery/dist/jquery.js"></script><!-- used only for ajax currently -->
-    <script src="../../vendor/turf.min.js"></script> <!-- used only for turf.buffer currently -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/4.1.0/turf.min.js"></script> <!-- used only for turf.buffer currently -->
     <script src="../../vendor/OBJLoader.js"></script> <!-- used only for turf.buffer currently -->
 
     <script src="../../src/controls/OrbitControls.js"></script>
-    <script src="../../src/controls/DragMouseControls.js"></script>
     <script src="../../src/controls/DeviceOrientationControls.js"></script>
     <script src="../../src/arthree.js"></script>
-    <script src="../../src/text.js"></script>
-    <script src="../../src/minimap.js"></script>
     <script src="../../src/geography.js"></script>
     <script src="../../src/styles.js"></script>
 
     <script>
-  var styles = {
-    buildings: {
-      /*color: 0x448800,
-      height_scale: 0.1,
-      extrude: 'rounded'*/
-      color: 0x00AA55,
-      extrude: 'flat'
-    },
-    roads: {
-      color: 0xDDAA00,
-      //height: 0.2,
-      extrude: 'flat'
-    },
-    "McDonald's": {
-      color: 0xffdd00,
-      height_scale: 1
-    },
-    path: {
-      width: 2
-    },
-    minor_road: {
-      width: 3
-    },
-    major_road: {
-      width: 4
-    },
-    highway: {
-      width: 5
-    },
-  };
-
-
+var styles = {
+  buildings: {
+    //height_scale: 0.1,
+    extrude: 'flat',
+    color: 0xFF4400
+  },
+  landuse: {
+    opacity: 0.6
+  },
+  residential: {
+    color: 0xFF00FF
+  },
+  roads: {
+    color: 0xFFDD00,
+  },
+  "McDonald's": {
+    color: 0xFFDD00,
+    height_scale: 1
+  },
+  path: {
+    width: 2
+  },
+  minor_road: {
+    width: 3
+  },
+  major_road: {
+    width: 4
+  },
+  highway: {
+    width: 5
+  },
+  meadow: {
+    opacity: 0.5
+  }
+};
     </script>
     <script src="index.js"></script>
 

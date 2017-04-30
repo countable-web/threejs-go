@@ -50,33 +50,34 @@ THREE.ARMapzenGeography = function(opts){
 
   this._drawn = {}; // avoid duplicate renderings.
 
+
+  var long2tile = function(lon, zoom) {
+    return Math.floor((lon+180)/360*Math.pow(2,zoom));
+  }
+
+  var lat2tile = function(lat,zoom) {
+    return Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom));
+  }
+
+
   var textureLoader = new THREE.TextureLoader();
-
   this.scale = 200000;
-
-  var TILE_ZOOM = 17;
-
+  var TILE_ZOOM = 16;
 
   this.feature_styles = {}; // global eature styling object.
   var feature_styles = this.feature_styles;
 
   this.init_feature_styles(opts.styles || {});
 
-  function long2tile(lon,zoom) {
-    return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
-  }
-  function lat2tile(lat,zoom) {
-    return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom)));
-  }
   var MAP_CACHE = {};
 
   setInterval(function(){
     if (!player.lat) return;
 
     // keep latitude and longitude up to date for tile loading.
-    if (this.opts.controls.target) {
-      this.player.lng = this.player.start_lng + this.opts.controls.target.x / this.scale;
-      this.player.lat = this.player.start_lat - this.opts.controls.target.z / this.scale;
+    if (this.opts.marker) {
+      this.player.lng = this.player.start_lng + this.opts.marker.x / this.scale;
+      this.player.lat = this.player.start_lat - this.opts.marker.z / this.scale;
     }
 
     load_tiles(player.lat, player.lng)
@@ -85,9 +86,9 @@ THREE.ARMapzenGeography = function(opts){
   var that = this;
 
   var handle_data = function(data) {
-    that.opts.layers.forEach(function(featureset_name){
-      if (feature_styles[featureset_name]) {
-        that.add_geojson(data, featureset_name);
+    that.opts.layers.forEach(function(layername){
+      if (feature_styles[layername]) {
+        that.add_geojson(data, layername);
       }
     });
   };
@@ -95,7 +96,7 @@ THREE.ARMapzenGeography = function(opts){
   var load_tile = (function(tx, ty) {
     var key = tx + '_' + ty + '_' + TILE_ZOOM
     MAP_CACHE[key] = 1;
-    var cached_data = null; //localStorage['mz_' + key];
+    var cached_data = localStorage['mz_' + key];
     if (cached_data) {
       setTimeout(function(){
         handle_data(JSON.parse(cached_data));
@@ -147,21 +148,23 @@ THREE.ARMapzenGeography = function(opts){
 
   load_tiles(player.lat, player.lng);
   player.start_lng = player.lng, player.start_lat = player.lat;
-  if (this.opts.minimap) this.minimap = new THREE.ARMiniMap(this); 
 
 
 };
 
 
 /**
- * Takes a 2d geojson, converts it to a ThreeJS Geometry, and extrudes it to a height suitable for 3d viewing.
+ * Takes a 2d geojson, converts it to a THREE.Geometry, and extrudes it to a height
+ * suitable for 3d viewing, such as for buildings.
  */
 THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styles){
 
   var shape = new THREE.Shape();
 
   // Buffer the linestrings so they have some thickness (uses turf.js)
-  if (feature.geometry.type === 'LineString' || feature.geometry.type === 'Point' || feature.geometry.type === 'MultiLineString') {
+  if (feature.geometry.type === 'LineString' ||
+      feature.geometry.type === 'Point' ||
+      feature.geometry.type === 'MultiLineString') {
     var width = styles.width || 1;
     var buf = turf.buffer(feature, width, 'meters');
     feature.geometry = buf.geometry;
@@ -201,10 +204,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
   }
 
   if (styles.extrude === 'flat') {
-
     var geometry = new THREE.ShapeGeometry( shape );
-
-
   } else if (styles.extrude === 'rounded') {
     var extrudeSettings = {
       steps: 1,
@@ -214,7 +214,6 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
       bevelSize: 16,
       bevelSegments: 16
     };
-
     var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
   } else {
     var extrudeSettings = {
@@ -222,7 +221,6 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
       amount: height || 1,
       bevelEnabled: false
     };
-
     var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
   }
   geometry.rotateX( - Math.PI / 2 );
@@ -232,32 +230,51 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
 };
 
 
-THREE.ARMapzenGeography.prototype.add_geojson = function(data, featureset_name){
-  geojson = data[featureset_name];
+/**
+ * Add a geojson tile to the scene.
+ */
+THREE.ARMapzenGeography.prototype.add_geojson = function(data, layername){
+  geojson = data[layername];
   var that = this;
   geojson.features.forEach(function(feature){
-    that.add_feature(feature, featureset_name)
+    that.add_feature(feature, layername)
   });
 };
 
 
-THREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_name) {
+THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
 
+  feature.layername = layername;
   var feature_styles = this.feature_styles;
 
-  if (this._drawn[feature.properties.id]) return;// avoid duplicate renderings. features might show up in 2 tiles.
-  this._drawn[feature.properties.id] = true;
+  // we only cache at the tile level now, the following doesn't work,
+  // since a feature could appear on multiple tiles.
+  //if (this._drawn[feature.properties.id]) return;// avoid duplicate renderings. features might show up in 2 tiles.
+  //this._drawn[feature.properties.id] = true;
+
+  // Style based on the the various feature property hints, in some order...
+  var layer_styles = feature_styles[layername];
+  var kind_styles = feature_styles[feature.properties.kind] || {};
+  // kind_detail seems to copy landuse for roads, which is dumb, don't color it.
+
+  if (layername === 'roads') {
+    var kind_detail_styles = {};
+  } else {
+    var kind_detail_styles = feature_styles[feature.properties.kind_detail] || {};
+  }
+  var name_styles = feature_styles[feature.properties.name] || {};
 
   // Many features have a 'kind' property that can be used for styling.
-  var styles = THREE.extend(feature_styles[featureset_name],
-                              feature_styles[feature.properties.kind || {}],
-                              feature_styles[feature.properties.kind_detail || {}],
-                              feature_styles[feature.properties.name || {}]);
+  var styles = THREE.extend(layer_styles,
+                            kind_styles,
+                            kind_detail_styles,
+                            name_styles);
+  
 
-
-  if (feature.properties && feature.properties.kind === 'building') { // special case for buildings.
+  // Inherit some properties from containing landuse boundary?
+  /*if (feature.properties.landuse_kind) { // special case for buildings.
     styles = THREE.extend(styles, feature_styles[feature.properties.landuse_kind || {}])
-  }
+  }*/
 
   // tally feature "kind" (descriptive tags). used for debugging/enumerating available features and building stylesheets.
   this.kinds[feature.properties.kind] = this.kinds[feature.properties.kind] || 1;
@@ -281,16 +298,22 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, featureset_nam
       shading: THREE.SmoothShading
     });
   }
+
+  // TODO, a better z-fighting avoidance method.
+  /*
   material.polygonOffset = true;
-  material.polygonOffsetFactor = Math.random() - 0.5; // TODO, a better z-fighting avoidance method.
-  material.polygonOffsetUnits = 1;
+  material.polygonOffsetFactor = (feature.properties.sort_rank || 100);
+  material.polygonOffsetUnits = .1;
+  material.depthTest = true;*/
 
   var mesh = new THREE.Mesh( geometry, material ) ;
-  mesh.position.y = 1;
+
+  // TODO, a better z-fighting avoidance method.
+  mesh.position.y = styles.offy || 0;
+
   scene.add( mesh );
   mesh.feature = feature;
   this.feature_meshes.push(mesh);
-
 }
 
 THREE.ARMapzenGeography.prototype.to_scene_coords = function(coord){

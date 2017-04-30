@@ -108,7 +108,8 @@ DEFAULT_FEATURE_STYLES = {
 
   roads: {
       color: 0x333333,
-      height: 1
+      offy: 1,
+      extrude: 'flat'
   },
 
   pois: {
@@ -118,12 +119,15 @@ DEFAULT_FEATURE_STYLES = {
 
   landuse: {
       color: 0xFFFF00,
-      height: 0.5
+      opacity: 0.33,
+      extrude: 'flat',
+      offy: -1
   },
 
   water: {
       color: 0x6688FF,
-      height: 0.1
+      extrude: 'flat',
+      offy: -2
   },
 
   address: {
@@ -165,22 +169,22 @@ DEFAULT_FEATURE_STYLES = {
   },
   park: {
     color: 0x008800,
-    opacity: 1,
-    height: 0.6
+    opacity: 0.33,
+    exrude: 'flat',
+    offy: -2
   },
   forest: {
     color: 0x008800,
     opacity: 0.8,
-    height: 4
+    offy: -2
   },
   pitch: {
-    color: 0x88FF88,
-    height: 0.8
+    color: 0x88FF88
   },
   parking: {
     color: 0x555555,
     opacity: 0.8,
-    height: 0.2
+    offy: 0
   },
   fence: {
     color: 0xFF0000,
