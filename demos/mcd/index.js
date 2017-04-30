@@ -74,7 +74,6 @@ var init = function() {
   //init_burgers();
 
   if (THREE.is_mobile) {
-    alert('mob');
     navigator.geolocation.getCurrentPosition(init_geo);
   } else {
     init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
