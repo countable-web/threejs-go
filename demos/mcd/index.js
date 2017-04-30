@@ -73,12 +73,13 @@ var init = function() {
 
   //init_burgers();
 
-  if (THREE.is_mobile) {
-    navigator.geolocation.getCurrentPosition(init_geo);
+  navigator.geolocation.getCurrentPosition(init_geo);
+  
+  /*if (THREE.is_mobile) {
   } else {
     init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
     //init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
-  }
+  }*/
 
 };
 
