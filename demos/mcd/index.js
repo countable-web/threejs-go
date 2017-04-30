@@ -73,13 +73,12 @@ var init = function() {
 
   //init_burgers();
 
-  navigator.geolocation.getCurrentPosition(init_geo);
-  
-  /*if (THREE.is_mobile) {
+  if (window.location.host === "countable-web.github.io") {
+    navigator.geolocation.getCurrentPosition(init_geo);
   } else {
     init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
     //init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
-  }*/
+  }
 
 };
 
@@ -96,10 +95,16 @@ var init_geo = function(position) {
 
 var init_ground = function(){
   // Ground.
+  var textureLoader = new THREE.TextureLoader();
+  var logo_tex = textureLoader.load("logo.png");
+  logo_tex.wrapS = THREE.RepeatWrapping;
+  logo_tex.wrapT = THREE.RepeatWrapping;
+  logo_tex.repeat.set( 300, 300 );  
   var geometry = new THREE.PlaneBufferGeometry( 3000, 3000);
   geometry.rotateX( - Math.PI / 2 );
   var material = new THREE.MeshPhongMaterial( {
     color: 0x448888,
+    map: logo_tex,
     side: THREE.DoubleSide,
     transparent: true,
     opacity: 1
@@ -404,8 +409,6 @@ function onClick( event ) {
 }
 document.addEventListener( 'click', onClick );
 
-if (window.location.host === "countable-web.github.io") {
 
-}
 
 init();
