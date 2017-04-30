@@ -1,8 +1,6 @@
 
 var camera, scene, renderer, controls;
 
-THREE.is_daytime = true;
-
 var init = function() {
   /* Standard THREE.JS stuff */
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -12,28 +10,45 @@ var init = function() {
 
   scene = new THREE.Scene();
 
-  var hour = (new Date()).getHours();
-  is_day = (hour > 7 && hour < 20);
-  var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-  light.position.set( 0.5, 1, 0.75 );
-  scene.add( light );
+  if (THREE.is_daytime) {
+    var light = new THREE.HemisphereLight( 0xffffee, 0x777788, 0.75 );
+    light.position.set( 0.5, 1, 0.75 );
+    scene.add( light );
+    var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.3 );
+    directionalLight.position.set( 1000, 1000, 1000 );
+    scene.add( directionalLight );
+    var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.3 );
+    directionalLight.position.set( 1000, 1000, -1000 );
+    scene.add( directionalLight );    
+    var directionalLight2 = new THREE.DirectionalLight( 0xffffdd, 0.4 );
+    directionalLight2.position.set( -1000, 1000, 1000 );
+    scene.add( directionalLight2 );
+  } else {
+    var light = new THREE.HemisphereLight( 0xaaaaff, 0x777788, 0.75 );
+    light.position.set( 0.5, 1, 0.75 );
+    scene.add( light );
+    var directionalLight2 = new THREE.DirectionalLight( 0xccccff, 0.7 );
+    directionalLight2.position.set( -1000, 1000, 1000 );
+    scene.add( directionalLight2 );
+  }
 
-  
-  var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-  directionalLight.position.set( 1000, 1000, 1000 );
-  scene.add( directionalLight );
-
-  var directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.5 );
-  directionalLight2.position.set( -1000, 1000, 1000 );
-  scene.add( directionalLight );
-  
 
   renderer = new THREE.WebGLRenderer();
+
+  renderer.physicallyBasedShading = true;  
+
+  // Cineon matches our filmic mapping in our shaders, but makes lighting a bit flat, disabled.
+  //renderer.toneMapping = THREE.ReinhardToneMapping;
+  //renderer.toneMapping = THREE.CineonToneMapping;
+  renderer.toneMapping = THREE.LinearToneMapping;
+  //renderer.toneMapping = THREE.Uncharted2ToneMapping;
+  //renderer.toneMappingExposure = 0.9;
+
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight ); 
   if (THREE.is_daytime) {
     renderer.setClearColor( 0xddeeff );
-    scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
+    scene.fog = new THREE.FogExp2( 0xdef1f7, 0.0025 );
   } else {
     // night.
     renderer.setClearColor( 0x000066 );
