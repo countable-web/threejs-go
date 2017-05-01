@@ -15,6 +15,7 @@ Clone the project.
 
 ```
 git clone https://github.com/countable-web/threejs-go.git
+cd threejs-go
 ```
 
 Set up your MapZen API key:
