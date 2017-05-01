@@ -2,6 +2,8 @@
 
 Augmented reality using map geometry.
 
+![Image of McDonald's Demo](https://github.com/countable-web/threejs-go/blob/gh-pages/assets/screengrab.png)
+
 Three.js Go is a library built on Three.js and Mapzen's OSM based vector tiles, for generating 3d geometry that approximates the real world, based on map data. The project was inspired by Pokemon Go, which launched a year ago, and the disappointment in the absence of other apps which make use of the player's location. In case it's a lack of tooling, this library may help with the groundwork for these kinds of applicaton.
 
 ## Examples
