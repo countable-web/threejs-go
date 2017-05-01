@@ -69,6 +69,7 @@ var init = function() {
 };
 
 var init_geo = function(position) {
+  window._ar_position = position;
   lat = position.coords.latitude;
   lng = position.coords.longitude;
   init_ar(lat, lng);
