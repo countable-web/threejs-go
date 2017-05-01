@@ -37,7 +37,7 @@ For further work, it's suggested you try extending one of the Demos since they'r
 
 ## Documentation
 
-### THREE.ARWorld
+### THREE.ARWorld(option)
 Includes various environment / utilities for map based AR. Your scene camera should be passed as a parameter.
 ```
 new THREE.ARWorld({
