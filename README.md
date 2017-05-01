@@ -8,7 +8,7 @@ Three.js Go is a library built on Three.js and Mapzen's OSM based vector tiles, 
 Clone the project.
 
 ```
-
+git clone https://github.com/countable-web/threejs-go.git
 ```
 
 Set up your MapZen API key:
