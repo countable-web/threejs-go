@@ -86,16 +86,18 @@ THREE.ARWorld = (function(opts){
     }
   }
 
-  ARWorld.prototype.updateSelection = function() {
+  /**
+   * @param look - based on look direction.
+   */
+  ARWorld.prototype.updateSelection = function(object) {
 
-      // touching stuff.
-      var vector = new THREE.Vector3(); // create once and reuse it!
+      object = this.opts.camera;
       
-      // update for WASD controls. TODO: move to WASD.
-      // this.opts.camera.getWorldDirection( vector );
-      // this.touch_raycaster.ray.origin.copy( this.opts.camera.position );
-      // this.touch_raycaster.ray.origin.y -= 3;
-      // this.touch_raycaster.ray.direction = vector;
+      var vector = new THREE.Vector3(); // create once and reuse it!
+      object.getWorldDirection( vector );
+      this.touch_raycaster.ray.origin.copy( object.position );
+      this.touch_raycaster.ray.origin.y -= 3;
+      this.touch_raycaster.ray.direction = vector;
 
       // get closest object in target ray.
       var intersects = this.touch_raycaster.intersectObjects( scene.children );

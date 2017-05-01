@@ -23,13 +23,14 @@ var init = function() {
 
   renderer = new THREE.WebGLRenderer();
 
+  /*
   renderer.physicallyBasedShading = true;  
 
   // Cineon matches our filmic mapping in our shaders, but makes lighting a bit flat, disabled.
   //renderer.toneMapping = THREE.ReinhardToneMapping;
   renderer.toneMapping = THREE.CineonToneMapping;
   //renderer.toneMapping = THREE.LinearToneMapping;
-  renderer.toneMappingExposure = 2;
+  renderer.toneMappingExposure = 2;*/
 
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight ); 
@@ -55,6 +56,9 @@ var init = function() {
   window.addEventListener( 'resize', onWindowResize, false );
 
   init_ground();
+  
+  fall_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+
   if (THREE.is_mobile || true) {
     init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
     // navigator.geolocation.getCurrentPosition(init_geo);
@@ -119,7 +123,7 @@ var init_ar = function(lat, lng){
   });
 };
 
-var raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+var fall_raycaster;
 
 var prevTime = performance.now();
 
@@ -132,39 +136,20 @@ var animate = function() {
   if (controls && controls.update) controls.update();
 
   ar_world.update();
-
+  ar_world.updateSelection(controls.getObject());
   // touching stuff.
   //this.update_player_focus();
 
   //standing on stuff.
   
-  if (ar_geo.meshes_by_layer.buildings) {
-
-    raycaster.ray.origin.copy( controls.getObject().position );
-    raycaster.ray.origin.y -= 5;
-
-    var intersections = raycaster.intersectObjects( ar_geo.meshes_by_layer.buildings ).filter(function(obj){
-      return !!obj.feature;
-    });
-
-    var isOnObject = intersections.length > 0;
+  if (controlsEnabled) {
+    fall_raycaster.ray.origin.copy( controls.getObject().position );
+    fall_raycaster.ray.origin.y -= 5;
+    var intersections = fall_raycaster.intersectObjects( ar_geo.meshes_by_layer.buildings );
+    var isOnObject = intersections.length > 0 || controls.getObject().position.y < 5;
   } else {
     isOnObject = true;
   }
-  /*
-  if (ar_geo.meshes_by_layer.buildings) {
-
-    // bad meshes? filter those.
-    var meshes = ar_geo.meshes_by_layer.buildings;
-    var intersections = fall_raycaster.intersectObjects(meshes)
-    intersections = intersections.filter(function(intersection){
-      return !!intersection.object.feature;
-    });
-    isOnObject = intersections.length > 0 || controls.getObject().position.y <= 5;
-  } else {
-    isOnObject = true;
-  }
-  */
   
   // friction.
   controls.velocity.x -= controls.velocity.x * 10.0 * delta;
@@ -176,10 +161,13 @@ var animate = function() {
   }
 
   if ( controls.moveForward ) { 
-    if (ar_world.touching && ar_world.touching.distance < 5) {
+    console.log(ar_world.selection);
+    if (ar_world.selection) console.log(ar_world.selection.distance);
+    if (ar_world.selection && ar_world.selection.distance < 5) {
+
       controls.velocity.x = 0;
       controls.velocity.z = 0;
-      controls.velocity.y = 1500 * delta;
+      controls.velocity.y = 150 * delta;
       //velocity.y += 1.5 * 9.8 * 10.0 * delta;
     } else {
       controls.velocity.z -= 400.0 * delta;

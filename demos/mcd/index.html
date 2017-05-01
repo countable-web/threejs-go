@@ -6,48 +6,41 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../../src/arthree.css">
     <style>
-    * {
-      box-sizing: border-box;
-    }
-    #walk {
-        display: none;
-        position: fixed;
-        width: 20vh;
-        height: 20vh;
-        right: 5vh;
-        bottom: 5vh;
-        background: #ffdd00;
-        border: 0.5vh solid black;
-        border-radius: 50%;
-        box-shadow: 1vh 1vh 10vh rgba(0,0,0,0.5);
-        font-size: 5vh;
-        text-align: center;
-        box-sizing: border-box;
-        padding-top: 7vh;
-    }
-    #walk:hover {
-        background: white;
-    }
-    #walk.depressed {
-        box-shadow: 1vh 0 5vh rgba(0,0,0,0.5);
-        bottom: 4vh;
-    }
+
     #notice {
       position: fixed;
       height: 6vw;
       font-size: 2vw;
       width: 100%;
       bottom: 0;
-      left: 0;
+      text-align: center;
+    }
+    #notice span {
+      padding: 1vw 3vw;
       background-color: black;
       color: white;
-      padding: 2vw;
+      opacity: 0.7;
+      border-radius: 0.5vw;
+    }
+    .forkme {
+      position: fixed;
+    }
+    @media(min-width:601px) {
+      .forkme {
+        padding:5px 45px;
+        width:128px;
+        top:50px;
+        right:-50px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg);box-shadow:0 0 0 3px #ffdd00, 0 0 20px -3px rgba(0, 0, 0, 0.5);text-shadow:0 0 0 #ffffff, 0 0 5px rgba(0, 0, 0, 0.3);background-color:#eebb00;color:#ffffff;font-size:13px;font-family:sans-serif;text-decoration:none;font-weight:bold;border:2px dotted #ffffff;-webkit-backface-visibility:hidden;letter-spacing:.5px;
+      }
+    }
+    @media(max-width: 600px) {
+
     }
     </style>
   </head>
   <body>
     <div id="walk"></div>
-    <div id="notice">Drag the screen to look around your actual location...</div>
+    <div id="notice"><span>Drag the screen to look around your actual location...</span></div>
 
     <script src="../../src/mapzen-api-key.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.min.js"></script>
@@ -102,6 +95,8 @@ var styles = {
 };
     </script>
     <script src="index.js"></script>
-    <a href="https://github.com/countable-web/threejs-go"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <a href='https://github.com/countable-web/threejs-go' class='forkme'>Fork me on GitHub</a>
+
   </body>
 </html>

@@ -29,6 +29,7 @@ THREE.WASDControls = function ( camera ) {
     var pointerlockerror = function ( event ) {
       instructions.style.display = '';
     };
+
     // Hook pointer lock state change events
     document.addEventListener( 'pointerlockchange', pointerlockchange, false );
     document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
@@ -84,7 +85,6 @@ THREE.WASDControls = function ( camera ) {
     }
   };
   var onKeyUp = function ( event ) {
-    console.log(event.keyCode);
     switch( event.keyCode ) {
       case 38: // up
       case 87: // w
@@ -164,6 +164,7 @@ THREE.WASDControls = function ( camera ) {
     };
 
   }();
+
 
 };
 
