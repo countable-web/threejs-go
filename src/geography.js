@@ -131,6 +131,7 @@ THREE.ARMapzenGeography = function(opts){
 
   // keep a reference to everything we add to the scene from map data.
   this.feature_meshes = [];
+  this.meshes_by_layer = {};
 
   /*
   var cobble_tex = {
@@ -217,14 +218,14 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
       bevelSize: 16,
       bevelSegments: 16
     };
-    var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+    var geometry = new THREE.ExtrudeBufferGeometry( shape, extrudeSettings );
   } else {
     var extrudeSettings = {
       steps: 1,
       amount: height || 1,
       bevelEnabled: false
     };
-    var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+    var geometry = new THREE.ExtrudeBufferGeometry( shape, extrudeSettings );
   }
   geometry.rotateX( - Math.PI / 2 );
 
@@ -316,7 +317,10 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
 
   scene.add( mesh );
   mesh.feature = feature;
+  mesh.attributes = {position: mesh.position};
   this.feature_meshes.push(mesh);
+  this.meshes_by_layer[layername] = this.meshes_by_layer[layername] || [];
+  this.meshes_by_layer[layername].push(mesh);
 }
 
 THREE.ARMapzenGeography.prototype.to_scene_coords = function(coord){

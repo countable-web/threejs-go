@@ -78,7 +78,7 @@ THREE.WASDControls = function ( camera ) {
         scope.moveRight = true;
         break;
       case 32: // space
-        if ( scope.canJump === true ) scope.velocity.y += 50;
+        if ( scope.canJump === true ) scope.velocity.y = 50;
         scope.canJump = false;
         break;
     }
