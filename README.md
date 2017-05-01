@@ -1,6 +1,6 @@
 # threejs-go
 
-Augmented reality using map geometry.
+Augmented reality using real world map features.
 
 ![Image of McDonald's Demo](https://github.com/countable-web/threejs-go/blob/gh-pages/assets/screengrab.png)
 
