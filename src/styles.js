@@ -119,7 +119,7 @@ DEFAULT_FEATURE_STYLES = {
 
   landuse: {
       color: 0xFFFF00,
-      opacity: 0.33,
+      opacity: 1,
       extrude: 'flat',
       offy: -1
   },
