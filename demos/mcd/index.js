@@ -322,7 +322,7 @@ var animate = function() {
   var delta = ( time - prevTime ) / 1000;
 
   requestAnimationFrame( animate );
-
+  updateParticles();
   /*
   ar_geo.feature_meshes.forEach(function(fm){
     if (fm.feature.layername == 'buildings') {
@@ -401,5 +401,95 @@ function onClick( event ) {
 document.addEventListener( 'click', onClick );
 
 
+/* Particles, from example here -
+ * https://codepen.io/antishow/post/three-js-particles
+ */
+var tau = Math.PI * 2;
+var mode;
+var scene, camera, renderer, pointCloud;
+
+THREE.ImageUtils.crossOrigin = '';
+
+var SETTINGS = [{
+  name: 'Spooky Ghosts',
+  particleCount: 50,
+  material: new THREE.PointCloudMaterial({
+    size: 16,
+    map: THREE.ImageUtils.loadTexture("burger.png"),
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    depthTest: false
+  }),
+  initialize: function(){
+    camera.position.y = 50;
+    camera.position.z = 200;
+    
+    pointCloud.sortParticles = true;
+  },
+  spawnBehavior: function(index){
+    var x, y, z;
+    var halfWidth = window.innerWidth / 2;
+    
+    x = (Math.random() * window.innerWidth) - halfWidth;
+    y = (Math.random() * window.innerWidth) - halfWidth;
+    z = (Math.random() * window.innerWidth) - halfWidth;
+    var v = new THREE.Vector3(x, y, z);
+    v.velocity = new THREE.Vector3(0,0,0);
+    
+    return v;
+  },
+  frameBehavior: function(particle, index){
+    function push(){
+      return (Math.random() * 0.125) - 0.0625;
+    }
+    
+    particle.add(particle.velocity);
+    particle.velocity.add(new THREE.Vector3(push(), push(), push()));
+    particle.velocity.add(new THREE.Vector3(particle.x, particle.y, particle.z).multiplyScalar(-0.00001));
+  },
+  sceneFrameBehavior: null
+}];
+
+var mode;
+
+function setMode(_mode){
+  mode = _mode;
+  scene.remove(pointCloud);
+  
+  var points = createPoints(mode.spawnBehavior);
+  var material = mode.material;
+  
+  pointCloud = new THREE.PointCloud(points, material);
+  
+  if(mode.initialize && typeof mode.initialize === 'function'){
+    mode.initialize();
+  }
+  scene.add(pointCloud);
+}
+
+function createPoints(spawnBehavior){
+  var ret = new THREE.Geometry();
+  
+  for(var i=0;i<mode.particleCount;i++) {
+    ret.vertices.push(spawnBehavior(i));
+  }
+  
+  return ret;
+}
+
+function updateParticles(){
+  if (!mode) return;
+  if(mode.sceneFrameBehavior && typeof mode.sceneFrameBehavior === 'function'){
+    mode.sceneFrameBehavior();
+  }
+  if(mode.frameBehavior && typeof mode.frameBehavior === 'function'){
+    pointCloud.geometry.vertices.forEach(mode.frameBehavior);
+    pointCloud.geometry.verticesNeedUpdate = true;
+    pointCloud.geometry.colorsNeedUpdate = true;
+  }
+}
 
 init();
+
+setMode(SETTINGS[SETTINGS.length-1]);
+  
