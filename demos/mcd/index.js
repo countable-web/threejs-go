@@ -111,18 +111,20 @@ var init_geo = function(position) {
 var init_ground = function(){
   // Ground.
   var textureLoader = new THREE.TextureLoader();
+  /*
   var logo_tex = textureLoader.load("logo.png");
   logo_tex.wrapS = THREE.RepeatWrapping;
   logo_tex.wrapT = THREE.RepeatWrapping;
-  logo_tex.repeat.set( 300, 300 );  
+  logo_tex.repeat.set( 300, 300 );*/
   var geometry = new THREE.PlaneBufferGeometry( 3000, 3000);
   geometry.rotateX( - Math.PI / 2 );
   var material = new THREE.MeshPhongMaterial( {
-    color: 0x448888,
-    map: logo_tex,
+    color: 0x55AA00,
+    //color: 0x448888,
+    //map: logo_tex,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 1
+    opacity: 0.8
   } );
   var plane = new THREE.Mesh( geometry, material );
   plane.position.y = -3;
