@@ -65,5 +65,9 @@ This boolean is populated, indicating whether it's daytime or not in case you wa
 ### THREE.is_mobile
 This boolean is populated, indicating whether you have a mobile device, in order to use DeviceOrientationControls for an immersive experience (such as Google Cardboard view).
 
+### Acknowledgements
+
+  * Thanks to [Animatic](http://www.animaticmedia.com/) for demo assets.
+  * Thanks to [Countable](http://countable.ca) for letting me work on this!
 
 
