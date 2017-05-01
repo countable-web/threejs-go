@@ -1,96 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>three.js webgl - geometry - cube</title>
+    <title>Three.js Go</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
-      html, body {
-        width: 100%;
-        height: 100%;
-      }
-      body {
-        background-color: #ffffff;
-        margin: 0;
-        overflow: hidden;
-        font-family: arial;
-      }
-      #blocker {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-      }
-      #instructions {
-        width: 100%;
-        height: 100%;
-        display: -webkit-box;
-        display: -moz-box;
-        display: box;
-        -webkit-box-orient: horizontal;
-        -moz-box-orient: horizontal;
-        box-orient: horizontal;
-        -webkit-box-pack: center;
-        -moz-box-pack: center;
-        box-pack: center;
-        -webkit-box-align: center;
-        -moz-box-align: center;
-        box-align: center;
-        color: #ffffff;
-        text-align: center;
-        cursor: pointer;
-      }
-
-      .arrow-marker {
-        position: relative;
-      }
-      .arrow-marker-inner {
-        position: absolute;
-        height: 40px;
-        width: 40px;
-        transform: rotateZ(90deg);
-        background: url(map-arrow.svg);
-        background-size: 40px 40px;
-      }
-
+    body {
+      text-align: center;
+      font-family: Helvetica, Arial, sans-serif;
+      padding: 16vw;
+      color: #ccc;
+      background-color: black;
+    }
+    h1 {
+      color: white;
+    }
+    a {
+      color: white;
+    }
     </style>
   </head>
   <body>
 
-    <div id="blocker">
-
-      <div id="instructions">
-        <span style="font-size:40px">Exploring Real Map Data.</span>
-        <br />
-        You don't have AR sensors (compass, accelerometer) so we're using keyboard/mouse controls.
-        <br />
-        (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
-      </div>
-    </div>
-
-    <div id="mapid" style="width: 500px; height: 300px; position: absolute; top:0; right: 0; z-index:100"></div>
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
-    <script src="mapzen-api-key.js"></script>
-    
-    <script src="bower_components/three.js/three.js"></script>
-    <script src="vendor/PointerLockControls.js"></script>
-
-    <script src="vendor/turf.min.js"></script> <!-- used only for turf.buffer currently -->
-    <script src="bower_components/jquery/dist/jquery.js"></script><!-- used only for ajax currently -->
-    
-    <script src="styles.js"></script>
-
-    <script src="controls.js"></script>
-    <script src="tbmf.js"></script>
-    <script src="geo.js"></script>
-    <script src="index.js"></script>
-    <script src="minimap.js"></script>
-
-    <script>
-      r3world({});
-    </script>
+  <h1>3 JS Go</h1>
+  <p>
+    Three.js Go is a library built on Three.js and Mapzen's OSM based vector tiles, for generating 3d geometry that approximates the real world, based on map data. See the <a href="https://github.com/countable-web/threejs-go">Three.js Go Github project</a> for more details.
+  </p>
+  <h2>Demos</h2>
+  <ul>
+    <li><a href="https://countable-web.github.io/threejs-go/demos/mcd/">McDonald's Demo</a></li>
+    <li><a href="https://countable-web.github.io/threejs-go/demos/fly/">Low Altitude Flight Sim</a></li>
+    <li><a href="https://countable-web.github.io/threejs-go/demos/fps/">First Person Superhero Sim</a></li>
+  </ul>
 
   </body>
 </html>

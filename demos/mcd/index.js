@@ -103,7 +103,6 @@ var init_geo = function(position) {
   init_ar();
   init_burgler();
   init_mcd();
-  init_events();
   init_heart();
   animate();
 };
@@ -156,7 +155,6 @@ var init_ar = function(){
   // AR Stuff
 
   ar_world = new THREE.ARWorld({
-    ground: true,
     camera: camera,
   });
 
@@ -253,30 +251,6 @@ var init_mcd = function(){
     });
   });
 };
-
-
-var init_events = function() {
-  var button = document.getElementById('walk');
-  /*button.addEventListener('mousedown', function(){
-    ar_world.moveForward = true;
-    button.className = 'depressed';
-  });
-
-  button.addEventListener('mouseup', function(){
-    ar_world.moveForward = false;
-    button.className = '';
-  });*/
-
-  button.addEventListener('click', function(){
-    navigator.geolocation.getCurrentPosition(function(position) {
-      ar_geo.player.lat = position.coords.latitude;
-      ar_geo.player.lng = position.coords.longitude;
-      ar_geo.player.start_lng = ar_geo.player.lng, ar_geo.player.start_lat = ar_geo.player.lat;
-      load_tiles(ar_geo.player.lat, ar_geo.player.lng);
-    });
-  });
-};
-
 
 var init_burgler = function(){
   var texture = new THREE.Texture();

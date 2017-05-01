@@ -83,37 +83,37 @@ THREE.ARMapzenGeography = function(opts){
     load_tiles(player.lat, player.lng)
   }.bind(this), 1000);
 
-  var that = this;
+  var scope = this;
 
   var handle_data = function(data) {
-    that.opts.layers.forEach(function(layername){
+    scope.opts.layers.forEach(function(layername){
       if (feature_styles[layername]) {
-        that.add_geojson(data, layername);
+        scope.add_geojson(data, layername);
       }
     });
   };
 
-  var load_tile = (function(tx, ty) {
-    var key = tx + '_' + ty + '_' + TILE_ZOOM
+  var load_tile = function(tx, ty, zoom, callback) {
+    var key = tx + '_' + ty + '_' + zoom
     MAP_CACHE[key] = 1;
     var cached_data = localStorage['mz_' + key];
     if (cached_data) {
       setTimeout(function(){
-        handle_data(JSON.parse(cached_data));
+        callback(JSON.parse(cached_data));
       }, 200);
     } else {
-      var url = "https://tile.mapzen.com/mapzen/vector/v1/all/" + TILE_ZOOM + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY
+      var url = "https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY
       fetch(url).then(function(response){
         return response.json();
       }).then(function(data){
+        callback(data);
         localStorage['mz_' + key] = JSON.stringify(data);
-        handle_data(data);
       });
     }
-  });
+  };
 
 
-  load_tiles = function(lat, lng) {
+  var load_tiles = function(lat, lng) {
     var tile_x0 = long2tile(lng, TILE_ZOOM);
     var tile_y0 = lat2tile(lat, TILE_ZOOM);
     var N = 1;
@@ -123,7 +123,7 @@ THREE.ARMapzenGeography = function(opts){
         var tile_y = tile_y0 + j;
         if (!tile_x || !tile_y) continue;
         if (!MAP_CACHE[tile_x + '_' + tile_y + '_' + TILE_ZOOM]) {
-          load_tile(tile_x, tile_y);
+          load_tile(tile_x, tile_y, TILE_ZOOM, handle_data);
         }
       }
     }
@@ -182,9 +182,9 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
   var point = this.to_scene_coords(coords[0]);
   shape.moveTo(point[0], point[1]);
 
-  var that=this;
+  var scope = this;
   coords.slice(1).forEach(function(coord){
-    var point = that.to_scene_coords(coord);
+    var point = scope.to_scene_coords(coord);
     shape.lineTo(point[0], point[1]);
   });
   var point = this.to_scene_coords(coords[0]);
@@ -238,9 +238,9 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
  */
 THREE.ARMapzenGeography.prototype.add_geojson = function(data, layername){
   geojson = data[layername];
-  var that = this;
+  var scope = this;
   geojson.features.forEach(function(feature){
-    that.add_feature(feature, layername)
+    scope.add_feature(feature, layername)
   });
 };
 
@@ -267,7 +267,7 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
   }
   var name_styles = feature_styles[feature.properties.name] || {};
 
-  // Many features have a 'kind' property that can be used for styling.
+  // Many features have a 'kind' property scope can be used for styling.
   var styles = THREE.extend(layer_styles,
                             kind_styles,
                             kind_detail_styles,
