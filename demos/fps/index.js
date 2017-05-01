@@ -119,7 +119,7 @@ var init_ar = function(lat, lng){
   });
 };
 
-var fall_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+var raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
 var prevTime = performance.now();
 
@@ -138,10 +138,19 @@ var animate = function() {
 
   //standing on stuff.
   
-  fall_raycaster.ray.origin.copy( controls.getObject().position );
-  //fall_raycaster.ray.origin.y -= 5;
+  if (ar_geo.meshes_by_layer.buildings) {
 
-  var isOnObject = controls.getObject().position.y <= 5;
+    raycaster.ray.origin.copy( controls.getObject().position );
+    raycaster.ray.origin.y -= 5;
+
+    var intersections = raycaster.intersectObjects( ar_geo.meshes_by_layer.buildings ).filter(function(obj){
+      return !!obj.feature;
+    });
+
+    var isOnObject = intersections.length > 0;
+  } else {
+    isOnObject = true;
+  }
   /*
   if (ar_geo.meshes_by_layer.buildings) {
 

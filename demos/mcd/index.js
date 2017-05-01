@@ -325,7 +325,7 @@ var animate = function() {
   var delta = ( time - prevTime ) / 1000;
 
   requestAnimationFrame( animate );
-  updateParticles();
+  if (typeof updateParticles !== 'undefined') updateParticles();
   /*
   ar_geo.feature_meshes.forEach(function(fm){
     if (fm.feature.layername == 'buildings') {
@@ -403,6 +403,7 @@ function onClick( event ) {
 }
 document.addEventListener( 'click', onClick );
 
+var updateParticles;
 var init_burger_flies = function(){
     /* Particles, from example here -
    * https://codepen.io/antishow/post/three-js-particles
@@ -480,7 +481,7 @@ var init_burger_flies = function(){
     return ret;
   }
 
-  function updateParticles(){
+  updateParticles = function(){
     if (!mode) return;
     if(mode.sceneFrameBehavior && typeof mode.sceneFrameBehavior === 'function'){
       mode.sceneFrameBehavior();
