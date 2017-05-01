@@ -20,7 +20,7 @@ git clone https://github.com/countable-web/threejs-go.git
 Set up your MapZen API key:
 
 ```
-cp mapzen-api-key.js.template mapzen-api-key.js
+cp src/mapzen-api-key.js.template src/mapzen-api-key.js
 ```
 
 Edit the file with your [mapzen api key](https://mapzen.com/developers/sign_in)
