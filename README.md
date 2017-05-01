@@ -47,7 +47,7 @@ new THREE.ARWorld({
 });
 ```
 
-### THREE.ARGeography(options)
+### THREE.ARMapzenGeography(options)
 Loads the actual Three.js mesh objects into your scene, with geometry generated from the actual geography around a location. Arguments:
 
 *options.layers* This includes roads, water, buildings, etc. See Mapzen's [layers](https://mapzen.com/documentation/vector-tiles/layers/#places) for details on what you can load.
