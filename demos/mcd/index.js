@@ -391,7 +391,7 @@ init_heart = function(){
 }
 
 function onClick( event ) {
-  event.preventDefault();
+  //event.preventDefault();
   var mouse = new THREE.Vector2();
   mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
