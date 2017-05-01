@@ -75,5 +75,6 @@ This boolean is populated, indicating whether you have a mobile device, in order
 
   * Thanks to [Animatic](http://www.animaticmedia.com/) for demo assets.
   * Thanks to [Countable](http://countable.ca) for letting me work on this!
-
+  * Thanks to [Mapzen](https://mapzen.com) for tiles.
+  * Thanks to [Codrops](https://tympanus.net/codrops/) for some clip art.
 
