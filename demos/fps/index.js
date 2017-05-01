@@ -1,6 +1,5 @@
 
 var camera, scene, renderer, controls;
-var is_day;
 var lat, lng;
 
 var init = function() {
@@ -10,7 +9,6 @@ var init = function() {
   scene = new THREE.Scene();
 
   var hour = (new Date()).getHours();
-  is_day = (hour > 7 && hour < 20);
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add( light );
@@ -26,14 +24,8 @@ var init = function() {
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight ); 
-  if (is_day) {
-    renderer.setClearColor( 0xddeeff );
-    scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
-  } else {
-    // night.
-    renderer.setClearColor( 0x000066 );
-    scene.fog = new THREE.FogExp2( 0x000066, 0.0015 );
-  }
+  renderer.setClearColor( 0xddeeff );
+  scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
   document.body.appendChild( renderer.domElement );
 
   if (THREE.is_mobile) {
@@ -91,19 +83,13 @@ var init_ar = function(){
   // AR Stuff
 
   ar_world = new THREE.ARWorld({
-    ground: true,
-    gravity: true,
-    camera: camera,
-    controls: controls
+    camera: camera
   });
 
   ar_geo = new THREE.ARMapzenGeography({
     styles: styles,
-    camera: camera,
-    controls: controls,
     lat: lat,
     lng: lng,
-    minimap: false,
     layers: ['buildings','roads','water','landuse']
   });
 
@@ -151,17 +137,13 @@ var animate = function() {
   velocity.z -= velocity.z * 10.0 * delta;
   
   // gravity
-  if (this.opts.gravity) {
-    velocity.y -= 9.8 * 3.0 * delta;
-  }
+  velocity.y -= 9.8 * 3.0 * delta;
 
   if ( this.moveForward ) { 
     if (this.opts.collisions && INTERSECTED && INTERSECTED.distance < 5) {
       velocity.x = 0;
       velocity.z = 0;
-      if (this.opts.gravity) {
-        velocity.y = 1500 * delta;
-      }
+      velocity.y = 1500 * delta;
       //velocity.y += 1.5 * 9.8 * 10.0 * delta;
     } else {
       velocity.z -= 400.0 * delta;
@@ -177,9 +159,9 @@ var animate = function() {
     this.canJump = true;
   }
   // no falling through the ground.
-  if ( this.opts.camera.position.y < 5 ) {
+  if ( camera.position.y < 5 ) {
     velocity.y = 0;
-    this.opts.camera.position.y = 5;
+    camera.position.y = 5;
     this.canJump = true;
   }
 
