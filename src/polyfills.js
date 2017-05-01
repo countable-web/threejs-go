@@ -461,7 +461,7 @@
     })
   }
   self.fetch.polyfill = true
-})(typeof self !== 'undefined' ? self : this);
+})(window);
 
 
 // @license http://opensource.org/licenses/MIT
