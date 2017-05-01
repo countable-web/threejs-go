@@ -78,7 +78,7 @@ var init_ground = function(){
 }
 
 var ar_world, ar_geo;
-var init_ar = function(){
+var init_ar = function(lat, lng){
 
   // AR Stuff
 
@@ -105,16 +105,9 @@ var animate = function() {
 
   requestAnimationFrame( animate );
 
-  if (controls.update) controls.update();
-  if (THREE.is_mobile) {
-    //orientationcontrols.updateAlphaOffsetAngle(controls.orientation.y);
-  } else {
-    //dragcontrols.update();
-  }
+  if (controls && controls.update) controls.update();
 
-  ar_world.update({
-    feature_meshes: ar_geo.feature_meshes
-  });
+  ar_world.update();
 
   // touching stuff.
   //this.update_player_focus();
@@ -133,43 +126,43 @@ var animate = function() {
   var isOnObject = true;
 
   // friction.
-  velocity.x -= velocity.x * 10.0 * delta;
-  velocity.z -= velocity.z * 10.0 * delta;
+  controls.velocity.x -= controls.velocity.x * 10.0 * delta;
+  controls.velocity.z -= controls.velocity.z * 10.0 * delta;
   
   // gravity
-  velocity.y -= 9.8 * 3.0 * delta;
+  controls.velocity.y -= 9.8 * 3.0 * delta;
 
-  if ( this.moveForward ) { 
-    if (this.opts.collisions && INTERSECTED && INTERSECTED.distance < 5) {
-      velocity.x = 0;
-      velocity.z = 0;
-      velocity.y = 1500 * delta;
+  if ( controls.moveForward ) { 
+    if (ar_world.touching && ar_world.touching.distance < 5) {
+      controls.velocity.x = 0;
+      controls.velocity.z = 0;
+      controls.velocity.y = 1500 * delta;
       //velocity.y += 1.5 * 9.8 * 10.0 * delta;
     } else {
-      velocity.z -= 400.0 * delta;
+      controls.velocity.z -= 400.0 * delta;
     }
   }
   
-  if ( this.moveBackward ) velocity.z += 400.0 * delta;
-  if ( this.moveLeft ) velocity.x -= 400.0 * delta;
-  if ( this.moveRight ) velocity.x += 400.0 * delta;
+  if ( controls.moveBackward ) controls.velocity.z += 400.0 * delta;
+  if ( controls.moveLeft ) controls.velocity.x -= 400.0 * delta;
+  if ( controls.moveRight ) controls.velocity.x += 400.0 * delta;
 
   if ( isOnObject === true ) {
-    velocity.y = Math.max( 0, velocity.y );
-    this.canJump = true;
+    controls.velocity.y = Math.max( 0, controls.velocity.y );
+    controls.canJump = true;
   }
   // no falling through the ground.
   if ( camera.position.y < 5 ) {
-    velocity.y = 0;
+    controls.velocity.y = 0;
     camera.position.y = 5;
-    this.canJump = true;
+    controls.canJump = true;
   }
 
   // apply velocity to position dx/dt dy/dt dz/dt
   var proxy = controls.getObject();
-  proxy.translateX( velocity.x * delta );
-  proxy.translateY( velocity.y * delta );
-  proxy.translateZ( velocity.z * delta );
+  proxy.translateX( controls.velocity.x * delta );
+  proxy.translateY( controls.velocity.y * delta );
+  proxy.translateZ( controls.velocity.z * delta );
 
   renderer.render( scene, camera );
 

@@ -98,11 +98,11 @@ var init = function() {
 };
 
 var init_geo = function(position) {
-  lat = position.coords.latitude;
-  lng = position.coords.longitude;
-  init_ar();
+  var lat = position.coords.latitude;
+  var lng = position.coords.longitude;
+  init_ar(lat, lng);
   init_burgler();
-  init_mcd();
+  init_mcd(lat, lng);
   init_heart();
   animate();
 };
@@ -150,7 +150,7 @@ var init_burgers = function(){
 }
 
 var ar_world, ar_geo;
-var init_ar = function(){
+var init_ar = function(lat, lng){
 
   // AR Stuff
 
@@ -183,7 +183,7 @@ var shadow_material = new THREE.MeshLambertMaterial( {
 } );
 
 var outlets = [];
-var init_mcd = function(){
+var init_mcd = function(lat, lng){
 
 
   var mcds = [
@@ -406,12 +406,12 @@ document.addEventListener( 'click', onClick );
  */
 var tau = Math.PI * 2;
 var mode;
-var scene, camera, renderer, pointCloud;
+var pointCloud;
 
 THREE.ImageUtils.crossOrigin = '';
 
 var SETTINGS = [{
-  name: 'Spooky Ghosts',
+  name: 'Burger Flies',
   particleCount: 50,
   material: new THREE.PointCloudMaterial({
     size: 16,
