@@ -119,7 +119,7 @@ DEFAULT_FEATURE_STYLES = {
 
   landuse: {
       color: 0xFFFF00,
-      opacity: 0.33,
+      opacity: 1,
       extrude: 'flat',
       offy: -1
   },
@@ -209,6 +209,9 @@ DEFAULT_FEATURE_STYLES = {
   },
   commercial: {
     color:0x880088
+  },
+  cemetery: {
+    offy: -1.9
   }
 
 };

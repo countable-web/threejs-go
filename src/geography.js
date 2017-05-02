@@ -107,7 +107,13 @@ THREE.ARMapzenGeography = function(opts){
         return response.json();
       }).then(function(data){
         callback(data);
-        localStorage['mz_' + key] = JSON.stringify(data);
+        try {
+          localStorage['mz_' + key] = JSON.stringify(data);
+        } catch(e) {
+          if(e.toString().indexOf('QuotaExceededError') > -1) {
+            localStorage.clear();
+          }
+        }
       });
     }
   };
@@ -131,6 +137,7 @@ THREE.ARMapzenGeography = function(opts){
 
   // keep a reference to everything we add to the scene from map data.
   this.feature_meshes = [];
+  this.meshes_by_layer = {};
 
   /*
   var cobble_tex = {
@@ -162,6 +169,7 @@ THREE.ARMapzenGeography = function(opts){
  */
 THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styles){
 
+  
   var shape = new THREE.Shape();
 
   // Buffer the linestrings so they have some thickness (uses turf.js)
@@ -187,7 +195,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
     var point = scope.to_scene_coords(coord);
     shape.lineTo(point[0], point[1]);
   });
-  var point = this.to_scene_coords(coords[0]);
+  point = this.to_scene_coords(coords[0]);
   shape.lineTo(point[0], point[1]);
 
   var height;
@@ -199,7 +207,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
       height = Math.sqrt(feature.properties.area);
     } else {
       // ignore standalone building labels.
-      return;
+      return null;
     }
     height *= styles.height_scale || 1;
   } else {
@@ -226,6 +234,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
     };
     var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
   }
+
   geometry.rotateX( - Math.PI / 2 );
 
   return geometry;
@@ -288,6 +297,7 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
   this.kind_details[feature.properties.kind_detail] ++;
 
   var geometry = this.extrude_feature_shape(feature, styles);
+  if (!geometry) return;
 
   var opacity = styles.opacity || 1;
   var material;
@@ -316,7 +326,10 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
 
   scene.add( mesh );
   mesh.feature = feature;
+  //mesh.attributes = {position: mesh.position};
   this.feature_meshes.push(mesh);
+  this.meshes_by_layer[layername] = this.meshes_by_layer[layername] || [];
+  this.meshes_by_layer[layername].push(mesh);
 }
 
 THREE.ARMapzenGeography.prototype.to_scene_coords = function(coord){
