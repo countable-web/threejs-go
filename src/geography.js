@@ -107,7 +107,13 @@ THREE.ARMapzenGeography = function(opts){
         return response.json();
       }).then(function(data){
         callback(data);
-        localStorage['mz_' + key] = JSON.stringify(data);
+        try {
+          localStorage['mz_' + key] = JSON.stringify(data);
+        } catch(e) {
+          if(e.toString().indexOf('QuotaExceededError') > -1) {
+            localStorage.clear();
+          }
+        }
       });
     }
   };
