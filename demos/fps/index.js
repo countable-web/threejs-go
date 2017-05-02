@@ -137,11 +137,13 @@ var animate = function() {
 
   ar_world.update();
   ar_world.updateSelection(controls.getObject());
-  // touching stuff.
-  //this.update_player_focus();
-
-  //standing on stuff.
   
+  if (ar_world.selection && ar_world.selection.distance < 10) {
+        ar_world.selection.currentHex = ar_world.selection.material.emissive.getHex();
+        ar_world.selection.material.emissive.setHex( 0xFFDD00 );  
+  }
+  
+  //standing on stuff. 
   if (controlsEnabled) {
     fall_raycaster.ray.origin.copy( controls.getObject().position );
     fall_raycaster.ray.origin.y -= 5;
@@ -164,10 +166,9 @@ var animate = function() {
     console.log(ar_world.selection);
     if (ar_world.selection) console.log(ar_world.selection.distance);
     if (ar_world.selection && ar_world.selection.distance < 5) {
-
       controls.velocity.x = 0;
       controls.velocity.z = 0;
-      controls.velocity.y = 150 * delta;
+      controls.velocity.y = 400 * delta;
       //velocity.y += 1.5 * 9.8 * 10.0 * delta;
     } else {
       controls.velocity.z -= 400.0 * delta;

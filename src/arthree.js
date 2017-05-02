@@ -91,10 +91,8 @@ THREE.ARWorld = (function(opts){
    */
   ARWorld.prototype.updateSelection = function(object) {
 
-      object = this.opts.camera;
-      
       var vector = new THREE.Vector3(); // create once and reuse it!
-      object.getWorldDirection( vector );
+      this.opts.camera.getWorldDirection( vector );
       this.touch_raycaster.ray.origin.copy( object.position );
       this.touch_raycaster.ray.origin.y -= 3;
       this.touch_raycaster.ray.direction = vector;
