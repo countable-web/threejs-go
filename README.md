@@ -9,7 +9,7 @@ Three.js Go is a library built on Three.js and Mapzen's OSM based vector tiles, 
 ## Examples
 
   * [McDonald's Demo](https://countable-web.github.io/threejs-go/demos/mcd/)
-  * [Low Altitude Flight Sim](https://countable-web.github.io/threejs-go/demos/fly/) (incomplete)
+  * [Low Altitude Flight Sim](https://countable-web.github.io/threejs-go/demos/fly/) (currently broken, coming soon)
   * [First Person Superhero Sim](https://countable-web.github.io/threejs-go/demos/fps/) (incomplete)
 
 ## Installation
