@@ -5,58 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../../src/arthree.css">
-    <style>
-
-    #notice {
-      position: fixed;
-      height: 11vw;
-      font-size: 5vw;
-      bottom: 5vw;
-      left: 10vw;
-      right: 10vw;
-      padding: 5vw 10vw;
-      background-color: rgba(255,255,255,0.5);
-      box-shadow: 1px 3px 3px rgba(0,0,0,0.2);
-      color: #222;
-      border-radius: 2vw;
-      text-align: center;
-    }
-
-    .forkme {
-      position: fixed;
-    }
-    @media(min-width:601px) {
-      .forkme {
-        padding:5px 45px;
-        width:128px;
-        top:50px;
-        right:-50px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg);box-shadow:0 0 0 3px #ffdd00, 0 0 20px -3px rgba(0, 0, 0, 0.5);text-shadow:0 0 0 #ffffff, 0 0 5px rgba(0, 0, 0, 0.3);background-color:#eebb00;color:#ffffff;font-size:13px;font-family:sans-serif;text-decoration:none;font-weight:bold;border:2px dotted #ffffff;-webkit-backface-visibility:hidden;letter-spacing:.5px;
-      }
-      .forkme img {
-        display: none;
-      }
-    }
-    @media(max-width: 600px) {
-      .forkme {
-        top: 1vw;
-        right: 2vw;
-        padding-right: 25px;
-        height: 35px;
-        text-decoration: none;
-        color: black;
-        opacity: 0.6;
-      }
-      .forkme img {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 18px;
-      }
-    }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
-    <div id="walk"></div>
     <div id="notice">Drag the screen to look <br>around at your location.</div>
 
     <script src="../../src/mapzen-api-key.js"></script>
@@ -114,7 +65,7 @@ var styles = {
     <script src="index.js"></script>
 
     <a href='https://github.com/countable-web/threejs-go' class='forkme'>
-    threejs-go on GitHub
+    Fork me on GitHub
     <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABSUlEQVRYR+2X7U3DMBCGn27ACLAB3aDdoGxQNmET2IBuUDYoG8AGZQPQi+Iqss4fFztEqrg/ltqLnze+L2dFf/uOtlzlENk/J2r7F7DoCWyA45I58AzslxJgwT+Bu7+oAgsu7gNwmFtACv4CPJZKubUPNMElrkVAM7xFQBf4VAHd4FMEdIV7BdTC5ScrVoBHgAceOmG3MtwBr0Y9xwBLZJdG9AHcRgKst5utFcfjNXe0swyjWMAWeEu02FnGseeCcQOce49jjwCxXf41s8C14dUIsEovzrt3YD38eALuC7PfvB2lQmBlc7z/uBq8/pe9cjmQar96uLYRBVCyd+QEqKQUCq1j+xoumlrH5vX/fbZUBRosYboFmKac3sgyr39RgCD60FCMZeqAin3OXP6lExBIg0ihkOmOr2zOmcu/RoBgTwMxrAUN9f4/AutTIaZOHkoAAAAASUVORK5CYII='>
     </a>
 

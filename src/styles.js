@@ -209,6 +209,9 @@ DEFAULT_FEATURE_STYLES = {
   },
   commercial: {
     color:0x880088
+  },
+  cemetery: {
+    offy: -1.9
   }
 
 };
