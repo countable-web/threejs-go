@@ -131,7 +131,7 @@ var init_ground = function(){
     opacity: 0.8
   } );
   var plane = new THREE.Mesh( geometry, material );
-  plane.position.y = -3;
+  plane.position.y = -2;
   scene.add( plane );
 }
 
@@ -297,11 +297,11 @@ var init_burgler = function(){
 
     object.position.y = 0;
 
-    var geometry4 = new THREE.CylinderGeometry( 17, 17, 1, 32 );
+    var geometry4 = new THREE.CylinderGeometry( 17, 17, 3, 32 );
     var cylinder4 = new THREE.Mesh( geometry4, shadow_material );
     cylinder4.position.x = 0;
     cylinder4.position.z = 0;
-    cylinder4.position.y = 4; //1/20;
+    cylinder4.position.y = 0; //1/20;
     cylinder4.renderorder = 4;
     object.add( cylinder4 );
     scene.add( object );
@@ -320,56 +320,7 @@ var init_skyball = function(){
   scene.add( mesh );
 };
 
-var prevTime = performance.now();
 
-var animate = function() {
-  var time = performance.now();
-  var delta = ( time - prevTime ) / 1000;
-
-  requestAnimationFrame( animate );
-  if (typeof updateParticles !== 'undefined') updateParticles();
-  /*
-  ar_geo.feature_meshes.forEach(function(fm){
-    if (fm.feature.layername == 'buildings') {
-      fm.scale.y = Math.cos(time/500 + (fm.feature.properties.area || 0)) + 1.5;
-    }
-  });
-  */
-
-  controls.update();
-
-  ar_world.update();
-
-  outlets.forEach(function(outlet){
-    outlet.rotateZ(.015);
-    outlet.cylinders.forEach(function(cylinder, i){
-      //cylinder.position.y = cylinder.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
-    })
-    outlet.spheres.forEach(function(sphere, i){
-      sphere.position.y = sphere.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
-      sphere.scale.y=Math.cos(time/600/(i+1));
-      sphere.scale.z=Math.cos(time/600/(i+1));
-      sphere.scale.x=Math.cos(time/600/(i+1));
-      /*sphere.position.x = sphere.start_position.x + Math.cos(time/300) * (Math.sin(time/500) * 3 + 6)
-      sphere.position.z = sphere.start_position.z + Math.sin(time/300) * (Math.sin(time/500) * 3 + 6)*/
-    })
-  });
-
-  if (typeof burglar !== 'undefined'){
-    burglar.scale.x = .6 + .06 * Math.sin(time/500);
-    burglar.scale.z = .6 + .06 * Math.sin(time/500);
-    burglar.scale.y = .6 + .03 * Math.cos(time/500);
-  }
-
-  heart.position.y = 65 + Math.cos(time/1500) * 5;
-  heart.scale.x = (1 - 0.1*Math.cos(time/200) );
-  heart.scale.y = (1 - 0.1*Math.cos(time/200) );
-  heart.scale.z = (1 - 0.1*Math.cos(time/200) );
-
-  renderer.render( scene, camera );
-
-  prevTime = time;
-}
 
 var heart;
 init_heart = function(){
@@ -498,6 +449,57 @@ var init_burger_flies = function(){
 
 }
 
-init();
+var prevTime = performance.now();
 
-  
+var animate = function() {
+  var time = performance.now();
+  var delta = ( time - prevTime ) / 1000;
+
+  requestAnimationFrame( animate );
+  if (typeof updateParticles !== 'undefined') updateParticles();
+  /*
+  ar_geo.feature_meshes.forEach(function(fm){
+    if (fm.feature.layername == 'buildings') {
+      fm.scale.y = Math.cos(time/500 + (fm.feature.properties.area || 0)) + 1.5;
+    }
+  });
+  */
+
+  controls.update();
+
+  ar_world.update();
+
+  outlets.forEach(function(outlet){
+    outlet.rotateZ(.015);
+    outlet.cylinders.forEach(function(cylinder, i){
+      //cylinder.position.y = cylinder.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
+    })
+    outlet.spheres.forEach(function(sphere, i){
+      sphere.position.y = sphere.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
+      sphere.scale.y=Math.cos(time/600/(i+1));
+      sphere.scale.z=Math.cos(time/600/(i+1));
+      sphere.scale.x=Math.cos(time/600/(i+1));
+      /*sphere.position.x = sphere.start_position.x + Math.cos(time/300) * (Math.sin(time/500) * 3 + 6)
+      sphere.position.z = sphere.start_position.z + Math.sin(time/300) * (Math.sin(time/500) * 3 + 6)*/
+    })
+  });
+
+  if (typeof burglar !== 'undefined'){
+    burglar.scale.x = .6 + .06 * Math.sin(time/500);
+    burglar.scale.z = .6 + .06 * Math.sin(time/500);
+    burglar.scale.y = .6 + .03 * Math.cos(time/500);
+  }
+
+  var sc = 1 - 0.1*Math.cos(time/200);
+  heart.position.y = 65 + Math.cos(time/1500) * 5;
+  heart.position.x = 5 - Math.cos(time/200);
+  heart.scale.x = sc;
+  heart.scale.y = sc;
+  heart.scale.z = sc;
+
+  renderer.render( scene, camera );
+
+  prevTime = time;
+}
+
+init();
