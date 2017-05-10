@@ -101,7 +101,7 @@ THREE.ARMapzenGeography = function(opts){
       if (cached_data) {
         cached_data = JSON.parse(cached_data);
         setTimeout(function(){
-          callback(JSON.parse(cached_data));
+          callback(cached_data);
         }, 200);
         return
       }
