@@ -96,26 +96,34 @@ THREE.ARMapzenGeography = function(opts){
   var load_tile = function(tx, ty, zoom, callback) {
     var key = tx + '_' + ty + '_' + zoom
     MAP_CACHE[key] = 1;
-    var cached_data = localStorage['mz_' + key];
-    if (cached_data) {
-      setTimeout(function(){
-        callback(JSON.parse(cached_data));
-      }, 200);
-    } else {
-      var url = "https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY
-      fetch(url).then(function(response){
-        return response.json();
-      }).then(function(data){
-        callback(data);
-        try {
-          localStorage['mz_' + key] = JSON.stringify(data);
-        } catch(e) {
-          if(e.toString().indexOf('QuotaExceededError') > -1) {
-            localStorage.clear();
-          }
-        }
-      });
+    try {
+      var cached_data = localStorage['mz_' + key];
+      if (cached_data) {
+        cached_data = JSON.parse(cached_data);
+        setTimeout(function(){
+          callback(JSON.parse(cached_data));
+        }, 200);
+        return
+      }
+
+    } catch (e) {
+
     }
+
+    var url = "https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY
+    fetch(url).then(function(response){
+      return response.json();
+    }).then(function(data){
+      callback(data);
+      try {
+        localStorage['mz_' + key] = JSON.stringify(data);
+      } catch(e) {
+        if(e.toString().indexOf('QuotaExceededError') > -1) {
+          localStorage.clear();
+        }
+      }
+    });
+    
   };
 
 
