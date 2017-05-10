@@ -1,13 +1,12 @@
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 var controlsEnabled;
 
 THREE.WASDControls = function ( camera ) {
 
   var scope = this;
+
+  scope.velocity = new THREE.Vector3();
 
   var blocker = document.getElementById( 'blocker' );
   var instructions = document.getElementById( 'instructions' );
@@ -30,6 +29,7 @@ THREE.WASDControls = function ( camera ) {
     var pointerlockerror = function ( event ) {
       instructions.style.display = '';
     };
+
     // Hook pointer lock state change events
     document.addEventListener( 'pointerlockchange', pointerlockchange, false );
     document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
@@ -65,22 +65,22 @@ THREE.WASDControls = function ( camera ) {
     switch ( event.keyCode ) {
       case 38: // up
       case 87: // w
-        ar_world.moveForward = true;
+        scope.moveForward = true;
         break;
       case 37: // left
       case 65: // a
-        ar_world.moveLeft = true; break;
+        scope.moveLeft = true; break;
       case 40: // down
       case 83: // s
-        ar_world.moveBackward =ar_world. true;
+        scope.moveBackward = true;
         break;
       case 39: // right
       case 68: // d
-        ar_world.moveRight = true;
+        scope.moveRight = true;
         break;
       case 32: // space
-        if ( ar_world.canJump === true ) velocity.y += 50;
-        ar_world.canJump = false;
+        if ( scope.canJump === true ) scope.velocity.y = 50;
+        scope.canJump = false;
         break;
     }
   };
@@ -88,19 +88,19 @@ THREE.WASDControls = function ( camera ) {
     switch( event.keyCode ) {
       case 38: // up
       case 87: // w
-        ar_world.moveForward = false;
+        scope.moveForward = false;
         break;
       case 37: // left
       case 65: // a
-        ar_world.moveLeft = false;
+        scope.moveLeft = false;
         break;
       case 40: // down
       case 83: // s
-        ar_world.moveBackward = false;
+        scope.moveBackward = false;
         break;
       case 39: // right
       case 68: // d
-        ar_world.moveRight = false;
+        scope.moveRight = false;
         break;
     }
   };
@@ -165,7 +165,6 @@ THREE.WASDControls = function ( camera ) {
 
   }();
 
+
 };
 
-var velocity = new THREE.Vector3();
-var mouse = THREE.Vector2;

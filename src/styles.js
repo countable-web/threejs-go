@@ -108,7 +108,7 @@ DEFAULT_FEATURE_STYLES = {
 
   roads: {
       color: 0x333333,
-      offy: 1,
+      offy: 0.2,
       extrude: 'flat'
   },
 
@@ -119,15 +119,15 @@ DEFAULT_FEATURE_STYLES = {
 
   landuse: {
       color: 0xFFFF00,
-      opacity: 0.33,
+      opacity: 1,
       extrude: 'flat',
-      offy: -1
+      offy: -.2
   },
 
   water: {
       color: 0x6688FF,
       extrude: 'flat',
-      offy: -2
+      offy: -.4
   },
 
   address: {
@@ -171,12 +171,12 @@ DEFAULT_FEATURE_STYLES = {
     color: 0x008800,
     opacity: 0.33,
     exrude: 'flat',
-    offy: -2
+    offy: -.4
   },
   forest: {
     color: 0x008800,
     opacity: 0.8,
-    offy: -2
+    offy: -.4
   },
   pitch: {
     color: 0x88FF88
@@ -209,6 +209,9 @@ DEFAULT_FEATURE_STYLES = {
   },
   commercial: {
     color:0x880088
+  },
+  cemetery: {
+    offy: -.1
   }
 
 };

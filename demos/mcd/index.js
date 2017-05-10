@@ -1,6 +1,9 @@
 
 var camera, scene, renderer, controls;
 
+// Force to always be daytime for now.
+THREE.is_daytime = true;
+
 var init = function() {
   /* Standard THREE.JS stuff */
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -89,20 +92,27 @@ var init = function() {
   //init_burgers();
 
   if (window.location.host === "countable-web.github.io") {
-    navigator.geolocation.getCurrentPosition(init_geo);
+    navigator.geolocation.getCurrentPosition(init_geo, default_geo, {timeout: 5000});
   } else {
-    init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
+    default_geo();
+    // chicago
     //init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
   }
 
 };
 
+var default_geo = function() {
+  // new west
+  init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
+};
+
 var init_geo = function(position) {
-  lat = position.coords.latitude;
-  lng = position.coords.longitude;
-  init_ar();
+  window._ar_position = position;
+  var lat = position.coords.latitude;
+  var lng = position.coords.longitude;
+  init_ar(lat, lng);
   init_burgler();
-  init_mcd();
+  init_mcd(lat, lng);
   init_heart();
   animate();
 };
@@ -126,7 +136,7 @@ var init_ground = function(){
     opacity: 0.8
   } );
   var plane = new THREE.Mesh( geometry, material );
-  plane.position.y = -3;
+  plane.position.y = -2;
   scene.add( plane );
 }
 
@@ -150,7 +160,7 @@ var init_burgers = function(){
 }
 
 var ar_world, ar_geo;
-var init_ar = function(){
+var init_ar = function(lat, lng){
 
   // AR Stuff
 
@@ -183,7 +193,7 @@ var shadow_material = new THREE.MeshLambertMaterial( {
 } );
 
 var outlets = [];
-var init_mcd = function(){
+var init_mcd = function(lat, lng){
 
 
   var mcds = [
@@ -292,11 +302,11 @@ var init_burgler = function(){
 
     object.position.y = 0;
 
-    var geometry4 = new THREE.CylinderGeometry( 17, 17, 1, 32 );
+    var geometry4 = new THREE.CylinderGeometry( 17, 17, 3, 32 );
     var cylinder4 = new THREE.Mesh( geometry4, shadow_material );
     cylinder4.position.x = 0;
     cylinder4.position.z = 0;
-    cylinder4.position.y = 4; //1/20;
+    cylinder4.position.y = 0; //1/20;
     cylinder4.renderorder = 4;
     object.add( cylinder4 );
     scene.add( object );
@@ -315,6 +325,136 @@ var init_skyball = function(){
   scene.add( mesh );
 };
 
+
+
+var heart;
+init_heart = function(){
+  var x = 0, y = 0;
+
+  var heartShape = new THREE.Shape();
+
+  heartShape.moveTo( x + 5, y + 5 );
+  heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
+  heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
+  heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
+  heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
+  heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
+  heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
+
+  var geometry = new THREE.ShapeGeometry( heartShape );
+  var material = new THREE.MeshBasicMaterial( { color: 0xff4400 , side: THREE.DoubleSide} );
+  heart = new THREE.Mesh( geometry, material ) ;
+  heart.position.y = 60;
+  heart.position.x = 5;
+  heart.position.z = 0;
+  heart.rotation.z = Math.PI;
+  scene.add( heart );
+}
+
+function onClick( event ) {
+  return
+  //event.preventDefault();
+  var mouse = new THREE.Vector2();
+  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  ar_world.touch_raycaster.setFromCamera( mouse, camera );
+  ar_world.updateSelection();
+}
+document.addEventListener( 'click', onClick );
+
+var updateParticles;
+var init_burger_flies = function(){
+    /* Particles, from example here -
+   * https://codepen.io/antishow/post/three-js-particles
+   */
+  var tau = Math.PI * 2;
+  var mode;
+  var pointCloud;
+
+  THREE.ImageUtils.crossOrigin = '';
+
+  var SETTINGS = [{
+    name: 'Burger Flies',
+    particleCount: 50,
+    material: new THREE.PointCloudMaterial({
+      size: 16,
+      map: THREE.ImageUtils.loadTexture("burger.png"),
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthTest: false
+    }),
+    initialize: function(){
+      camera.position.y = 50;
+      camera.position.z = 200;
+      
+      pointCloud.sortParticles = true;
+    },
+    spawnBehavior: function(index){
+      var x, y, z;
+      var halfWidth = window.innerWidth / 2;
+      
+      x = (Math.random() * window.innerWidth) - halfWidth;
+      y = (Math.random() * window.innerWidth) - halfWidth;
+      z = (Math.random() * window.innerWidth) - halfWidth;
+      var v = new THREE.Vector3(x, y, z);
+      v.velocity = new THREE.Vector3(0,0,0);
+      
+      return v;
+    },
+    frameBehavior: function(particle, index){
+      function push(){
+        return (Math.random() * 0.125) - 0.0625;
+      }
+      
+      particle.add(particle.velocity);
+      particle.velocity.add(new THREE.Vector3(push(), push(), push()));
+      particle.velocity.add(new THREE.Vector3(particle.x, particle.y, particle.z).multiplyScalar(-0.00001));
+    },
+    sceneFrameBehavior: null
+  }];
+
+  var mode;
+
+  function setMode(_mode){
+    mode = _mode;
+    scene.remove(pointCloud);
+    
+    var points = createPoints(mode.spawnBehavior);
+    var material = mode.material;
+    
+    pointCloud = new THREE.PointCloud(points, material);
+    
+    if(mode.initialize && typeof mode.initialize === 'function'){
+      mode.initialize();
+    }
+    scene.add(pointCloud);
+  }
+
+  function createPoints(spawnBehavior){
+    var ret = new THREE.Geometry();
+    
+    for(var i=0;i<mode.particleCount;i++) {
+      ret.vertices.push(spawnBehavior(i));
+    }
+    
+    return ret;
+  }
+
+  updateParticles = function(){
+    if (!mode) return;
+    if(mode.sceneFrameBehavior && typeof mode.sceneFrameBehavior === 'function'){
+      mode.sceneFrameBehavior();
+    }
+    if(mode.frameBehavior && typeof mode.frameBehavior === 'function'){
+      pointCloud.geometry.vertices.forEach(mode.frameBehavior);
+      pointCloud.geometry.verticesNeedUpdate = true;
+      pointCloud.geometry.colorsNeedUpdate = true;
+    }
+  }
+  setMode(SETTINGS[SETTINGS.length-1]);
+
+}
+
 var prevTime = performance.now();
 
 var animate = function() {
@@ -322,7 +462,7 @@ var animate = function() {
   var delta = ( time - prevTime ) / 1000;
 
   requestAnimationFrame( animate );
-  updateParticles();
+  if (typeof updateParticles !== 'undefined') updateParticles();
   /*
   ar_geo.feature_meshes.forEach(function(fm){
     if (fm.feature.layername == 'buildings') {
@@ -356,140 +496,16 @@ var animate = function() {
     burglar.scale.y = .6 + .03 * Math.cos(time/500);
   }
 
+  var sc = 1 - 0.1*Math.cos(time/200);
   heart.position.y = 65 + Math.cos(time/1500) * 5;
-  heart.scale.x = (1 - 0.1*Math.cos(time/200) );
-  heart.scale.y = (1 - 0.1*Math.cos(time/200) );
-  heart.scale.z = (1 - 0.1*Math.cos(time/200) );
+  heart.position.x = 5 - Math.cos(time/200);
+  heart.scale.x = sc;
+  heart.scale.y = sc;
+  heart.scale.z = sc;
 
   renderer.render( scene, camera );
 
   prevTime = time;
 }
 
-var heart;
-init_heart = function(){
-  var x = 0, y = 0;
-
-  var heartShape = new THREE.Shape();
-
-  heartShape.moveTo( x + 5, y + 5 );
-  heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
-  heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
-  heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
-  heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
-  heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
-  heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
-
-  var geometry = new THREE.ShapeGeometry( heartShape );
-  var material = new THREE.MeshBasicMaterial( { color: 0xff4400 , side: THREE.DoubleSide} );
-  heart = new THREE.Mesh( geometry, material ) ;
-  heart.position.y = 60;
-  heart.position.x = 5;
-  heart.position.z = 0;
-  heart.rotation.z = Math.PI;
-  scene.add( heart );
-}
-
-function onClick( event ) {
-  //event.preventDefault();
-  var mouse = new THREE.Vector2();
-  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-  ar_world.touch_raycaster.setFromCamera( mouse, camera );
-  ar_world.updateSelection();
-}
-document.addEventListener( 'click', onClick );
-
-
-/* Particles, from example here -
- * https://codepen.io/antishow/post/three-js-particles
- */
-var tau = Math.PI * 2;
-var mode;
-var scene, camera, renderer, pointCloud;
-
-THREE.ImageUtils.crossOrigin = '';
-
-var SETTINGS = [{
-  name: 'Spooky Ghosts',
-  particleCount: 50,
-  material: new THREE.PointCloudMaterial({
-    size: 16,
-    map: THREE.ImageUtils.loadTexture("burger.png"),
-    blending: THREE.AdditiveBlending,
-    transparent: true,
-    depthTest: false
-  }),
-  initialize: function(){
-    camera.position.y = 50;
-    camera.position.z = 200;
-    
-    pointCloud.sortParticles = true;
-  },
-  spawnBehavior: function(index){
-    var x, y, z;
-    var halfWidth = window.innerWidth / 2;
-    
-    x = (Math.random() * window.innerWidth) - halfWidth;
-    y = (Math.random() * window.innerWidth) - halfWidth;
-    z = (Math.random() * window.innerWidth) - halfWidth;
-    var v = new THREE.Vector3(x, y, z);
-    v.velocity = new THREE.Vector3(0,0,0);
-    
-    return v;
-  },
-  frameBehavior: function(particle, index){
-    function push(){
-      return (Math.random() * 0.125) - 0.0625;
-    }
-    
-    particle.add(particle.velocity);
-    particle.velocity.add(new THREE.Vector3(push(), push(), push()));
-    particle.velocity.add(new THREE.Vector3(particle.x, particle.y, particle.z).multiplyScalar(-0.00001));
-  },
-  sceneFrameBehavior: null
-}];
-
-var mode;
-
-function setMode(_mode){
-  mode = _mode;
-  scene.remove(pointCloud);
-  
-  var points = createPoints(mode.spawnBehavior);
-  var material = mode.material;
-  
-  pointCloud = new THREE.PointCloud(points, material);
-  
-  if(mode.initialize && typeof mode.initialize === 'function'){
-    mode.initialize();
-  }
-  scene.add(pointCloud);
-}
-
-function createPoints(spawnBehavior){
-  var ret = new THREE.Geometry();
-  
-  for(var i=0;i<mode.particleCount;i++) {
-    ret.vertices.push(spawnBehavior(i));
-  }
-  
-  return ret;
-}
-
-function updateParticles(){
-  if (!mode) return;
-  if(mode.sceneFrameBehavior && typeof mode.sceneFrameBehavior === 'function'){
-    mode.sceneFrameBehavior();
-  }
-  if(mode.frameBehavior && typeof mode.frameBehavior === 'function'){
-    pointCloud.geometry.vertices.forEach(mode.frameBehavior);
-    pointCloud.geometry.verticesNeedUpdate = true;
-    pointCloud.geometry.colorsNeedUpdate = true;
-  }
-}
-
 init();
-
-setMode(SETTINGS[SETTINGS.length-1]);
-  

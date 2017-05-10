@@ -5,55 +5,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../../src/arthree.css">
-    <style>
-    * {
-      box-sizing: border-box;
-    }
-    #walk {
-        display: none;
-        position: fixed;
-        width: 20vh;
-        height: 20vh;
-        right: 5vh;
-        bottom: 5vh;
-        background: #ffdd00;
-        border: 0.5vh solid black;
-        border-radius: 50%;
-        box-shadow: 1vh 1vh 10vh rgba(0,0,0,0.5);
-        font-size: 5vh;
-        text-align: center;
-        box-sizing: border-box;
-        padding-top: 7vh;
-    }
-    #walk:hover {
-        background: white;
-    }
-    #walk.depressed {
-        box-shadow: 1vh 0 5vh rgba(0,0,0,0.5);
-        bottom: 4vh;
-    }
-    #notice {
-      position: fixed;
-      height: 14vw;
-      font-size: 2.5vw;
-      width: 100%;
-      bottom: 0;
-      left: 0;
-      background-color: black;
-      color: white;
-      padding: 3vw;
-    }
-    </style>
   </head>
   <body>
-    <div id="walk"></div>
-    <div id="notice">Drag to look around your actual location. Note: this app does <b>not</b> show the location of real McDonald's restaurants, it's just a demo.</div>
+    <div id="notice">Drag the screen to look <br>around at your location.</div>
 
     <script src="../../src/mapzen-api-key.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/4.1.0/turf.min.js"></script> <!-- used only for turf.buffer currently -->
     <script src="../../vendor/OBJLoader.js"></script> <!-- used only for turf.buffer currently -->
 
+    <script src="../../src/polyfills.js"></script>
     <script src="../../src/controls/OrbitControls.js"></script>
     <script src="../../src/controls/DeviceOrientationControls.js"></script>
     <script src="../../src/arthree.js"></script>
@@ -101,6 +62,11 @@ var styles = {
 };
     </script>
     <script src="index.js"></script>
-    <a href="https://github.com/countable-web/threejs-go"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <!--<a href='https://github.com/countable-web/threejs-go' class='forkme'>
+    Fork me on GitHub
+    <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABSUlEQVRYR+2X7U3DMBCGn27ACLAB3aDdoGxQNmET2IBuUDYoG8AGZQPQi+Iqss4fFztEqrg/ltqLnze+L2dFf/uOtlzlENk/J2r7F7DoCWyA45I58AzslxJgwT+Bu7+oAgsu7gNwmFtACv4CPJZKubUPNMElrkVAM7xFQBf4VAHd4FMEdIV7BdTC5ScrVoBHgAceOmG3MtwBr0Y9xwBLZJdG9AHcRgKst5utFcfjNXe0swyjWMAWeEu02FnGseeCcQOce49jjwCxXf41s8C14dUIsEovzrt3YD38eALuC7PfvB2lQmBlc7z/uBq8/pe9cjmQar96uLYRBVCyd+QEqKQUCq1j+xoumlrH5vX/fbZUBRosYboFmKac3sgyr39RgCD60FCMZeqAin3OXP6lExBIg0ihkOmOr2zOmcu/RoBgTwMxrAUN9f4/AutTIaZOHkoAAAAASUVORK5CYII='>-->
+    </a>
+
   </body>
 </html>

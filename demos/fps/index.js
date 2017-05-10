@@ -1,6 +1,5 @@
 
 var camera, scene, renderer, controls;
-var is_day;
 var lat, lng;
 
 var init = function() {
@@ -10,7 +9,6 @@ var init = function() {
   scene = new THREE.Scene();
 
   var hour = (new Date()).getHours();
-  is_day = (hour > 7 && hour < 20);
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add( light );
@@ -24,16 +22,20 @@ var init = function() {
   scene.add( directionalLight );
 
   renderer = new THREE.WebGLRenderer();
+
+  /*
+  renderer.physicallyBasedShading = true;  
+
+  // Cineon matches our filmic mapping in our shaders, but makes lighting a bit flat, disabled.
+  //renderer.toneMapping = THREE.ReinhardToneMapping;
+  renderer.toneMapping = THREE.CineonToneMapping;
+  //renderer.toneMapping = THREE.LinearToneMapping;
+  renderer.toneMappingExposure = 2;*/
+
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight ); 
-  if (is_day) {
-    renderer.setClearColor( 0xddeeff );
-    scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
-  } else {
-    // night.
-    renderer.setClearColor( 0x000066 );
-    scene.fog = new THREE.FogExp2( 0x000066, 0.0015 );
-  }
+  renderer.setClearColor( 0xddeeff );
+  scene.fog = new THREE.FogExp2( 0xddeeff, 0.0015 );
   document.body.appendChild( renderer.domElement );
 
   if (THREE.is_mobile) {
@@ -54,62 +56,74 @@ var init = function() {
   window.addEventListener( 'resize', onWindowResize, false );
 
   init_ground();
-  if (THREE.is_mobile || true) {
-    init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
-    // navigator.geolocation.getCurrentPosition(init_geo);
+  
+  fall_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+  if ((window.location.host+'') === "countable-web.github.io") {
+    navigator.geolocation.getCurrentPosition(init_geo);
   } else {
-    init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
+    init_geo({coords:{latitude: 49.2213079, longitude: -122.8981869}});
+//    init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
   }
 
 };
 
 var init_geo = function(position) {
+  window._ar_position = position;
   lat = position.coords.latitude;
   lng = position.coords.longitude;
-  init_ar();
+  init_ar(lat, lng);
   animate();
 };
 
 var init_ground = function(){
   // Ground.
+  var gd_tex = (new THREE.TextureLoader()).load("../../assets/textures/cobblestone/diffuse.jpg");
+  gd_tex.wrapS = THREE.RepeatWrapping;
+  gd_tex.wrapT = THREE.RepeatWrapping;
+  gd_tex.repeat.set( 200, 200 );
+  
+  // var gd_normal = (new THREE.TextureLoader()).load("../../assets/textures/cobblestone/normal.jpg");
+  // gd_normal.wrapS = THREE.RepeatWrapping;
+  // gd_normal.wrapT = THREE.RepeatWrapping;
+  // gd_normal.repeat.set( 200, 200 );
+
+  // var gd_spec = (new THREE.TextureLoader()).load("../../assets/textures/cobblestone/specular.png");
+  // gd_spec.wrapS = THREE.RepeatWrapping;
+  // gd_spec.wrapT = THREE.RepeatWrapping;
+  // gd_spec.repeat.set( 200, 200 );
+
   var geometry = new THREE.PlaneBufferGeometry( 3000, 3000);
   geometry.rotateX( - Math.PI / 2 );
   var material = new THREE.MeshPhongMaterial( {
-    color: 0x55AA00,
+    color: 0x884444,
+    map: gd_tex,
+    //normalMap: gd_normal,
+    //specularMap: gd_spec,
     side: THREE.DoubleSide,
     transparent: true,
     opacity: 0.8
   } );
   var plane = new THREE.Mesh( geometry, material );
-  plane.position.y = -2;
+  plane.position.y = -3;
+  plane.renderOrder = -5;
   scene.add( plane );
-}
+};
 
 var ar_world, ar_geo;
-var init_ar = function(){
-
-  // AR Stuff
-
+var init_ar = function(lat, lng){
   ar_world = new THREE.ARWorld({
-    ground: true,
-    gravity: true,
-    camera: camera,
-    controls: controls
+    camera: camera
   });
 
   ar_geo = new THREE.ARMapzenGeography({
     styles: styles,
-    camera: camera,
-    controls: controls,
     lat: lat,
     lng: lng,
-    minimap: false,
     layers: ['buildings','roads','water','landuse']
   });
-
 };
 
-var fall_raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+var fall_raycaster;
 
 var prevTime = performance.now();
 
@@ -119,75 +133,64 @@ var animate = function() {
 
   requestAnimationFrame( animate );
 
-  if (controls.update) controls.update();
-  if (THREE.is_mobile) {
-    //orientationcontrols.updateAlphaOffsetAngle(controls.orientation.y);
-  } else {
-    //dragcontrols.update();
+  if (controls && controls.update) controls.update();
+
+  ar_world.update();
+  ar_world.updateSelection(controls.getObject());
+  
+  if (ar_world.selection && ar_world.selection.distance < 10) {
+        ar_world.selection.currentHex = ar_world.selection.material.emissive.getHex();
+        ar_world.selection.material.emissive.setHex( 0xFFDD00 );  
   }
-
-  ar_world.update({
-    feature_meshes: ar_geo.feature_meshes
-  });
-
-  // touching stuff.
-  //this.update_player_focus();
-
-  //standing on stuff.
-  /*
-  fall_raycaster.ray.origin.copy( controls.getObject().position );
-  fall_raycaster.ray.origin.y -= 5;
-
-  var intersections = fall_raycaster.intersectObjects( params.feature_meshes ).filter(function(intersection){
-    return !!intersection.object.feature;
-  });
-
-  var isOnObject = intersections.length > 0;
-  */
-  var isOnObject = true;
-
+  
+  //standing on stuff. 
+  if (controlsEnabled) {
+    fall_raycaster.ray.origin.copy( controls.getObject().position );
+    fall_raycaster.ray.origin.y -= 5;
+    var intersections = fall_raycaster.intersectObjects( ar_geo.meshes_by_layer.buildings );
+    var isOnObject = intersections.length > 0 || controls.getObject().position.y < 5;
+  } else {
+    isOnObject = true;
+  }
+  
   // friction.
-  velocity.x -= velocity.x * 10.0 * delta;
-  velocity.z -= velocity.z * 10.0 * delta;
+  controls.velocity.x -= controls.velocity.x * 10.0 * delta;
+  controls.velocity.z -= controls.velocity.z * 10.0 * delta;
   
   // gravity
-  if (this.opts.gravity) {
-    velocity.y -= 9.8 * 3.0 * delta;
+  if (!isOnObject) {
+    controls.velocity.y -= 9.8 * 3.0 * delta;
   }
 
-  if ( this.moveForward ) { 
-    if (this.opts.collisions && INTERSECTED && INTERSECTED.distance < 5) {
-      velocity.x = 0;
-      velocity.z = 0;
-      if (this.opts.gravity) {
-        velocity.y = 1500 * delta;
-      }
+  if ( controls.moveForward ) { 
+    console.log(ar_world.selection);
+    if (ar_world.selection) console.log(ar_world.selection.distance);
+    if (ar_world.selection && ar_world.selection.distance < 5) {
+      controls.velocity.x = 0;
+      controls.velocity.z = 0;
+      controls.velocity.y = 400 * delta;
       //velocity.y += 1.5 * 9.8 * 10.0 * delta;
     } else {
-      velocity.z -= 400.0 * delta;
+      controls.velocity.z -= 400.0 * delta;
     }
   }
   
-  if ( this.moveBackward ) velocity.z += 400.0 * delta;
-  if ( this.moveLeft ) velocity.x -= 400.0 * delta;
-  if ( this.moveRight ) velocity.x += 400.0 * delta;
+  if ( controls.moveBackward ) controls.velocity.z += 400.0 * delta;
+  if ( controls.moveLeft ) controls.velocity.x -= 400.0 * delta;
+  if ( controls.moveRight ) controls.velocity.x += 400.0 * delta;
 
   if ( isOnObject === true ) {
-    velocity.y = Math.max( 0, velocity.y );
-    this.canJump = true;
+    controls.velocity.y = Math.max( 0, controls.velocity.y );
+    controls.canJump = true;
+    if (controls.getObject().position.y < 5) controls.getObject().position.y = 5;
   }
-  // no falling through the ground.
-  if ( this.opts.camera.position.y < 5 ) {
-    velocity.y = 0;
-    this.opts.camera.position.y = 5;
-    this.canJump = true;
-  }
+
 
   // apply velocity to position dx/dt dy/dt dz/dt
   var proxy = controls.getObject();
-  proxy.translateX( velocity.x * delta );
-  proxy.translateY( velocity.y * delta );
-  proxy.translateZ( velocity.z * delta );
+  proxy.translateX( controls.velocity.x * delta );
+  proxy.translateY( controls.velocity.y * delta );
+  proxy.translateZ( controls.velocity.z * delta );
 
   renderer.render( scene, camera );
 
