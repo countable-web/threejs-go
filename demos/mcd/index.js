@@ -95,8 +95,6 @@ var init = function() {
     navigator.geolocation.getCurrentPosition(init_geo, default_geo, {timeout: 5000});
   } else {
     default_geo();
-    // new west
-    //init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
     // chicago
     //init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
   }
@@ -104,7 +102,8 @@ var init = function() {
 };
 
 var default_geo = function() {
-  init_geo({coords:{latitude: 49.2213079, longitude: -122.8981869}});
+  // new west
+  init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
 };
 
 var init_geo = function(position) {
