@@ -92,13 +92,19 @@ var init = function() {
   //init_burgers();
 
   if (window.location.host === "countable-web.github.io") {
-    navigator.geolocation.getCurrentPosition(init_geo);
+    navigator.geolocation.getCurrentPosition(init_geo, default_geo, {timeout: 5000});
   } else {
-    init_geo({coords:{latitude: 49.2213079, longitude: -122.8981869}});
-   // init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
+    default_geo();
+    // new west
+    //init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
+    // chicago
     //init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
   }
 
+};
+
+var default_geo = function() {
+  init_geo({coords:{latitude: 49.2213079, longitude: -122.8981869}});
 };
 
 var init_geo = function(position) {

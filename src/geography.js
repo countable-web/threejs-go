@@ -100,14 +100,17 @@ THREE.ARMapzenGeography = function(opts){
       var cached_data = localStorage['mz_' + key];
       if (cached_data) {
         cached_data = JSON.parse(cached_data);
+        console.log('mapzen cache hit', key);
         setTimeout(function(){
           callback(cached_data);
         }, 200);
         return
+      } else {
+        console.log('mapen cache miss', key)
       }
 
     } catch (e) {
-
+      console.log('mapzen cache error', key, e)
     }
 
     var url = "https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY
@@ -121,6 +124,7 @@ THREE.ARMapzenGeography = function(opts){
         if(e.toString().indexOf('QuotaExceededError') > -1) {
           localStorage.clear();
         }
+        console.error(e);
       }
     });
     
