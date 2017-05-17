@@ -91,13 +91,7 @@ var init = function() {
 
   //init_burgers();
 
-  if (window.location.host === "countable-web.github.io") {
-    navigator.geolocation.getCurrentPosition(init_geo, default_geo, {timeout: 5000});
-  } else {
-    default_geo();
-    // chicago
-    //init_geo({coords:{latitude: 41.886811, longitude: -87.626186}});
-  }
+  navigator.geolocation.getCurrentPosition(init_geo, default_geo, {timeout: 5000});
 
 };
 
