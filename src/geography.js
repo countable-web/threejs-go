@@ -98,7 +98,7 @@ THREE.ARMapzenGeography = function(opts){
     MAP_CACHE[key] = 1;
     try {
       var cached_data = localStorage['mz_' + key];
-      if (cached_data) {
+      if (cached_data && window.location.hash !== '#nocache') {
         cached_data = JSON.parse(cached_data);
         console.log('mapzen cache hit', key);
         setTimeout(function(){
