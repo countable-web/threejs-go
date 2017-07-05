@@ -159,6 +159,49 @@ THREE.ARMapzenGeography = function(opts){
   load_tiles(player.lat, player.lng);
   player.start_lng = player.lng, player.start_lat = player.lat;
 
+  this._building_material = (function(){
+    // build a small canvas 32x64 and paint it in white
+    var canvas  = document.createElement( 'canvas' );
+    canvas.width = 32;
+    canvas.height    = 64;
+    var context = canvas.getContext( '2d' );
+    // plain it in white
+    context.fillStyle    = '#ffffff';
+    context.fillRect( 0, 0, 32, 64 );
+    // draw the window rows - with a small noise to simulate light variations in each room
+    for( var y = 2; y < 64; y += 2 ){
+        for( var x = 0; x < 32; x += 2 ){
+            var value   = Math.floor( Math.random() * 64 );
+            context.fillStyle = 'rgb(' + [value, value, value].join( ',' )  + ')';
+            context.fillRect( x, y, 2, 1 );
+        }
+    }
+
+    // build a bigger canvas and copy the small one in it
+    // This is a trick to upscale the texture without filtering
+    var canvas2 = document.createElement( 'canvas' );
+    canvas2.width    = 512;
+    canvas2.height   = 1024;
+    var context = canvas2.getContext( '2d' );
+    // disable smoothing
+    context.imageSmoothingEnabled        = false;
+    context.webkitImageSmoothingEnabled  = false;
+    context.mozImageSmoothingEnabled = false;
+    // then draw the image
+    context.drawImage( canvas, 0, 0, canvas2.width, canvas2.height );
+
+    // generate the texture
+    var texture       = new THREE.Texture( canvas2 );
+    texture.needsUpdate    = true;
+
+    // build the mesh
+    var material  = new THREE.MeshLambertMaterial({
+      map     : texture,
+      vertexColors    : THREE.VertexColors
+    });
+    return material;
+  })();
+
 
 };
 
@@ -230,9 +273,34 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
     var extrudeSettings = {
       steps: 1,
       amount: height || 1,
-      bevelEnabled: false
+      bevelEnabled: false,
     };
     var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+  }
+
+  var nfaces = geometry.faces.length
+  var verts = geometry.vertices;
+  for(var i=0; i<nfaces; i++) {
+    var face=geometry.faces[i];
+    if (Math.abs(face.normal.y) > 1e-9) {
+      var nbig = 0;
+      if (verts[face.a].z > 10) nbig ++;
+      if (verts[face.b].z > 10) nbig ++;
+      if (verts[face.c].z > 10) nbig ++;
+      if (nbig == 2) {
+        geometry.faceVertexUvs[0][i] = [
+            new THREE.Vector2( 1, 1 ),    // TL
+            new THREE.Vector2( 1, 0 ),    // BL
+            new THREE.Vector2( 0, 0 )   // TR
+        ];
+      } else {
+        geometry.faceVertexUvs[0][i] = [
+            new THREE.Vector2( 0, 0 ),    // TL
+            new THREE.Vector2( 1, 0 ),    // BL
+            new THREE.Vector2( 1, 1 )   // TR
+        ];        
+      }
+    }
   }
 
   geometry.rotateX( - Math.PI / 2 );
@@ -301,7 +369,9 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
 
   var opacity = styles.opacity || 1;
   var material;
-  if (styles.shader_material) {
+  if (styles.material == 'buildings') {
+    material = this._building_material;
+  } else if (styles.shader_material) {
     material = styles.shader_material;
   } else {
     material = new THREE.MeshLambertMaterial({
@@ -387,3 +457,5 @@ THREE.ARMapzenGeography.prototype.setup_shader = function(opts){
       +"}\n",
   });
 }
+
+

@@ -11,8 +11,9 @@
 
     <script src="../../src/mapzen-api-key.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/4.1.0/turf.min.js"></script> <!-- used only for turf.buffer currently -->
-    <script src="../../vendor/OBJLoader.js"></script> <!-- used only for turf.buffer currently -->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/4.1.0/turf.min.js"></script>  used only for turf.buffer currently -->
+    <script src="../../vendor/turf.buffer.min.js"></script>
+    <script src="../../vendor/OBJLoader.js"></script>
 
     <script src="../../src/polyfills.js"></script>
     <script src="../../src/controls/OrbitControls.js"></script>
@@ -26,7 +27,8 @@ var styles = {
   buildings: {
     //height_scale: 0.1,
     extrude: 'flat',
-    color: 0x00AA55
+    color: 0x00AA55,
+    material: 'buildings'
     //color: 0xEE4411
   },
   landuse: {
