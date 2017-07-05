@@ -96,26 +96,38 @@ THREE.ARMapzenGeography = function(opts){
   var load_tile = function(tx, ty, zoom, callback) {
     var key = tx + '_' + ty + '_' + zoom
     MAP_CACHE[key] = 1;
-    var cached_data = localStorage['mz_' + key];
-    if (cached_data) {
-      setTimeout(function(){
-        callback(JSON.parse(cached_data));
-      }, 200);
-    } else {
-      var url = "https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY
-      fetch(url).then(function(response){
-        return response.json();
-      }).then(function(data){
-        callback(data);
-        try {
-          localStorage['mz_' + key] = JSON.stringify(data);
-        } catch(e) {
-          if(e.toString().indexOf('QuotaExceededError') > -1) {
-            localStorage.clear();
-          }
-        }
-      });
+    try {
+      var cached_data = localStorage['mz_' + key];
+      if (cached_data && window.location.hash !== '#nocache') {
+        cached_data = JSON.parse(cached_data);
+        console.log('mapzen cache hit', key);
+        setTimeout(function(){
+          callback(cached_data);
+        }, 200);
+        return
+      } else {
+        console.log('mapen cache miss', key)
+      }
+
+    } catch (e) {
+      console.log('mapzen cache error', key, e)
     }
+
+    var url = "https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY
+    fetch(url).then(function(response){
+      return response.json();
+    }).then(function(data){
+      callback(data);
+      try {
+        localStorage['mz_' + key] = JSON.stringify(data);
+      } catch(e) {
+        if(e.toString().indexOf('QuotaExceededError') > -1) {
+          localStorage.clear();
+        }
+        console.error(e);
+      }
+    });
+
   };
 
 
@@ -212,7 +224,7 @@ THREE.ARMapzenGeography = function(opts){
  */
 THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styles){
 
-  
+
   var shape = new THREE.Shape();
 
   // Buffer the linestrings so they have some thickness (uses turf.js)
@@ -242,7 +254,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
   shape.lineTo(point[0], point[1]);
 
   var height;
-  
+
   if (styles.height === 'a') {
     if (feature.properties.height) {
       height = feature.properties.height;
@@ -298,7 +310,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
             new THREE.Vector2( 0, 0 ),    // TL
             new THREE.Vector2( 1, 0 ),    // BL
             new THREE.Vector2( 1, 1 )   // TR
-        ];        
+        ];
       }
     }
   }
@@ -349,7 +361,7 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
                             kind_styles,
                             kind_detail_styles,
                             name_styles);
-  
+
 
   // Inherit some properties from containing landuse boundary?
   /*if (feature.properties.landuse_kind) { // special case for buildings.
@@ -457,5 +469,3 @@ THREE.ARMapzenGeography.prototype.setup_shader = function(opts){
       +"}\n",
   });
 }
-
-

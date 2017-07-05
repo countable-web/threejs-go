@@ -92,6 +92,12 @@ var init = function() {
 
   // init_burgers();
 
+  navigator.geolocation.getCurrentPosition(init_geo, default_geo, {timeout: 5000});
+
+};
+
+var default_geo = function() {
+  // new west
   if (window.location.host === "countable-web.github.io") {
     navigator.geolocation.getCurrentPosition(init_geo);
   } else {
@@ -341,8 +347,9 @@ init_heart = function() {
   scene.add(heart);
 };
 
-function onClick(event) {
-  // event.preventDefault();
+function onClick( event ) {
+  return
+  //event.preventDefault();
   var mouse = new THREE.Vector2();
   mouse.x = event.clientX / window.innerWidth * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
