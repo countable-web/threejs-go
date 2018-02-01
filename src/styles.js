@@ -1,4 +1,3 @@
-
 /*
 address:44
 alcohol:5
@@ -80,7 +79,7 @@ waste_basket:2
 
 DEFAULT_FEATURE_STYLES = {
   buildings: {
-    /*fragment_shader: 
+    /*fragment_shader:
        "uniform vec2 resolution;\n"
       +"uniform float time;\n"
       +"varying vec3 worldPos;\n"
@@ -102,36 +101,36 @@ DEFAULT_FEATURE_STYLES = {
       +"  gl_Position = projectionMatrix * mvPosition;\n"
       +"}\n"*/
 
-      color: 0x999999,
-      height: 'a'
+    color: 0x999999,
+    height: "a"
   },
 
   roads: {
-      color: 0x333333,
-      offy: 0.2,
-      extrude: 'flat'
+    color: 0x333333,
+    offy: 0.2,
+    extrude: "flat"
   },
 
   pois: {
-      color: 0xFF0000,
-      height: 20
+    color: 0xff0000,
+    height: 20
   },
 
   landuse: {
-      color: 0xFFFF00,
-      opacity: 1,
-      extrude: 'flat',
-      offy: -.2
+    color: 0xffff00,
+    opacity: 1,
+    extrude: "flat",
+    offy: -0.2
   },
 
   water: {
-      color: 0x6688FF,
-      extrude: 'flat',
-      offy: -.4
+    color: 0x6688ff,
+    extrude: "flat",
+    offy: -0.4
   },
 
   address: {
-    color: 0xFFFFFF
+    color: 0xffffff
   },
   path: {
     width: 3
@@ -145,22 +144,22 @@ DEFAULT_FEATURE_STYLES = {
   highway: {
     width: 9
   },
-  
+
   pedestrian: {
-    color: 0xFFFFFF
+    color: 0xffffff
   },
   playground: {
     height: 10,
-    color: 0xFFFF00,
+    color: 0xffff00,
     opacity: 0.5
   },
   tree: {
-    color: 0x00FF00,
+    color: 0x00ff00,
     height: 40,
     width: 3
   },
   grass: {
-    color: 0x00FF00,
+    color: 0x00ff00,
     height: 0.7
   },
   hedge: {
@@ -170,16 +169,16 @@ DEFAULT_FEATURE_STYLES = {
   park: {
     color: 0x008800,
     opacity: 0.33,
-    exrude: 'flat',
-    offy: -.4
+    exrude: "flat",
+    offy: -0.4
   },
   forest: {
     color: 0x008800,
     opacity: 0.8,
-    offy: -.4
+    offy: -0.4
   },
   pitch: {
-    color: 0x88FF88
+    color: 0x88ff88
   },
   parking: {
     color: 0x555555,
@@ -187,7 +186,7 @@ DEFAULT_FEATURE_STYLES = {
     offy: 0
   },
   fence: {
-    color: 0xFF0000,
+    color: 0xff0000,
     height: 9
   },
   railway: {
@@ -196,7 +195,7 @@ DEFAULT_FEATURE_STYLES = {
   },
   retail: {
     height: 0.8,
-    color: 0xCC44CC
+    color: 0xcc44cc
   },
   military: {
     color: 0x448800
@@ -205,14 +204,12 @@ DEFAULT_FEATURE_STYLES = {
     color: 0x000000
   },
   residential: {
-    color: 0xCC8800
+    color: 0xcc8800
   },
   commercial: {
-    color:0x880088
+    color: 0x880088
   },
   cemetery: {
-    offy: -.1
+    offy: -0.1
   }
-
 };
-

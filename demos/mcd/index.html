@@ -8,7 +8,9 @@
   </head>
   <body>
     <div id="notice">Drag the screen to look <br>around at your location.</div>
-
+    <script>
+var startTime = performance.now();
+</script>
     <script src="../../src/mapzen-api-key.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.min.js"></script>
 <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/4.1.0/turf.min.js"></script>  used only for turf.buffer currently -->
@@ -21,14 +23,13 @@
     <script src="../../src/arthree.js"></script>
     <script src="../../src/geography.js"></script>
     <script src="../../src/styles.js"></script>
-
     <script>
 var styles = {
   buildings: {
     //height_scale: 0.1,
-    extrude: 'flat',
-    color: 0x00AA55,
-    material: 'buildings'
+    extrude: "flat",
+    color: 0x00aa55,
+    material: "buildings"
     //color: 0xEE4411
   },
   landuse: {
@@ -40,10 +41,10 @@ var styles = {
     opacity: 0.05
   },
   roads: {
-    color: 0xEEBB11,
+    color: 0xeebb11
   },
   "McDonald's": {
-    color: 0xEEAA11,
+    color: 0xeeaa11,
     height_scale: 1
   },
   path: {
@@ -62,7 +63,7 @@ var styles = {
     opacity: 0.5
   }
 };
-    </script>
+</script>
     <script src="index.js"></script>
 
     <!--<a href='https://github.com/countable-web/threejs-go' class='forkme'>

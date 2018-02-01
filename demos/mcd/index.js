@@ -90,10 +90,11 @@ var init = function() {
   }
   init_ground();
 
+  console.log(1, startTime - performance.now());
+
   // init_burgers();
 
-  navigator.geolocation.getCurrentPosition(init_geo, default_geo, {timeout: 5000});
-
+  navigator.geolocation.getCurrentPosition(init_geo, default_geo, { timeout: 5000 });
 };
 
 var default_geo = function() {
@@ -121,6 +122,7 @@ var init_geo = function(position) {
   init_mcd(lat, lng);
   init_heart();
   animate();
+  console.log(2, startTime - performance.now());
 };
 
 var init_ground = function() {
@@ -211,11 +213,11 @@ var init_mcd = function(lat, lng) {
     }
   ];
 
-  var add_outlet = function(point, arc){
+  var add_outlet = function(point, arc) {
     var outlet = arc.clone();
     outlet.rotateX(Math.PI / 2);
     outlet.scale.set(1.2, 1.2, 1.2);
-    coords = ar_geo.to_scene_coords([point.lng, point.lat]);
+    coords = ar_geo.ll_to_scene_coords([point.lng, point.lat]);
     outlet.position.x = coords[0];
     outlet.position.z = coords[1];
     outlet.position.y = 50;
@@ -255,10 +257,13 @@ var init_mcd = function(lat, lng) {
       }
     });
 
-    mcds.forEach(function(p){add_outlet(p, arc)});
+    mcds.forEach(function(p) {
+      add_outlet(p, arc);
+    });
   });
 };
 
+var burglar;
 var init_burgler = function() {
   var texture = new THREE.Texture();
 
@@ -302,17 +307,20 @@ var init_burgler = function() {
       cylinder4.renderorder = 4;
       object.add(cylinder4);
       scene.add(object);
+      burglar = object;
     },
     onProgress,
     onError
   );
 };
 
+var sky_texture = new THREE.TextureLoader().load("imgpsh_fullsize.png");
+
 var init_skyball = function() {
   var geometry = new THREE.SphereGeometry(5000, 60, 40);
   geometry.scale(-1, 1, 1);
   var material = new THREE.MeshBasicMaterial({
-    map: new THREE.TextureLoader().load("imgpsh_fullsize.png"),
+    map: sky_texture,
     fog: false
   });
   mesh = new THREE.Mesh(geometry, material);
@@ -347,8 +355,8 @@ init_heart = function() {
   scene.add(heart);
 };
 
-function onClick( event ) {
-  return
+function onClick(event) {
+  return;
   //event.preventDefault();
   var mouse = new THREE.Vector2();
   mouse.x = event.clientX / window.innerWidth * 2 - 1;
@@ -470,6 +478,12 @@ var animate = function() {
   */
 
   controls.update();
+
+  if (typeof burglar !== "undefined") {
+    burglar.translateX(1);
+    burglar.translateZ(1);
+    controls.target = burglar.position.clone();
+  }
 
   ar_world.update();
 
