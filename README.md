@@ -1,13 +1,15 @@
 # threejs-go
 
-Augmented reality using map geometry.
+Augmented reality, powered by real world map data near you.
+
+![Image of McDonald's Demo](https://github.com/countable-web/threejs-go/blob/gh-pages/assets/screengrab.png)
 
 Three.js Go is a library built on Three.js and Mapzen's OSM based vector tiles, for generating 3d geometry that approximates the real world, based on map data. The project was inspired by Pokemon Go, which launched a year ago, and the disappointment in the absence of other apps which make use of the player's location. In case it's a lack of tooling, this library may help with the groundwork for these kinds of applicaton.
 
 ## Examples
 
   * [McDonald's Demo](https://countable-web.github.io/threejs-go/demos/mcd/)
-  * [Low Altitude Flight Sim](https://countable-web.github.io/threejs-go/demos/fly/) (incomplete)
+  * [Low Altitude Flight Sim](https://countable-web.github.io/threejs-go/demos/fly/) (currently broken, coming soon)
   * [First Person Superhero Sim](https://countable-web.github.io/threejs-go/demos/fps/) (incomplete)
 
 ## Installation
@@ -15,12 +17,13 @@ Clone the project.
 
 ```
 git clone https://github.com/countable-web/threejs-go.git
+cd threejs-go
 ```
 
 Set up your MapZen API key:
 
 ```
-cp mapzen-api-key.js.template mapzen-api-key.js
+cp src/mapzen-api-key.js.template src/mapzen-api-key.js
 ```
 
 Edit the file with your [mapzen api key](https://mapzen.com/developers/sign_in)
@@ -36,7 +39,7 @@ For further work, it's suggested you try extending one of the Demos since they'r
 
 ## Documentation
 
-### THREE.ARWorld
+### THREE.ARWorld(option)
 Includes various environment / utilities for map based AR. Your scene camera should be passed as a parameter.
 ```
 new THREE.ARWorld({
@@ -44,7 +47,7 @@ new THREE.ARWorld({
 });
 ```
 
-### THREE.ARGeography(options)
+### THREE.ARMapzenGeography(options)
 Loads the actual Three.js mesh objects into your scene, with geometry generated from the actual geography around a location. Arguments:
 
 *options.layers* This includes roads, water, buildings, etc. See Mapzen's [layers](https://mapzen.com/documentation/vector-tiles/layers/#places) for details on what you can load.

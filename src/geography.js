@@ -26,7 +26,7 @@ THREE.extend = function(defaults, o1, o2, o3) {
 
 THREE.ARMapzenGeography = function(opts) {
     this.opts = opts = opts || {};
-    this.opts.layers = this.opts.layers || ["buildings", "roads", "pois", "water", "landuse"];
+    this.opts.layers = this.opts.layers || ["building"];
 
     // tally feature tags.
     this.names = {};
@@ -78,42 +78,19 @@ THREE.ARMapzenGeography = function(opts) {
                 this.center.lat = this.center.start_lat - this.marker.position.z / this.scale;
             }
 
-            load_tiles(this.center.lat, this.center.lng);
+            //load_tiles(this.center.lat, this.center.lng);
         }.bind(this),
         1000
     );
 
     var scope = this;
 
-    function blobToBuffer(blob, cb) {
-        var Buffer = buffer.Buffer;
-        if (typeof Blob === 'undefined' || !(blob instanceof Blob)) {
-            throw new Error('first argument must be a Blob')
-        }
-        if (typeof cb !== 'function') {
-            throw new Error('second argument must be a function')
-        }
-
-        var reader = new FileReader()
-
-        function onLoadEnd(e) {
-            reader.removeEventListener('loadend', onLoadEnd, false)
-            if (e.error) cb(e.error)
-            else cb(null, Buffer.from(reader.result))
-        }
-
-        reader.addEventListener('loadend', onLoadEnd, false)
-        reader.readAsArrayBuffer(blob)
-    }
-
-    var handle_data = function(data) {
-        console.log(4, startTime - performance.now());
+    var handle_data = function(data, x, y, z) {
         scope.opts.layers.forEach(function(layername) {
             if (feature_styles[layername]) {
-                scope.add_geojson(data, layername);
+                scope.add_vt(data, layername, x, y, z);
             }
         });
-        console.log(5, startTime - performance.now());
     };
 
     var load_tile = function(tx, ty, zoom, callback) {
@@ -137,19 +114,16 @@ THREE.ARMapzenGeography = function(opts) {
 
         var url =
             //"https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY;
-            "http://stage.countable.ca:8080/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
+            "http://tiles.countable.ca:8080/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
         fetch(url)
             .then(function(response) {
-                console.log(response);
                 return response.blob()
             })
             .then(function(blob) {
                 //console.log(raw);
-                blobToBuffer(blob, function(buf) {
-
-                    var geojson = geobuf.decode(new Pbf(buf));
-                    console.log(geojson);
-                    callback(geojson);
+                vectors(blob, function(tile) {
+                    callback(tile, tx, ty, zoom);
+                    return; // Disable localstorage caching
                     try {
                         localStorage["mz_" + key] = JSON.stringify(geojson);
                     } catch (e) {
@@ -163,7 +137,6 @@ THREE.ARMapzenGeography = function(opts) {
     };
 
     var load_tiles = function(lat, lng) {
-        console.log(3, startTime - performance.now());
 
         var tile_x0 = long2tile(lng, TILE_ZOOM);
         var tile_y0 = lat2tile(lat, TILE_ZOOM);
@@ -247,8 +220,7 @@ THREE.ARMapzenGeography = function(opts) {
         });
         return material;
     })();
-};
-
+}
 /**
  * Takes a 2d geojson, converts it to a THREE.Geometry, and extrudes it to a height
  * suitable for 3d viewing, such as for buildings.
@@ -362,6 +334,16 @@ THREE.ARMapzenGeography.prototype.add_geojson = function(data, layername) {
     });
 };
 
+THREE.ARMapzenGeography.prototype.add_vt = function(tile, layername, x, y, z) {
+    vector_layer = tile.layers[layername];
+    var scope = this;
+    for (var i = 0; i < vector_layer.length; i++) {
+        var feature = vector_layer.feature(i).toGeoJSON(x, y, z);
+        console.log('geojson', feature);
+        scope.add_feature(feature, layername);
+    }
+};
+
 THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
     feature.layername = layername;
     var feature_styles = this.feature_styles;
@@ -404,7 +386,7 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
 
     var opacity = styles.opacity || 1;
     var material;
-    if (styles.material == "buildings") {
+    if (styles.material == "building") {
         material = this._building_material;
     } else if (styles.shader_material) {
         material = styles.shader_material;
@@ -464,6 +446,7 @@ THREE.ARMapzenGeography.prototype.init_feature_styles = function(styles) {
  * @param fs_part just modifies vec3 color and float opacity.
  * @param vs_part just modifies mvPosition.
  */
+
 THREE.ARMapzenGeography.prototype.setup_shader = function(opts) {
     return new THREE.ShaderMaterial({
         transparent: true,
@@ -488,4 +471,4 @@ THREE.ARMapzenGeography.prototype.setup_shader = function(opts) {
             opts.fs_part ||
             "" + "  gl_FragColor=vec4(color,opacity);\n" + "}\n"
     });
-};
+}

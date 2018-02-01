@@ -78,138 +78,138 @@ waste_basket:2
 */
 
 DEFAULT_FEATURE_STYLES = {
-  buildings: {
-    /*fragment_shader:
-       "uniform vec2 resolution;\n"
-      +"uniform float time;\n"
-      +"varying vec3 worldPos;\n"
-      +"void main(void)\n"
-      +"{\n"
-      +"  float opacity = 1.0;\n"
-      +"  vec3 color = vec3(1.0,1.0,1.0);"
-      +"  opacity = pow(sin(worldPos.x) / 2.0 + sin(worldPos.y - time) / 2.0, 4.0);\n"
-      +"  gl_FragColor=vec4(color,opacity);\n"
-      +"}\n",
-    vertex_shader:
-       "uniform float time;\n"
-      +"varying vec3 worldPos;\n"
-      +"void main()\n"
-      +"{\n"
-      +"  vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n"
-      +"  worldPos = position;\n"
-      +"  mvPosition.x += sin(mvPosition.y);\n"
-      +"  gl_Position = projectionMatrix * mvPosition;\n"
-      +"}\n"*/
+    building: {
+        /*fragment_shader:
+           "uniform vec2 resolution;\n"
+          +"uniform float time;\n"
+          +"varying vec3 worldPos;\n"
+          +"void main(void)\n"
+          +"{\n"
+          +"  float opacity = 1.0;\n"
+          +"  vec3 color = vec3(1.0,1.0,1.0);"
+          +"  opacity = pow(sin(worldPos.x) / 2.0 + sin(worldPos.y - time) / 2.0, 4.0);\n"
+          +"  gl_FragColor=vec4(color,opacity);\n"
+          +"}\n",
+        vertex_shader:
+           "uniform float time;\n"
+          +"varying vec3 worldPos;\n"
+          +"void main()\n"
+          +"{\n"
+          +"  vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n"
+          +"  worldPos = position;\n"
+          +"  mvPosition.x += sin(mvPosition.y);\n"
+          +"  gl_Position = projectionMatrix * mvPosition;\n"
+          +"}\n"*/
 
-    color: 0x999999,
-    height: "a"
-  },
+        color: 0x999999,
+        height: "a"
+    },
 
-  roads: {
-    color: 0x333333,
-    offy: 0.2,
-    extrude: "flat"
-  },
+    transportation: {
+        color: 0x333333,
+        offy: 0.2,
+        extrude: "flat"
+    },
 
-  pois: {
-    color: 0xff0000,
-    height: 20
-  },
+    poi: {
+        color: 0xff0000,
+        height: 20
+    },
 
-  landuse: {
-    color: 0xffff00,
-    opacity: 1,
-    extrude: "flat",
-    offy: -0.2
-  },
+    landuse: {
+        color: 0xffff00,
+        opacity: 1,
+        extrude: "flat",
+        offy: -0.2
+    },
 
-  water: {
-    color: 0x6688ff,
-    extrude: "flat",
-    offy: -0.4
-  },
+    water: {
+        color: 0x6688ff,
+        extrude: "flat",
+        offy: -0.4
+    },
 
-  address: {
-    color: 0xffffff
-  },
-  path: {
-    width: 3
-  },
-  minor_road: {
-    width: 5
-  },
-  major_road: {
-    width: 7
-  },
-  highway: {
-    width: 9
-  },
+    address: {
+        color: 0xffffff
+    },
+    path: {
+        width: 3
+    },
+    minor_road: {
+        width: 5
+    },
+    major_road: {
+        width: 7
+    },
+    highway: {
+        width: 9
+    },
 
-  pedestrian: {
-    color: 0xffffff
-  },
-  playground: {
-    height: 10,
-    color: 0xffff00,
-    opacity: 0.5
-  },
-  tree: {
-    color: 0x00ff00,
-    height: 40,
-    width: 3
-  },
-  grass: {
-    color: 0x00ff00,
-    height: 0.7
-  },
-  hedge: {
-    color: 0x006600,
-    height: 8
-  },
-  park: {
-    color: 0x008800,
-    opacity: 0.33,
-    exrude: "flat",
-    offy: -0.4
-  },
-  forest: {
-    color: 0x008800,
-    opacity: 0.8,
-    offy: -0.4
-  },
-  pitch: {
-    color: 0x88ff88
-  },
-  parking: {
-    color: 0x555555,
-    opacity: 0.8,
-    offy: 0
-  },
-  fence: {
-    color: 0xff0000,
-    height: 9
-  },
-  railway: {
-    color: 0x888800,
-    height: 1.5
-  },
-  retail: {
-    height: 0.8,
-    color: 0xcc44cc
-  },
-  military: {
-    color: 0x448800
-  },
-  place_of_worship: {
-    color: 0x000000
-  },
-  residential: {
-    color: 0xcc8800
-  },
-  commercial: {
-    color: 0x880088
-  },
-  cemetery: {
-    offy: -0.1
-  }
+    pedestrian: {
+        color: 0xffffff
+    },
+    playground: {
+        height: 10,
+        color: 0xffff00,
+        opacity: 0.5
+    },
+    tree: {
+        color: 0x00ff00,
+        height: 40,
+        width: 3
+    },
+    grass: {
+        color: 0x00ff00,
+        height: 0.7
+    },
+    hedge: {
+        color: 0x006600,
+        height: 8
+    },
+    park: {
+        color: 0x008800,
+        opacity: 0.33,
+        exrude: "flat",
+        offy: -0.4
+    },
+    forest: {
+        color: 0x008800,
+        opacity: 0.8,
+        offy: -0.4
+    },
+    pitch: {
+        color: 0x88ff88
+    },
+    parking: {
+        color: 0x555555,
+        opacity: 0.8,
+        offy: 0
+    },
+    fence: {
+        color: 0xff0000,
+        height: 9
+    },
+    railway: {
+        color: 0x888800,
+        height: 1.5
+    },
+    retail: {
+        height: 0.8,
+        color: 0xcc44cc
+    },
+    military: {
+        color: 0x448800
+    },
+    place_of_worship: {
+        color: 0x000000
+    },
+    residential: {
+        color: 0xcc8800
+    },
+    commercial: {
+        color: 0x880088
+    },
+    cemetery: {
+        offy: -0.1
+    }
 };
