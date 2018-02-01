@@ -1,0 +1,25 @@
+{
+  "name": "threejs-go",
+  "version": "1.0.0",
+  "description": "ThreeJS Map Based AR",
+  "main": "index.js",
+  "dependencies": {
+    "browserify": "^14.4.0",
+    "uglify-js": "^3.0.23"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "./node_moduels/mocha/bin/mocha"
+    "build": "./node_modules/browserify/bin/cmd.js -s turf vendor/turf.buffer.main.js |./node_modules/uglify-js/bin/uglifyjs > vendor/turf.buffer.min.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/countable-web/ar-map-demo.git"
+  },
+  "author": "countable",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/countable-web/ar-map-demo/issues"
+  },
+  "homepage": "https://github.com/countable-web/ar-map-demo#readme"
+}

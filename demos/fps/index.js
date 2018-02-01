@@ -139,8 +139,8 @@ var animate = function() {
   ar_world.updateSelection(controls.getObject());
   
   if (ar_world.selection && ar_world.selection.distance < 10) {
-        ar_world.selection.currentHex = ar_world.selection.material.emissive.getHex();
-        ar_world.selection.material.emissive.setHex( 0xFFDD00 );  
+      ar_world.selection.currentHex = ar_world.selection.material.emissive.getHex();
+      //ar_world.selection.material.emissive.setHex( 0xFFDD00 );  
   }
   
   //standing on stuff. 
