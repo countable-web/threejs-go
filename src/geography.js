@@ -140,7 +140,7 @@ THREE.ARMapzenGeography = function(opts) {
 
         var tile_x0 = long2tile(lng, TILE_ZOOM);
         var tile_y0 = lat2tile(lat, TILE_ZOOM);
-        var N = 1;
+        var N = 0;
         for (var i = -N; i <= N; i++) {
             for (var j = -N; j <= N; j++) {
                 var tile_x = tile_x0 + i;
@@ -237,20 +237,19 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
         var width = styles.width || 1;
         var buf = turf.buffer(feature, width, "meters");
         feature.geometry = buf.geometry;
-    }
-
-    if (feature.geometry.type === "MultiPolygon") {
+    } else if (feature.geometry.type === "MultiPolygon") {
         var coords = feature.geometry.coordinates[0][0]; // TODO: add all multipolygon coords.
     } else {
         var coords = feature.geometry.coordinates[0];
     }
+    console.log(coords);
 
     var point = this.ll_to_scene_coords(coords[0]);
     shape.moveTo(point[0], point[1]);
 
     var scope = this;
     coords.slice(1).forEach(function(coord) {
-        var point = scope.ll_to_scene_coords(coord);
+        point = scope.ll_to_scene_coords(coord);
         shape.lineTo(point[0], point[1]);
     });
     point = this.ll_to_scene_coords(coords[0]);
@@ -261,10 +260,13 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
     if (styles.height === "a") {
         if (feature.properties.height) {
             height = feature.properties.height;
+        } else if (feature.properties.render_height) {
+            height = feature.properties.render_height;
         } else if (feature.properties.area) {
             height = Math.sqrt(feature.properties.area);
         } else {
             // ignore standalone building labels.
+            console.warn('just a label.', feature.properties)
             return null;
         }
         height *= styles.height_scale || 1;
@@ -339,7 +341,7 @@ THREE.ARMapzenGeography.prototype.add_vt = function(tile, layername, x, y, z) {
     var scope = this;
     for (var i = 0; i < vector_layer.length; i++) {
         var feature = vector_layer.feature(i).toGeoJSON(x, y, z);
-        console.log('geojson', feature);
+        //console.log('geojson', vector_layer.feature(i).loadGeometry(), feature);
         scope.add_feature(feature, layername);
     }
 };
@@ -382,22 +384,25 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
     this.kind_details[feature.properties.kind_detail]++;
 
     var geometry = this.extrude_feature_shape(feature, styles);
-    if (!geometry) return;
+    if (!geometry) {
+        console.warn('no geomtry for feature')
+        return;
+    }
 
     var opacity = styles.opacity || 1;
     var material;
-    if (styles.material == "building") {
+    /*if (styles.material == "building") {
         material = this._building_material;
     } else if (styles.shader_material) {
         material = styles.shader_material;
-    } else {
-        material = new THREE.MeshLambertMaterial({
-            color: styles.color || 0xffffff,
-            opacity: opacity,
-            transparent: opacity < 1,
-            shading: THREE.SmoothShading
-        });
-    }
+    } else {*/
+    material = new THREE.MeshLambertMaterial({
+        color: styles.color || 0xffffff,
+        opacity: opacity,
+        transparent: opacity < 1,
+        shading: THREE.SmoothShading
+    });
+    //}
 
     // TODO, a better z-fighting avoidance method.
     /*

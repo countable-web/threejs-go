@@ -88,9 +88,7 @@ var init = function() {
     if (THREE.is_daytime) {
         init_skyball();
     }
-    init_ground();
-
-    console.log(1, startTime - performance.now());
+    //init_ground();
 
     // init_burgers();
 
@@ -181,7 +179,8 @@ var init_ar = function(lat, lng) {
         styles: styles,
         lat: lat,
         lng: lng,
-        layers: ["transportation", "landcover", "landuse", "place", "poi"]
+        layers: ["building"]
+        //layers: ["transportation", "landcover", "landuse", "place", "poi"]
     });
 };
 
@@ -482,9 +481,9 @@ var animate = function() {
     controls.update();
 
     if (typeof burglar !== "undefined") {
-        burglar.translateX(1);
+        /*burglar.translateX(1);
         burglar.translateZ(1);
-        controls.target = burglar.position.clone();
+        controls.target = burglar.position.clone();*/
     }
 
     ar_world.update();
