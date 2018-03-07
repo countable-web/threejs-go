@@ -114,7 +114,7 @@ THREE.ARMapzenGeography = function(opts) {
 
         var url =
             //"https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY;
-            "http://51.15.214.195/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
+            "https://tiles.countable.ca/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
         fetch(url)
             .then(function(response) {
                 return response.blob()
