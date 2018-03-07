@@ -20,20 +20,15 @@ git clone https://github.com/countable-web/threejs-go.git
 cd threejs-go
 ```
 
-Set up your MapZen API key:
-
-```
-cp src/mapzen-api-key.js.template src/mapzen-api-key.js
-```
-
-Edit the file with your [mapzen api key](https://mapzen.com/developers/sign_in)
-
 To view the demos, run with any webserver (like python)
 ```
-python3 -m http.server
+npm build
+npm run dev
 ```
 
-Browse to `localhost:8000/demos/`.
+This will serve your app locally and auto-build client deps with [rollup](https://rollupjs.org/).
+
+Browse to `localhost:5000`.
 
 For further work, it's suggested you try extending one of the Demos since they're standard Three.js applications, you can do anything you'd normally do in Three.js
 
@@ -80,4 +75,3 @@ This boolean is populated, indicating whether you have a mobile device, in order
   * Thanks to [Countable](http://countable.ca) for letting me work on this!
   * Thanks to [Mapzen](https://mapzen.com) for tiles.
   * Thanks to [Codrops](https://tympanus.net/codrops/) for some clip art.
-

@@ -114,7 +114,7 @@ THREE.ARMapzenGeography = function(opts) {
 
         var url =
             //"https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY;
-            "http://tiles.countable.ca:8080/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
+            "http://51.15.214.195/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
         fetch(url)
             .then(function(response) {
                 return response.blob()
@@ -237,12 +237,12 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
         var width = styles.width || 1;
         var buf = turf.buffer(feature, width, "meters");
         feature.geometry = buf.geometry;
-    } else if (feature.geometry.type === "MultiPolygon") {
+    }
+    if (feature.geometry.type === "MultiPolygon") {
         var coords = feature.geometry.coordinates[0][0]; // TODO: add all multipolygon coords.
     } else {
         var coords = feature.geometry.coordinates[0];
     }
-    console.log(coords);
 
     var point = this.ll_to_scene_coords(coords[0]);
     shape.moveTo(point[0], point[1]);

@@ -179,8 +179,14 @@ var init_ar = function(lat, lng) {
         styles: styles,
         lat: lat,
         lng: lng,
-        layers: ["building"]
-        //layers: ["transportation", "landcover", "landuse", "place", "poi"]
+        //layers: ["building"]
+        layers: [
+            "transportation",
+            "landcover",
+            "landuse",
+            "place",
+            "poi"
+        ]
     });
 };
 

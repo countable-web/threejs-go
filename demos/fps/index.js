@@ -123,7 +123,14 @@ var init_ar = function(lat, lng) {
         styles: styles,
         lat: lat,
         lng: lng,
-        layers: ['landuse']
+        layers: [
+            "transportation",
+            //"landcover",
+            "building",
+            //"landuse",
+            "place",
+            "poi"
+        ]
     });
 };
 

@@ -27,13 +27,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 
     <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
-    <script src="../../src/mapzen-api-key.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/4.1.0/turf.min.js"></script> <!-- used only for turf.buffer currently -->
-    <script src="../../vendor/turf.min.js"></script> <!-- used only for turf.buffer currently -->
+    <script src="../../vendor/turf.buffer.min.js"></script>
+
     <script src="../../vendor/OBJLoader.js"></script> <!-- used only for turf.buffer currently -->
 
+    <script src="../../public/bundle.js"></script>
     <script src="../../src/controls/WASDControls.js"></script>
     <script src="../../src/controls/PointerLockControls.js"></script>
     <script src="../../src/arthree.js"></script>
@@ -43,15 +44,16 @@
 
     <script>
   var styles = {
-    buildings: {
+    building: {
       color: 0xCCCCCC,
       opacity: 1,
-      height_scale: 1
+      height_scale: 1,
+      height: 'a'
     },
     roads: {
       color: 0x444444,
       extrude: 'flat'
-    },
+  },
     path: {
       width: 2
     },
