@@ -366,7 +366,7 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
         var kind_detail_styles = feature_styles[feature.properties.kind_detail] || {};
     }
     var name_styles = feature_styles[feature.properties.name] || {};
-
+    console.log(feature.properties);
     // Many features have a 'kind' property scope can be used for styling.
     var styles = THREE.extend(layer_styles, kind_styles, kind_detail_styles, name_styles);
 

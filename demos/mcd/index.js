@@ -88,7 +88,7 @@ var init = function() {
     if (THREE.is_daytime) {
         init_skyball();
     }
-    //init_ground();
+    init_ground();
 
     // init_burgers();
 
@@ -181,9 +181,10 @@ var init_ar = function(lat, lng) {
         lng: lng,
         //layers: ["building"]
         layers: [
+            "building",
             "transportation",
-            "landcover",
-            "landuse",
+            //"landcover",
+            //"landuse",
             "place",
             "poi"
         ]
