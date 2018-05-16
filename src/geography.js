@@ -295,6 +295,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
         var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     }
 
+    /*
     var nfaces = geometry.faces.length;
     var verts = geometry.vertices;
     for (var i = 0; i < nfaces; i++) {
@@ -318,7 +319,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
                 ];
             }
         }
-    }
+    }*/
 
     geometry.rotateX(-Math.PI / 2);
 
@@ -366,7 +367,7 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
         var kind_detail_styles = feature_styles[feature.properties.kind_detail] || {};
     }
     var name_styles = feature_styles[feature.properties.name] || {};
-    console.log(feature.properties);
+    //console.log(feature.properties);
     // Many features have a 'kind' property scope can be used for styling.
     var styles = THREE.extend(layer_styles, kind_styles, kind_detail_styles, name_styles);
 
