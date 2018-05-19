@@ -3,8 +3,13 @@ import {
 } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import buffer from 'buffer/'; // note: the trailing slash is important!
+import * as tb from '@turf/buffer';
 
-export default function vectors(blob, cb) {
+function turf_buffer(geojson, radius, opts) {
+    return tb.default(geojson, radius, opts);
+}
+
+function vectors(blob, cb) {
 
     /*fetch("http://stage.countable.ca:8080/data/v3/2/1/1.pbf").then(function(response) {
         var b = response.blob();
@@ -19,6 +24,11 @@ export default function vectors(blob, cb) {
         cb(tile);
     })
 
+}
+
+export default {
+    turf_buffer: turf_buffer,
+    vectors: vectors
 }
 
 function blobToBuffer(blob, cb) {

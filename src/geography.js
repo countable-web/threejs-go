@@ -121,7 +121,7 @@ THREE.ARMapzenGeography = function(opts) {
             })
             .then(function(blob) {
                 //console.log(raw);
-                vectors(blob, function(tile) {
+                Bundle.vectors(blob, function(tile) {
                     callback(tile, tx, ty, zoom);
                     return; // Disable localstorage caching
                     try {
@@ -221,6 +221,39 @@ THREE.ARMapzenGeography = function(opts) {
         return material;
     })();
 }
+
+// Switch to earcut for triangulation:
+// https://github.com/mrdoob/three.js/issues/5959
+function addContour(vertices, contour) {
+    for (var i = 0; i < contour.length; i++) {
+        vertices.push(contour[i].x);
+        vertices.push(contour[i].y);
+    }
+}
+
+THREE.ShapeUtils.triangulateShape = function(contour, holes) {
+    var vertices = [];
+
+    addContour(vertices, contour);
+
+    var holeIndices = [];
+    var holeIndex = contour.length;
+
+    for (i = 0; i < holes.length; i++) {
+        holeIndices.push(holeIndex);
+        holeIndex += holes[i].length;
+        addContour(vertices, holes[i]);
+    }
+
+    var result = earcut(vertices, holeIndices, 2);
+
+    var grouped = [];
+    for (var i = 0; i < result.length; i += 3) {
+        grouped.push(result.slice(i, i + 3));
+    }
+    return grouped;
+};
+
 /**
  * Takes a 2d geojson, converts it to a THREE.Geometry, and extrudes it to a height
  * suitable for 3d viewing, such as for buildings.
@@ -235,7 +268,9 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
         feature.geometry.type === "MultiLineString"
     ) {
         var width = styles.width || 1;
-        var buf = turf.buffer(feature, width, "meters");
+        var buf = Bundle.turf_buffer(feature, width, {
+            units: "meters"
+        });
         feature.geometry = buf.geometry;
     }
     if (feature.geometry.type === "MultiPolygon") {
@@ -347,10 +382,27 @@ THREE.ARMapzenGeography.prototype.add_vt = function(tile, layername, x, y, z) {
     }
 };
 
+// cache materials for perf.
+var _mtl_cache = {}
+var _get_material_cached = (color, opacity) => {
+    var key = color + '|' + opacity;
+    if (!_mtl_cache[key]) {
+
+        _mtl_cache[key] = new THREE.MeshLambertMaterial({
+            color: color || 0xffffff,
+            opacity: opacity,
+            transparent: opacity < 1,
+            shading: THREE.SmoothShading
+        });
+    }
+    return _mtl_cache[key];
+}
+
 THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
     feature.layername = layername;
     var feature_styles = this.feature_styles;
 
+    //console.log(layername, feature.properties);
     // we only cache at the tile level now, the following doesn't work,
     // since a feature could appear on multiple tiles.
     //if (this._drawn[feature.properties.id]) return;// avoid duplicate renderings. features might show up in 2 tiles.
@@ -358,13 +410,13 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
 
     // Style based on the the various feature property hints, in some order...
     var layer_styles = feature_styles[layername];
-    var kind_styles = feature_styles[feature.properties.kind] || {};
+    var kind_styles = feature_styles[feature.properties.class] || {};
     // kind_detail seems to copy landuse for roads, which is dumb, don't color it.
 
     if (layername === "roads") {
         var kind_detail_styles = {};
     } else {
-        var kind_detail_styles = feature_styles[feature.properties.kind_detail] || {};
+        var kind_detail_styles = feature_styles[feature.properties.subclass] || {};
     }
     var name_styles = feature_styles[feature.properties.name] || {};
     //console.log(feature.properties);
@@ -377,12 +429,12 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
     }*/
 
     // tally feature "kind" (descriptive tags). used for debugging/enumerating available features and building stylesheets.
-    this.kinds[feature.properties.kind] = this.kinds[feature.properties.kind] || 1;
+    this.kinds[feature.properties.class] = this.kinds[feature.properties.class] || 1;
     this.names[feature.properties.name] = this.names[feature.properties.name] || 1;
-    this.kind_details[feature.properties.kind_detail] = this.kind_details[feature.properties.kind_detail] || 1;
-    this.kinds[feature.properties.kind]++;
+    this.kind_details[feature.properties.subclass] = this.kind_details[feature.properties.subclass] || 1;
+    this.kinds[feature.properties.class]++;
     this.names[feature.properties.name]++;
-    this.kind_details[feature.properties.kind_detail]++;
+    this.kind_details[feature.properties.subclass]++;
 
     var geometry = this.extrude_feature_shape(feature, styles);
     if (!geometry) {
@@ -397,12 +449,7 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
     } else if (styles.shader_material) {
         material = styles.shader_material;
     } else {*/
-    material = new THREE.MeshLambertMaterial({
-        color: styles.color || 0xffffff,
-        opacity: opacity,
-        transparent: opacity < 1,
-        shading: THREE.SmoothShading
-    });
+    material = _get_material_cached(styles.color, opacity);
     //}
 
     // TODO, a better z-fighting avoidance method.

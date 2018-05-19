@@ -184,7 +184,7 @@ var init_ar = function(lat, lng) {
             "building",
             "transportation",
             //"landcover",
-            //"landuse",
+            "landuse",
             "place",
             "poi"
         ]

@@ -135,10 +135,13 @@ DEFAULT_FEATURE_STYLES = {
     path: {
         width: 3
     },
-    minor_road: {
+    service: {
         width: 5
     },
-    major_road: {
+    minor: {
+        width: 5
+    },
+    major: {
         width: 7
     },
     highway: {
@@ -211,5 +214,8 @@ DEFAULT_FEATURE_STYLES = {
     },
     cemetery: {
         offy: -0.1
+    },
+    school: {
+        color: 0xddaaaa
     }
 };
