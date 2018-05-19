@@ -3189,7 +3189,24 @@ var factors = {
 };
 
 /**
- * Units of measurement factors based on 1 meter.
+ * Wraps a GeoJSON {@link Geometry} in a GeoJSON {@link Feature}.
+ *
+ * @name feature
+ * @param {Geometry} geometry input geometry
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Object} [options={}] Optional Parameters
+ * @param {Array<number>} [options.bbox] Bounding Box Array [west, south, east, north] associated with the Feature
+ * @param {string|number} [options.id] Identifier associated with the Feature
+ * @returns {Feature} a GeoJSON Feature
+ * @example
+ * var geometry = {
+ *   "type": "Point",
+ *   "coordinates": [110, 50]
+ * };
+ *
+ * var feature = turf.feature(geometry);
+ *
+ * //=feature
  */
 function feature(geometry, properties, options) {
     // Optional Parameters
@@ -3214,22 +3231,19 @@ function feature(geometry, properties, options) {
 }
 
 /**
- * Creates a GeoJSON {@link Geometry} from a Geometry string type & coordinates.
- * For GeometryCollection type use `helpers.geometryCollection`
+ * Creates a {@link Point} {@link Feature} from a Position.
  *
- * @name geometry
- * @param {string} type Geometry Type
- * @param {Array<number>} coordinates Coordinates
+ * @name point
+ * @param {Array<number>} coordinates longitude, latitude position (each in decimal degrees)
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
  * @param {Object} [options={}] Optional Parameters
- * @param {Array<number>} [options.bbox] Bounding Box Array [west, south, east, north] associated with the Geometry
- * @returns {Geometry} a GeoJSON Geometry
+ * @param {Array<number>} [options.bbox] Bounding Box Array [west, south, east, north] associated with the Feature
+ * @param {string|number} [options.id] Identifier associated with the Feature
+ * @returns {Feature<Point>} a Point feature
  * @example
- * var type = 'Point';
- * var coordinates = [110, 50];
+ * var point = turf.point([-75.343, 39.984]);
  *
- * var geometry = turf.geometry(type, coordinates);
- *
- * //=geometry
+ * //=point
  */
 function point(coordinates, properties, options) {
     if (!coordinates) throw new Error('coordinates is required');
@@ -3244,23 +3258,26 @@ function point(coordinates, properties, options) {
 }
 
 /**
- * Creates a {@link Point} {@link FeatureCollection} from an Array of Point coordinates.
+ * Takes one or more {@link Feature|Features} and creates a {@link FeatureCollection}.
  *
- * @name points
- * @param {Array<Array<number>>} coordinates an array of Points
- * @param {Object} [properties={}] Translate these properties to each Feature
+ * @name featureCollection
+ * @param {Feature[]} features input features
  * @param {Object} [options={}] Optional Parameters
- * @param {Array<number>} [options.bbox] Bounding Box Array [west, south, east, north] associated with the FeatureCollection
- * @param {string|number} [options.id] Identifier associated with the FeatureCollection
- * @returns {FeatureCollection<Point>} Point Feature
+ * @param {Array<number>} [options.bbox] Bounding Box Array [west, south, east, north] associated with the Feature
+ * @param {string|number} [options.id] Identifier associated with the Feature
+ * @returns {FeatureCollection} FeatureCollection of Features
  * @example
- * var points = turf.points([
- *   [-75, 39],
- *   [-80, 45],
- *   [-78, 50]
+ * var locationA = turf.point([-75.343, 39.984], {name: 'Location A'});
+ * var locationB = turf.point([-75.833, 39.284], {name: 'Location B'});
+ * var locationC = turf.point([-75.534, 39.123], {name: 'Location C'});
+ *
+ * var collection = turf.featureCollection([
+ *   locationA,
+ *   locationB,
+ *   locationC
  * ]);
  *
- * //=points
+ * //=collection
  */
 function featureCollection(features, options) {
     // Optional Parameters
@@ -3284,21 +3301,13 @@ function featureCollection(features, options) {
 }
 
 /**
- * Creates a {@link Feature<MultiLineString>} based on a
- * coordinate array. Properties can be added optionally.
+ * Convert a distance measurement (assuming a spherical Earth) from radians to a more friendly unit.
+ * Valid units: miles, nauticalmiles, inches, yards, meters, metres, kilometers, centimeters, feet
  *
- * @name multiLineString
- * @param {Array<Array<Array<number>>>} coordinates an array of LineStrings
- * @param {Object} [properties={}] an Object of key-value pairs to add as properties
- * @param {Object} [options={}] Optional Parameters
- * @param {Array<number>} [options.bbox] Bounding Box Array [west, south, east, north] associated with the Feature
- * @param {string|number} [options.id] Identifier associated with the Feature
- * @returns {Feature<MultiLineString>} a MultiLineString feature
- * @throws {Error} if no coordinates are passed
- * @example
- * var multiLine = turf.multiLineString([[[0,0],[10,10]]]);
- *
- * //=multiLine
+ * @name radiansToLength
+ * @param {number} radians in radians across the sphere
+ * @param {string} [units='kilometers'] can be degrees, radians, miles, or kilometers inches, yards, metres, meters, kilometres, kilometers.
+ * @returns {number} distance
  */
 function radiansToLength(radians, units) {
     if (radians === undefined || radians === null) throw new Error('radians is required');
@@ -3328,13 +3337,15 @@ function lengthToRadians(distance, units) {
 }
 
 /**
- * Convert a distance measurement (assuming a spherical Earth) from a real-world unit into degrees
- * Valid units: miles, nauticalmiles, inches, yards, meters, metres, centimeters, kilometres, feet
+ * isNumber
  *
- * @name lengthToDegrees
- * @param {number} distance in real units
- * @param {string} [units='kilometers'] can be degrees, radians, miles, or kilometers inches, yards, metres, meters, kilometres, kilometers.
- * @returns {number} degrees
+ * @param {*} num Number to validate
+ * @returns {boolean} true/false
+ * @example
+ * turf.isNumber(123)
+ * //=true
+ * turf.isNumber('foo')
+ * //=false
  */
 function isNumber(num) {
     return !isNaN(num) && num !== null && !Array.isArray(num);
@@ -3411,8 +3422,39 @@ function validateId(id) {
     if (['string', 'number'].indexOf(typeof id) === -1) throw new Error('id must be a number or a string');
 }
 
-// Deprecated methods
+/**
+ * Callback for coordEach
+ *
+ * @callback coordEachCallback
+ * @param {Array<number>} currentCoord The current coordinate being processed.
+ * @param {number} coordIndex The current index of the coordinate being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed.
+ * @param {number} geometryIndex The current index of the Geometry being processed.
+ */
 
+/**
+ * Iterate over coordinates in any GeoJSON object, similar to Array.forEach()
+ *
+ * @name coordEach
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (currentCoord, coordIndex, featureIndex, multiFeatureIndex)
+ * @param {boolean} [excludeWrapCoord=false] whether or not to include the final coordinate of LinearRings that wraps the ring in its iteration.
+ * @returns {void}
+ * @example
+ * var features = turf.featureCollection([
+ *   turf.point([26, 37], {"foo": "bar"}),
+ *   turf.point([36, 53], {"hello": "world"})
+ * ]);
+ *
+ * turf.coordEach(features, function (currentCoord, coordIndex, featureIndex, multiFeatureIndex, geometryIndex) {
+ *   //=currentCoord
+ *   //=coordIndex
+ *   //=featureIndex
+ *   //=multiFeatureIndex
+ *   //=geometryIndex
+ * });
+ */
 function coordEach(geojson, callback, excludeWrapCoord) {
     // Handles null Geometry -- Skips this GeoJSON
     if (geojson === null) return;
@@ -3511,53 +3553,30 @@ function coordEach(geojson, callback, excludeWrapCoord) {
 }
 
 /**
- * Callback for coordReduce
+ * Callback for featureEach
  *
- * The first time the callback function is called, the values provided as arguments depend
- * on whether the reduce method has an initialValue argument.
- *
- * If an initialValue is provided to the reduce method:
- *  - The previousValue argument is initialValue.
- *  - The currentValue argument is the value of the first element present in the array.
- *
- * If an initialValue is not provided:
- *  - The previousValue argument is the value of the first element present in the array.
- *  - The currentValue argument is the value of the second element present in the array.
- *
- * @callback coordReduceCallback
- * @param {*} previousValue The accumulated value previously returned in the last invocation
- * of the callback, or initialValue, if supplied.
- * @param {Array<number>} currentCoord The current coordinate being processed.
- * @param {number} coordIndex The current index of the coordinate being processed.
- * Starts at index 0, if an initialValue is provided, and at index 1 otherwise.
+ * @callback featureEachCallback
+ * @param {Feature<any>} currentFeature The current Feature being processed.
  * @param {number} featureIndex The current index of the Feature being processed.
- * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed.
- * @param {number} geometryIndex The current index of the Geometry being processed.
  */
 
 /**
- * Reduce coordinates in any GeoJSON object, similar to Array.reduce()
+ * Iterate over features in any GeoJSON object, similar to
+ * Array.forEach.
  *
- * @name coordReduce
- * @param {FeatureCollection|Geometry|Feature} geojson any GeoJSON object
- * @param {Function} callback a method that takes (previousValue, currentCoord, coordIndex)
- * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
- * @param {boolean} [excludeWrapCoord=false] whether or not to include the final coordinate of LinearRings that wraps the ring in its iteration.
- * @returns {*} The value that results from the reduction.
+ * @name featureEach
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (currentFeature, featureIndex)
+ * @returns {void}
  * @example
  * var features = turf.featureCollection([
- *   turf.point([26, 37], {"foo": "bar"}),
- *   turf.point([36, 53], {"hello": "world"})
+ *   turf.point([26, 37], {foo: 'bar'}),
+ *   turf.point([36, 53], {hello: 'world'})
  * ]);
  *
- * turf.coordReduce(features, function (previousValue, currentCoord, coordIndex, featureIndex, multiFeatureIndex, geometryIndex) {
- *   //=previousValue
- *   //=currentCoord
- *   //=coordIndex
+ * turf.featureEach(features, function (currentFeature, featureIndex) {
+ *   //=currentFeature
  *   //=featureIndex
- *   //=multiFeatureIndex
- *   //=geometryIndex
- *   return currentCoord;
  * });
  */
 function featureEach(geojson, callback) {
@@ -3571,45 +3590,35 @@ function featureEach(geojson, callback) {
 }
 
 /**
- * Callback for featureReduce
+ * Callback for geomEach
  *
- * The first time the callback function is called, the values provided as arguments depend
- * on whether the reduce method has an initialValue argument.
- *
- * If an initialValue is provided to the reduce method:
- *  - The previousValue argument is initialValue.
- *  - The currentValue argument is the value of the first element present in the array.
- *
- * If an initialValue is not provided:
- *  - The previousValue argument is the value of the first element present in the array.
- *  - The currentValue argument is the value of the second element present in the array.
- *
- * @callback featureReduceCallback
- * @param {*} previousValue The accumulated value previously returned in the last invocation
- * of the callback, or initialValue, if supplied.
- * @param {Feature} currentFeature The current Feature being processed.
+ * @callback geomEachCallback
+ * @param {Geometry} currentGeometry The current Geometry being processed.
  * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {Object} featureProperties The current Feature Properties being processed.
+ * @param {Array<number>} featureBBox The current Feature BBox being processed.
+ * @param {number|string} featureId The current Feature Id being processed.
  */
 
 /**
- * Reduce features in any GeoJSON object, similar to Array.reduce().
+ * Iterate over each geometry in any GeoJSON object, similar to Array.forEach()
  *
- * @name featureReduce
+ * @name geomEach
  * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
- * @param {Function} callback a method that takes (previousValue, currentFeature, featureIndex)
- * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
- * @returns {*} The value that results from the reduction.
+ * @param {Function} callback a method that takes (currentGeometry, featureIndex, featureProperties, featureBBox, featureId)
+ * @returns {void}
  * @example
  * var features = turf.featureCollection([
- *   turf.point([26, 37], {"foo": "bar"}),
- *   turf.point([36, 53], {"hello": "world"})
+ *     turf.point([26, 37], {foo: 'bar'}),
+ *     turf.point([36, 53], {hello: 'world'})
  * ]);
  *
- * turf.featureReduce(features, function (previousValue, currentFeature, featureIndex) {
- *   //=previousValue
- *   //=currentFeature
+ * turf.geomEach(features, function (currentGeometry, featureIndex, featureProperties, featureBBox, featureId) {
+ *   //=currentGeometry
  *   //=featureIndex
- *   return currentFeature
+ *   //=featureProperties
+ *   //=featureBBox
+ *   //=featureId
  * });
  */
 function geomEach(geojson, callback) {
@@ -3684,54 +3693,19 @@ function geomEach(geojson, callback) {
 }
 
 /**
- * Callback for geomReduce
+ * Takes a set of features, calculates the bbox of all input features, and returns a bounding box.
  *
- * The first time the callback function is called, the values provided as arguments depend
- * on whether the reduce method has an initialValue argument.
- *
- * If an initialValue is provided to the reduce method:
- *  - The previousValue argument is initialValue.
- *  - The currentValue argument is the value of the first element present in the array.
- *
- * If an initialValue is not provided:
- *  - The previousValue argument is the value of the first element present in the array.
- *  - The currentValue argument is the value of the second element present in the array.
- *
- * @callback geomReduceCallback
- * @param {*} previousValue The accumulated value previously returned in the last invocation
- * of the callback, or initialValue, if supplied.
- * @param {Geometry} currentGeometry The current Geometry being processed.
- * @param {number} featureIndex The current index of the Feature being processed.
- * @param {Object} featureProperties The current Feature Properties being processed.
- * @param {Array<number>} featureBBox The current Feature BBox being processed.
- * @param {number|string} featureId The current Feature Id being processed.
- */
-
-/**
- * Reduce geometry in any GeoJSON object, similar to Array.reduce().
- *
- * @name geomReduce
- * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
- * @param {Function} callback a method that takes (previousValue, currentGeometry, featureIndex, featureProperties, featureBBox, featureId)
- * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
- * @returns {*} The value that results from the reduction.
+ * @name bbox
+ * @param {GeoJSON} geojson any GeoJSON object
+ * @returns {BBox} bbox extent in [minX, minY, maxX, maxY] order
  * @example
- * var features = turf.featureCollection([
- *     turf.point([26, 37], {foo: 'bar'}),
- *     turf.point([36, 53], {hello: 'world'})
- * ]);
+ * var line = turf.lineString([[-74, 40], [-78, 42], [-82, 35]]);
+ * var bbox = turf.bbox(line);
+ * var bboxPolygon = turf.bboxPolygon(bbox);
  *
- * turf.geomReduce(features, function (previousValue, currentGeometry, featureIndex, featureProperties, featureBBox, featureId) {
- *   //=previousValue
- *   //=currentGeometry
- *   //=featureIndex
- *   //=featureProperties
- *   //=featureBBox
- *   //=featureId
- *   return currentGeometry
- * });
+ * //addToMap
+ * var addToMap = [line, bboxPolygon]
  */
-
 function bbox(geojson) {
     var BBox = [Infinity, Infinity, -Infinity, -Infinity];
     coordEach(geojson, function (coord) {
@@ -3743,6 +3717,28 @@ function bbox(geojson) {
     return BBox;
 }
 
+/**
+ * Takes a {@link Feature} or {@link FeatureCollection} and returns the absolute center point of all features.
+ *
+ * @name center
+ * @param {GeoJSON} geojson GeoJSON to be centered
+ * @param {Object} [options={}] Optional parameters
+ * @param {Object} [options.properties={}] an Object that is used as the {@link Feature}'s properties
+ * @returns {Feature<Point>} a Point feature at the absolute center point of all input features
+ * @example
+ * var features = turf.featureCollection([
+ *   turf.point( [-97.522259, 35.4691]),
+ *   turf.point( [-97.502754, 35.463455]),
+ *   turf.point( [-97.508269, 35.463245])
+ * ]);
+ *
+ * var center = turf.center(features);
+ *
+ * //addToMap
+ * var addToMap = [features, center]
+ * center.properties['marker-size'] = 'large';
+ * center.properties['marker-color'] = '#000';
+ */
 function center(geojson, options) {
     // Optional parameters
     options = options || {};
@@ -22623,6 +22619,21 @@ function deepSlice(coords) {
     });
 }
 
+/**
+ * Converts a WGS84 GeoJSON object into Mercator (EPSG:900913) projection
+ *
+ * @name toMercator
+ * @param {GeoJSON|Position} geojson WGS84 GeoJSON object
+ * @param {Object} [options] Optional parameters
+ * @param {boolean} [options.mutate=false] allows GeoJSON input to be mutated (significant performance increase if true)
+ * @returns {GeoJSON} true/false
+ * @example
+ * var pt = turf.point([-71,41]);
+ * var converted = turf.toMercator(pt);
+ *
+ * //addToMap
+ * var addToMap = [pt, converted];
+ */
 function toMercator(geojson, options) {
     return convert(geojson, 'mercator', options);
 }
@@ -23014,6 +23025,7 @@ function rotation(rotate) {
   return forward;
 }
 
+// Generates a circle centered at [0°, 0°], with a given radius and precision.
 function circleStream(stream, radius, delta, direction, t0, t1) {
   if (!delta) return;
   var cosRadius = cos(radius),
@@ -24263,6 +24275,29 @@ function geoTransverseMercator() {
       .scale(159.155);
 }
 
+/**
+ * Calculates a buffer for input features for a given radius. Units supported are miles, kilometers, and degrees.
+ *
+ * When using a negative radius, the resulting geometry may be invalid if
+ * it's too small compared to the radius magnitude. If the input is a
+ * FeatureCollection, only valid members will be returned in the output
+ * FeatureCollection - i.e., the output collection may have fewer members than
+ * the input, or even be empty.
+ *
+ * @name buffer
+ * @param {FeatureCollection|Geometry|Feature<any>} geojson input to be buffered
+ * @param {number} radius distance to draw the buffer (negative values are allowed)
+ * @param {Object} [options={}] Optional parameters
+ * @param {string} [options.units="kilometers"] any of the options supported by turf units
+ * @param {number} [options.steps=64] number of steps
+ * @returns {FeatureCollection|Feature<Polygon|MultiPolygon>|undefined} buffered features
+ * @example
+ * var point = turf.point([-90.548630, 14.616599]);
+ * var buffered = turf.buffer(point, 500, {units: 'miles'});
+ *
+ * //addToMap
+ * var addToMap = [point, buffered]
+ */
 function buffer$2(geojson, radius, options) {
     // Optional params
     options = options || {};
