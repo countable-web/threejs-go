@@ -5,6 +5,8 @@ var camera, scene, renderer, controls;
 // Force to always be daytime for now.
 THREE.is_daytime = true;
 
+
+
 var init = function () {
     var light, directionalLight, directionalLight2, directionalLight3;
     /* Standard THREE.JS stuff */
@@ -121,16 +123,23 @@ var default_geo = function () {
 };
 
 var init_geo = function (position) {
-    window._ar_position = position;
     var lat = position.coords.latitude;
     var lng = position.coords.longitude;
-    init_ar(lat, lng);
-    init_burgler();
-    init_mcd(lat, lng);
-    init_snow();
-    init_heart();
-    animate();
-    console.log(2, startTime - performance.now());
+	fetch('http://api.apixu.com/v1/current.json?key=b7718de366844ed98e465303191402&q='+lat+','+lng)
+	  .then(function(response) {
+		return response.json();
+	  })
+	  .then(function(result) {
+		console.log(JSON.stringify(result));
+        document.getElementById("weather").innerHTML = result.location.name + " is " + result.current.temp_c + " &deg; C and " + result.current.condition.text
+		window._ar_position = position;
+		init_ar(lat, lng);
+		init_burgler();
+		init_mcd(lat, lng);
+		init_snow();
+		init_heart();
+		animate();
+	  });
 };
 
 var particleSystem;
