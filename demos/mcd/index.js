@@ -5,7 +5,7 @@ var camera, scene, renderer, controls;
 // Force to always be daytime for now.
 THREE.is_daytime = true;
 
-var init = function() {
+var init = function () {
     var light, directionalLight, directionalLight2, directionalLight3;
     /* Standard THREE.JS stuff */
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
@@ -77,7 +77,7 @@ var init = function() {
     // }
     scene.add(camera);
 
-    var onWindowResize = function() {
+    var onWindowResize = function () {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -95,17 +95,24 @@ var init = function() {
     navigator.geolocation.getCurrentPosition(init_geo, default_geo, {
         timeout: 5000
     });
+
+    // init_geo({
+    //     coords: {
+    //         latitude: 49.2820,
+    //         longitude: -123.1171
+    //     }
+    // });
 };
 
-var default_geo = function() {
+var default_geo = function () {
     // new west
     if (window.location.host === "countable-web.github.io") {
         navigator.geolocation.getCurrentPosition(init_geo);
     } else {
         init_geo({
             coords: {
-                latitude: 49.2213079,
-                longitude: -122.8981869
+                latitude: 49.2820,
+                longitude: -123.1171
             }
         });
         // init_geo({coords:{latitude: 49.20725849999999, longitude: -122.90213449999999}});
@@ -113,19 +120,63 @@ var default_geo = function() {
     }
 };
 
-var init_geo = function(position) {
+var init_geo = function (position) {
     window._ar_position = position;
     var lat = position.coords.latitude;
     var lng = position.coords.longitude;
     init_ar(lat, lng);
     init_burgler();
     init_mcd(lat, lng);
+    init_snow();
     init_heart();
     animate();
     console.log(2, startTime - performance.now());
 };
 
-var init_ground = function() {
+var particleSystem;
+var snow;
+var init_snow = function () {
+
+    snow = new THREE.Geometry();
+    var vertices = [];
+    var textureLoader = new THREE.TextureLoader();
+
+    var sprite1 = textureLoader.load('disc.png');
+
+    for (var i = 0; i < 1000; i++) {
+
+        var x = Math.random() * 1000 - 500;
+        var y = Math.random() * 1000 - 500;
+        var z = Math.random() * 1000 - 500;
+        particle = new THREE.Vector3(x, y, z);
+        particle.velocity = {};
+        particle.velocity.y = -1;
+        snow.vertices.push(particle);
+
+    }
+
+    //geometry.addAttribute('position', new THREE.Float32BufferAttribute(snow_vertices, 3));
+
+    var mat = new THREE.PointsMaterial({
+        size: 10,
+        sizeAttenuation: true, map: sprite1, alphaTest: 0.5,
+        opacity: 0.7,
+        transparent: true
+    });
+    mat.color.setHSL(1, 1, 1);
+
+    //var particles = new THREE.Points(geometry, mat);
+    particleSystem = new THREE.PointCloud(snow, mat);
+
+    particleSystem.rotation.x = Math.random() * 1 - 0.5;
+    particleSystem.rotation.y = Math.random() * 1 - 0.5;
+    particleSystem.rotation.z = Math.random() * 1 - 0.5;
+
+    scene.add(particleSystem);
+
+}
+
+var init_ground = function () {
     // Ground.
     var textureLoader = new THREE.TextureLoader();
     /*
@@ -136,7 +187,8 @@ var init_ground = function() {
     var geometry = new THREE.PlaneBufferGeometry(3000, 3000);
     geometry.rotateX(-Math.PI / 2);
     var material = new THREE.MeshPhongMaterial({
-        color: 0x55aa00,
+        color: 0xffffff,
+        // color: 0x55aa00,
         // color: 0x448888,
         // map: logo_tex,
         side: THREE.DoubleSide,
@@ -148,7 +200,7 @@ var init_ground = function() {
     scene.add(plane);
 };
 
-var init_burgers = function() {
+var init_burgers = function () {
     var textureLoader = new THREE.TextureLoader();
     var geometry = new THREE.PlaneGeometry(25, 25, 1, 1);
     var plane_tex = textureLoader.load("burger.png");
@@ -168,7 +220,7 @@ var init_burgers = function() {
 };
 
 var ar_world, ar_geo;
-var init_ar = function(lat, lng) {
+var init_ar = function (lat, lng) {
     // AR Stuff
 
     ar_world = new THREE.ARWorld({
@@ -182,11 +234,11 @@ var init_ar = function(lat, lng) {
         //layers: ["building"]
         layers: [
             "building",
-            "transportation",
-            //"landcover",
+            "road"
+            /*"landcover",
             "landuse",
             "place",
-            "poi"
+            "poi"*/
         ]
     });
 };
@@ -205,22 +257,22 @@ var shadow_material = new THREE.MeshLambertMaterial({
 });
 
 var outlets = [];
-var init_mcd = function(lat, lng) {
+var init_mcd = function (lat, lng) {
     var mcds = [{
-            lat: lat + 0.0015,
-            lng: lng + 0.0015
-        },
-        {
-            lat: lat - 0.0015,
-            lng: lng + 0.0015
-        },
-        {
-            lat: lat + 0.0015,
-            lng: lng - 0.0015
-        }
+        lat: lat + 0.0015,
+        lng: lng + 0.0015
+    },
+    {
+        lat: lat - 0.0015,
+        lng: lng + 0.0015
+    },
+    {
+        lat: lat + 0.0015,
+        lng: lng - 0.0015
+    }
     ];
 
-    var add_outlet = function(point, arc) {
+    var add_outlet = function (point, arc) {
         var outlet = arc.clone();
         outlet.rotateX(Math.PI / 2);
         outlet.scale.set(1.2, 1.2, 1.2);
@@ -236,7 +288,7 @@ var init_mcd = function(lat, lng) {
 
         [
             [60, 1, 4]
-        ].forEach(function(params) {
+        ].forEach(function (params) {
             var geometry = new THREE.CylinderGeometry(params[0], params[0], params[1], 32);
             var cylinder = new THREE.Mesh(geometry, shadow_material);
             cylinder.position.x = coords[0];
@@ -259,34 +311,34 @@ var init_mcd = function(lat, lng) {
     };
 
     var loader = new THREE.OBJLoader();
-    loader.load("mcdo_arc_single.simplified.dec.obj", function(arc) {
-        arc.traverse(function(child) {
+    loader.load("mcdo_arc_single.simplified.dec.obj", function (arc) {
+        arc.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
                 child.material = outlet_material;
             }
         });
 
-        mcds.forEach(function(p) {
+        mcds.forEach(function (p) {
             add_outlet(p, arc);
         });
     });
 };
 
 var burglar;
-var init_burgler = function() {
+var init_burgler = function () {
     var texture = new THREE.Texture();
 
-    var onProgress = function(xhr) {
+    var onProgress = function (xhr) {
         if (xhr.lengthComputable) {
             var percentComplete = xhr.loaded / xhr.total * 100;
             console.log(Math.round(percentComplete, 2) + "% downloaded");
         }
     };
 
-    var onError = function(xhr) {};
+    var onError = function (xhr) { };
 
     var tloader = new THREE.ImageLoader();
-    tloader.load("hamburglar_diff_small.png", function(image) {
+    tloader.load("hamburglar_diff_small.png", function (image) {
         texture.image = image;
         texture.needsUpdate = true;
     });
@@ -296,9 +348,9 @@ var init_burgler = function() {
     var loader = new THREE.OBJLoader();
     loader.load(
         "hamburglar_OBJ.simplified.obj",
-        function(object) {
+        function (object) {
             burglar = object;
-            object.traverse(function(child) {
+            object.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
                     child.material.map = texture;
                     child.material.side = THREE.DoubleSide;
@@ -325,7 +377,7 @@ var init_burgler = function() {
 
 var sky_texture = new THREE.TextureLoader().load("imgpsh_fullsize.png");
 
-var init_skyball = function() {
+var init_skyball = function () {
     var geometry = new THREE.SphereGeometry(5000, 60, 40);
     geometry.scale(-1, 1, 1);
     var material = new THREE.MeshBasicMaterial({
@@ -337,7 +389,7 @@ var init_skyball = function() {
 };
 
 var heart;
-init_heart = function() {
+init_heart = function () {
     var x = 0,
         y = 0;
 
@@ -376,7 +428,7 @@ function onClick(event) {
 document.addEventListener("click", onClick);
 
 var updateParticles;
-var init_burger_flies = function() {
+var init_burger_flies = function () {
     /* Particles, from example here -
      * https://codepen.io/antishow/post/three-js-particles
      */
@@ -396,13 +448,13 @@ var init_burger_flies = function() {
             transparent: true,
             depthTest: false
         }),
-        initialize: function() {
+        initialize: function () {
             camera.position.y = 50;
             camera.position.z = 200;
 
             pointCloud.sortParticles = true;
         },
-        spawnBehavior: function(index) {
+        spawnBehavior: function (index) {
             var x, y, z;
             var halfWidth = window.innerWidth / 2;
 
@@ -414,7 +466,7 @@ var init_burger_flies = function() {
 
             return v;
         },
-        frameBehavior: function(particle, index) {
+        frameBehavior: function (particle, index) {
             function push() {
                 return Math.random() * 0.125 - 0.0625;
             }
@@ -454,7 +506,7 @@ var init_burger_flies = function() {
         return ret;
     }
 
-    updateParticles = function() {
+    updateParticles = function () {
         if (!mode) return;
         if (mode.sceneFrameBehavior && typeof mode.sceneFrameBehavior === "function") {
             mode.sceneFrameBehavior();
@@ -471,7 +523,7 @@ var init_burger_flies = function() {
 /* global performance */
 var prevTime = performance.now();
 
-var animate = function() {
+var animate = function () {
     var time = performance.now();
     // var delta = (time - prevTime) / 1000
 
@@ -493,14 +545,14 @@ var animate = function() {
         controls.target = burglar.position.clone();*/
     }
 
-    ar_world.update();
+    //ar_world.update();
 
-    outlets.forEach(function(outlet) {
+    outlets.forEach(function (outlet) {
         outlet.rotateZ(0.015);
-        outlet.cylinders.forEach(function(cylinder, i) {
+        outlet.cylinders.forEach(function (cylinder, i) {
             // cylinder.position.y = cylinder.start_position.y + (i+1) * 2 * Math.cos(time/200/(i+1));
         });
-        outlet.spheres.forEach(function(sphere, i) {
+        outlet.spheres.forEach(function (sphere, i) {
             sphere.position.y = sphere.start_position.y + (i + 1) * 2 * Math.cos(time / 200 / (i +
                 1));
             sphere.scale.y = Math.cos(time / 600 / (i + 1));
@@ -511,6 +563,19 @@ var animate = function() {
         });
     });
 
+    var pCount = 1000;
+    while (pCount--) {
+        var particle = snow.vertices[pCount];
+        if (particle.y < -200) {
+            particle.y = 200;
+        }
+
+        particle.y += particle.velocity.y;
+    }
+    snow.verticesNeedUpdate = true;
+
+
+
     /* global burglar */
     if (typeof burglar !== "undefined") {
         burglar.scale.x = 0.6 + 0.06 * Math.sin(time / 500);
@@ -518,13 +583,16 @@ var animate = function() {
         burglar.scale.y = 0.6 + 0.03 * Math.cos(time / 500);
     }
 
-    var sc = 1 - 0.1 * Math.cos(time / 200);
-    heart.position.y = 65 + Math.cos(time / 1500) * 5;
-    heart.position.x = 5 - Math.cos(time / 200);
-    heart.scale.x = sc;
-    heart.scale.y = sc;
-    heart.scale.z = sc;
+    if (heart) {
 
+        var sc = 1 - 0.1 * Math.cos(time / 200);
+        heart.position.y = 65 + Math.cos(time / 1500) * 5;
+        heart.position.x = 5 - Math.cos(time / 200);
+        heart.scale.x = sc;
+        heart.scale.y = sc;
+        heart.scale.z = sc;
+
+    }
     renderer.render(scene, camera);
 
     prevTime = time;

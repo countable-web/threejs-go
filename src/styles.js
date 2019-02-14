@@ -105,7 +105,7 @@ DEFAULT_FEATURE_STYLES = {
         height: "a"
     },
 
-    transportation: {
+    road: {
         color: 0x333333,
         offy: 0.2,
         extrude: "flat"
@@ -123,7 +123,7 @@ DEFAULT_FEATURE_STYLES = {
         offy: -0.2
     },
 
-    water: {
+    landcover: {
         color: 0x6688ff,
         extrude: "flat",
         offy: -0.4

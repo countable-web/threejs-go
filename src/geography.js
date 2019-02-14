@@ -59,7 +59,7 @@ THREE.ARMapzenGeography = function(opts) {
 
     var textureLoader = new THREE.TextureLoader();
     this.scale = 200000;
-    var TILE_ZOOM = 14;
+    var TILE_ZOOM = 16;
 
     this.feature_styles = {}; // global eature styling object.
     var feature_styles = this.feature_styles;
@@ -111,10 +111,12 @@ THREE.ARMapzenGeography = function(opts) {
         } catch (e) {
             console.log("mapzen cache error", key, e);
         }*/
+        var MAPBOX_API_KEY = "pk.eyJ1IjoiY291bnRhYmxlLXdlYiIsImEiOiJjamQyZG90dzAxcmxmMndtdzBuY3Ywa2ViIn0.MU-sGTVDS9aGzgdJJ3EwHA";
 
         var url =
             //"https://tile.mapzen.com/mapzen/vector/v1/all/" + zoom + "/" + tx + "/" + ty + ".json?api_key=" + MAPZEN_API_KEY;
-            "https://tiles.countable.ca/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
+            //"https://tiles.countable.ca/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
+            "https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7/" + zoom + "/" + tx + "/" + ty + ".vector.pbf?access_token=" + MAPBOX_API_KEY
         fetch(url)
             .then(function(response) {
                 return response.blob()
@@ -140,7 +142,7 @@ THREE.ARMapzenGeography = function(opts) {
 
         var tile_x0 = long2tile(lng, TILE_ZOOM);
         var tile_y0 = lat2tile(lat, TILE_ZOOM);
-        var N = 0;
+        var N = 1;
         for (var i = -N; i <= N; i++) {
             for (var j = -N; j <= N; j++) {
                 var tile_x = tile_x0 + i;
@@ -377,7 +379,6 @@ THREE.ARMapzenGeography.prototype.add_vt = function(tile, layername, x, y, z) {
     var scope = this;
     for (var i = 0; i < vector_layer.length; i++) {
         var feature = vector_layer.feature(i).toGeoJSON(x, y, z);
-        //console.log('geojson', vector_layer.feature(i).loadGeometry(), feature);
         scope.add_feature(feature, layername);
     }
 };
