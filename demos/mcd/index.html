@@ -1,75 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>McDonalds AR App</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="../../src/arthree.css">
-  </head>
-  <body>
-    <div id="notice">Drag the screen to look <br>around at your location.</div>
-    <script>
-var startTime = performance.now();
-</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.min.js"></script>
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/4.1.0/turf.min.js"></script>  used only for turf.buffer currently -->
-    <script src="../../vendor/OBJLoader.js"></script>
-    <script src="../../public/bundle.js"></script>
-    <script src="../../vendor/Earcut.js"></script>
 
-    <script src="../../src/polyfills.js"></script>
-    <script src="../../src/controls/OrbitControls.js"></script>
-    <script src="../../src/controls/DeviceOrientationControls.js"></script>
-    <script src="../../src/arthree.js"></script>
-    <script src="../../src/geography.js"></script>
-    <script src="../../src/styles.js"></script>
-    <script>
-var styles = {
-  building: {
-    //height_scale: 0.1,
-    extrude: "flat",
-    color: 0x00aa55,
-    material: "buildings"
-    //color: 0xEE4411
-  },
-  landuse: {
-    opacity: 0.9
-  },
-  residential: {
-    //color: 0xEE11EE,
-    color: 0x000001,
-    opacity: 0.05
-  },
-  roads: {
-    color: 0xeebb11
-  },
-  "McDonald's": {
-    color: 0xeeaa11,
-    height_scale: 1
-  },
-  path: {
-    width: 2
-  },
-  minor_road: {
-    width: 3
-  },
-  major_road: {
-    width: 4
-  },
-  highway: {
-    width: 5
-  },
-  meadow: {
-    opacity: 0.5
-  }
-};
-</script>
-    <script src="index.js"></script>
+<head>
+  <title>McDonalds AR App</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="../../src/arthree.css">
+</head>
 
-    <!--<a href='https://github.com/countable-web/threejs-go' class='forkme'>
+<body>
+  <div id="notice">Drag the screen to look <br>around at your location.</div>
+  <div id="weather">It's snowing in Vancouver, -3&deg C.</div>
+  <script>
+    var startTime = performance.now();
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.min.js"></script>
+  <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/4.1.0/turf.min.js"></script>  used only for turf.buffer currently -->
+  <script src="../../vendor/OBJLoader.js"></script>
+  <script src="../../public/bundle.js"></script>
+  <script src="../../vendor/Earcut.js"></script>
+
+  <script src="../../src/polyfills.js"></script>
+  <script src="../../src/controls/OrbitControls.js"></script>
+  <script src="../../src/controls/DeviceOrientationControls.js"></script>
+  <script src="../../src/arthree.js"></script>
+  <script src="../../src/geography.js"></script>
+  <script src="../../src/styles.js"></script>
+  <style>
+    #weather {
+      background-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 1px 3px 3px rgba(0, 0, 0, 0.2);
+      color: #222;
+      text-align: center;
+      position: fixed;
+      line-height: 1.3;
+      -moz-user-select: none;
+      -khtml-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      height: 40px;
+      font-size: 30px;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      padding: 25px 25px;
+      border-radius: 5px;
+    }
+  </style>
+  <script>
+    var styles = {
+      building: {
+        //height_scale: 0.1,
+        extrude: "flat",
+        color: 0x00aa55,
+        material: "buildings"
+        //color: 0xEE4411
+      },
+      landuse: {
+        opacity: 0.9
+      },
+      residential: {
+        //color: 0xEE11EE,
+        color: 0x000001,
+        opacity: 0.05
+      },
+      roads: {
+        color: 0xeebb11
+      },
+      "McDonald's": {
+        color: 0xeeaa11,
+        height_scale: 1
+      },
+      path: {
+        width: 2
+      },
+      minor_road: {
+        width: 3
+      },
+      major_road: {
+        width: 4
+      },
+      highway: {
+        width: 5
+      },
+      meadow: {
+        opacity: 0.5
+      }
+    };
+  </script>
+  <script src="index.js"></script>
+
+  <!--<a href='https://github.com/countable-web/threejs-go' class='forkme'>
     Fork me on GitHub
     <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABSUlEQVRYR+2X7U3DMBCGn27ACLAB3aDdoGxQNmET2IBuUDYoG8AGZQPQi+Iqss4fFztEqrg/ltqLnze+L2dFf/uOtlzlENk/J2r7F7DoCWyA45I58AzslxJgwT+Bu7+oAgsu7gNwmFtACv4CPJZKubUPNMElrkVAM7xFQBf4VAHd4FMEdIV7BdTC5ScrVoBHgAceOmG3MtwBr0Y9xwBLZJdG9AHcRgKst5utFcfjNXe0swyjWMAWeEu02FnGseeCcQOce49jjwCxXf41s8C14dUIsEovzrt3YD38eALuC7PfvB2lQmBlc7z/uBq8/pe9cjmQar96uLYRBVCyd+QEqKQUCq1j+xoumlrH5vX/fbZUBRosYboFmKac3sgyr39RgCD60FCMZeqAin3OXP6lExBIg0ihkOmOr2zOmcu/RoBgTwMxrAUN9f4/AutTIaZOHkoAAAAASUVORK5CYII='>-->
-    </a>
+  </a>
 
-  </body>
+</body>
+
 </html>
