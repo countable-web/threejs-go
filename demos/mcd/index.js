@@ -12,7 +12,9 @@ var update_environment = function () {
         particleSystem.visible = true;
         particleSystem.material = snow_material;
         color = 0xffffff;
+        precip_velocity = -1;
     } else if (THREE.current_weather === "rain") {
+        precip_velocity = -4;
         particleSystem.visible = true;
         color = 0xccddee;
         particleSystem.material = rain_material;
@@ -28,6 +30,13 @@ var update_environment = function () {
     } else {
         console.error('invalid weather: ', THREE.current_weather)
     }
+
+    var pCount = 500;
+    while (pCount--) {
+        var particle = precip.vertices[pCount];
+        particle.velocity.y = precip_velocity;
+    }
+
     document.querySelectorAll(".active").forEach(function (el) {
         el.className = '';
     })
@@ -210,6 +219,7 @@ var init_geo = function (position) {
 
 var particleSystem;
 var precip;
+var precip_velocity = -4;
 var snow_material, rain_material;
 var init_snow = function () {
 
@@ -220,14 +230,14 @@ var init_snow = function () {
     var sprite1 = textureLoader.load('disc.png');
     var rain_sprite = textureLoader.load('rain.png');
 
-    for (var i = 0; i < 1000; i++) {
+    for (var i = 0; i < 500; i++) {
 
         var x = Math.random() * 1000 - 500;
         var y = Math.random() * 500
         var z = Math.random() * 1000 - 500;
         particle = new THREE.Vector3(x, y, z);
         particle.velocity = {};
-        particle.velocity.y = -4;
+        particle.velocity.y = precip_velocity;
         precip.vertices.push(particle);
 
     }
@@ -616,24 +626,25 @@ var animate = function () {
     // var delta = (time - prevTime) / 1000
 
     requestAnimationFrame(animate);
-    if (typeof updateParticles !== "undefined") updateParticles();
+    //if (typeof updateParticles !== "undefined") updateParticles();
     /*
     ar_geo.feature_meshes.forEach(function(fm){
-      if (fm.feature.layername == 'buildings') {
-        fm.scale.y = Math.cos(time/500 + (fm.feature.properties.area || 0)) + 1.5;
-      }
+        if (fm.feature.layername == 'buildings') {
+            fm.scale.y = Math.cos(time/500 + (fm.feature.properties.area || 0)) + 1.5;
+        }
     });
     */
+
 
     controls.update();
 
     if (typeof burglar !== "undefined") {
-        /*burglar.translateX(1);
-        burglar.translateZ(1);
-        controls.target = burglar.position.clone();*/
+        // burglar.translateX(1);
+        // burglar.translateZ(1);
+        // controls.target = burglar.position.clone();
     }
 
-    //ar_world.update();
+    ar_world.update();
 
     outlets.forEach(function (outlet) {
         outlet.rotateZ(0.015);
@@ -646,15 +657,14 @@ var animate = function () {
             sphere.scale.y = Math.cos(time / 600 / (i + 1));
             sphere.scale.z = Math.cos(time / 600 / (i + 1));
             sphere.scale.x = Math.cos(time / 600 / (i + 1));
-            /* sphere.position.x = sphere.start_position.x + Math.cos(time/300) * (Math.sin(time/500) * 3 + 6)
-            sphere.position.z = sphere.start_position.z + Math.sin(time/300) * (Math.sin(time/500) * 3 + 6) */
         });
     });
 
-    var pCount = 1000;
+
+    var pCount = 500;
     while (pCount--) {
         var particle = precip.vertices[pCount];
-        if (particle.y < -200) {
+        if (particle.y < -100) {
             particle.y = 200;
         }
 
@@ -662,9 +672,6 @@ var animate = function () {
     }
     precip.verticesNeedUpdate = true;
 
-
-
-    /* global burglar */
     if (typeof burglar !== "undefined") {
         burglar.scale.x = 0.6 + 0.06 * Math.sin(time / 500);
         burglar.scale.z = 0.6 + 0.06 * Math.sin(time / 500);

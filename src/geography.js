@@ -1,4 +1,4 @@
-THREE.extend = function(defaults, o1, o2, o3) {
+THREE.extend = function (defaults, o1, o2, o3) {
     var extended = {};
     var prop;
     for (prop in defaults) {
@@ -24,7 +24,7 @@ THREE.extend = function(defaults, o1, o2, o3) {
     return extended;
 };
 
-THREE.ARMapzenGeography = function(opts) {
+THREE.ARMapzenGeography = function (opts) {
     this.opts = opts = opts || {};
     this.opts.layers = this.opts.layers || ["building"];
 
@@ -45,16 +45,25 @@ THREE.ARMapzenGeography = function(opts) {
 
     this._drawn = {}; // avoid duplicate renderings.
 
-    var long2tile = function(lon, zoom) {
-        return Math.floor((lon + 180) / 360 * Math.pow(2, zoom));
+    var long2tile = function (lon, zoom) {
+        var tile_long = (lon + 180) / 360 * Math.pow(2, zoom);
+        var tile_long_rounded = Math.floor(tile_long);
+        return {
+            index: tile_long_rounded,
+            offset: tile_long - tile_long_rounded
+        }
     };
 
-    var lat2tile = function(lat, zoom) {
-        return Math.floor(
+    var lat2tile = function (lat, zoom) {
+        var tile_lat =
             (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) /
             2 *
             Math.pow(2, zoom)
-        );
+        var tile_lat_rounded = Math.floor(tile_lat);
+        return {
+            index: tile_lat_rounded,
+            offset: tile_lat - tile_lat_rounded
+        }
     };
 
     var textureLoader = new THREE.TextureLoader();
@@ -69,7 +78,7 @@ THREE.ARMapzenGeography = function(opts) {
     var MAP_CACHE = {};
 
     setInterval(
-        function() {
+        function () {
             if (!this.center.lat) return;
 
             // keep latitude and longitude up to date for tile loading.
@@ -85,15 +94,15 @@ THREE.ARMapzenGeography = function(opts) {
 
     var scope = this;
 
-    var handle_data = function(data, x, y, z) {
-        scope.opts.layers.forEach(function(layername) {
+    var handle_data = function (data, x, y, z) {
+        scope.opts.layers.forEach(function (layername) {
             if (feature_styles[layername]) {
                 scope.add_vt(data, layername, x, y, z);
             }
         });
     };
 
-    var load_tile = function(tx, ty, zoom, callback) {
+    var load_tile = function (tx, ty, zoom, callback) {
         var key = tx + "_" + ty + "_" + zoom;
         /*MAP_CACHE[key] = 1;
         try {
@@ -118,12 +127,12 @@ THREE.ARMapzenGeography = function(opts) {
             //"https://tiles.countable.ca/data/v3/" + zoom + "/" + tx + "/" + ty + ".pbf"
             "https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7/" + zoom + "/" + tx + "/" + ty + ".vector.pbf?access_token=" + MAPBOX_API_KEY
         fetch(url)
-            .then(function(response) {
+            .then(function (response) {
                 return response.blob()
             })
-            .then(function(blob) {
+            .then(function (blob) {
                 //console.log(raw);
-                Bundle.vectors(blob, function(tile) {
+                Bundle.vectors(blob, function (tile) {
                     callback(tile, tx, ty, zoom);
                     return; // Disable localstorage caching
                     try {
@@ -138,15 +147,25 @@ THREE.ARMapzenGeography = function(opts) {
             });
     };
 
-    var load_tiles = function(lat, lng) {
-
+    var load_tiles = function (lat, lng) {
+        var X_plus, Y_plus;
         var tile_x0 = long2tile(lng, TILE_ZOOM);
         var tile_y0 = lat2tile(lat, TILE_ZOOM);
-        var N = 1;
-        for (var i = -N; i <= N; i++) {
-            for (var j = -N; j <= N; j++) {
-                var tile_x = tile_x0 + i;
-                var tile_y = tile_y0 + j;
+        if (tile_x0.offset > 0.5) {
+            X_plus = 1;
+        } else {
+            X_plus = 0;
+        }
+        if (tile_y0.offset > 0.5) {
+            Y_plus = 1;
+        } else {
+            Y_plus = 0;
+        }
+        for (var i = -(1 - X_plus); i <= X_plus; i++) {
+            for (var j = -(1 - Y_plus); j <= Y_plus; j++) {
+                console.log(i, j, "******")
+                var tile_x = tile_x0.index + i;
+                var tile_y = tile_y0.index + j;
                 if (!tile_x || !tile_y) continue;
                 if (!MAP_CACHE[tile_x + "_" + tile_y + "_" + TILE_ZOOM]) {
                     load_tile(tile_x, tile_y, TILE_ZOOM, handle_data);
@@ -180,7 +199,7 @@ THREE.ARMapzenGeography = function(opts) {
     this.center.start_lat = this.center.lat;
     load_tiles(this.center.lat, this.center.lng);
 
-    this._building_material = (function() {
+    this._building_material = (function () {
         // build a small canvas 32x64 and paint it in white
         var canvas = document.createElement("canvas");
         canvas.width = 32;
@@ -233,7 +252,7 @@ function addContour(vertices, contour) {
     }
 }
 
-THREE.ShapeUtils.triangulateShape = function(contour, holes) {
+THREE.ShapeUtils.triangulateShape = function (contour, holes) {
     var vertices = [];
 
     addContour(vertices, contour);
@@ -260,7 +279,7 @@ THREE.ShapeUtils.triangulateShape = function(contour, holes) {
  * Takes a 2d geojson, converts it to a THREE.Geometry, and extrudes it to a height
  * suitable for 3d viewing, such as for buildings.
  */
-THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styles) {
+THREE.ARMapzenGeography.prototype.extrude_feature_shape = function (feature, styles) {
     var shape = new THREE.Shape();
 
     // Buffer the linestrings so they have some thickness (uses turf.js)
@@ -285,7 +304,7 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
     shape.moveTo(point[0], point[1]);
 
     var scope = this;
-    coords.slice(1).forEach(function(coord) {
+    coords.slice(1).forEach(function (coord) {
         point = scope.ll_to_scene_coords(coord);
         shape.lineTo(point[0], point[1]);
     });
@@ -366,15 +385,15 @@ THREE.ARMapzenGeography.prototype.extrude_feature_shape = function(feature, styl
 /**
  * Add a geojson tile to the scene.
  */
-THREE.ARMapzenGeography.prototype.add_geojson = function(data, layername) {
+THREE.ARMapzenGeography.prototype.add_geojson = function (data, layername) {
     geojson = data[layername];
     var scope = this;
-    geojson.features.forEach(function(feature) {
+    geojson.features.forEach(function (feature) {
         scope.add_feature(feature, layername);
     });
 };
 
-THREE.ARMapzenGeography.prototype.add_vt = function(tile, layername, x, y, z) {
+THREE.ARMapzenGeography.prototype.add_vt = function (tile, layername, x, y, z) {
     vector_layer = tile.layers[layername];
     var scope = this;
     for (var i = 0; i < vector_layer.length; i++) {
@@ -399,7 +418,7 @@ var _get_material_cached = (color, opacity) => {
     return _mtl_cache[key];
 }
 
-THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
+THREE.ARMapzenGeography.prototype.add_feature = function (feature, layername) {
     feature.layername = layername;
     var feature_styles = this.feature_styles;
 
@@ -473,11 +492,11 @@ THREE.ARMapzenGeography.prototype.add_feature = function(feature, layername) {
     this.meshes_by_layer[layername].push(mesh);
 };
 
-THREE.ARMapzenGeography.prototype.ll_to_scene_coords = function(coord) {
+THREE.ARMapzenGeography.prototype.ll_to_scene_coords = function (coord) {
     return [(coord[0] - this.center.start_lng) * this.scale, (coord[1] - this.center.start_lat) * this.scale];
 };
 
-THREE.ARMapzenGeography.prototype.init_feature_styles = function(styles) {
+THREE.ARMapzenGeography.prototype.init_feature_styles = function (styles) {
     // map feature styles.
 
     for (var k in DEFAULT_FEATURE_STYLES) {
@@ -501,7 +520,7 @@ THREE.ARMapzenGeography.prototype.init_feature_styles = function(styles) {
  * @param vs_part just modifies mvPosition.
  */
 
-THREE.ARMapzenGeography.prototype.setup_shader = function(opts) {
+THREE.ARMapzenGeography.prototype.setup_shader = function (opts) {
     return new THREE.ShaderMaterial({
         transparent: true,
         uniforms: shader_uniforms,
