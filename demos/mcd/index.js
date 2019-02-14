@@ -3,12 +3,73 @@ var camera, scene, renderer, controls;
 /* global THREE */
 
 // Force to always be daytime for now.
-THREE.is_daytime = true;
+THREE.is_daytime = (new Date()).getHours() > 6 && (new Date()).getHours() < 19;
 
+var update_environment = function () {
+    var color;
+    sky.visible = false;
+    if (THREE.current_weather === "snow") {
+        particleSystem.visible = true;
+        particleSystem.material = snow_material;
+        color = 0xffffff;
+    } else if (THREE.current_weather === "rain") {
+        particleSystem.visible = true;
+        color = 0xccddee;
+        particleSystem.material = rain_material;
+    } else if (THREE.current_weather === "cloudy") {
+        particleSystem.visible = false;
+        color = 0xdef1f7;
+        if (THREE.is_daytime) {
+            sky.visible = true;
+        }
+    } else if (THREE.current_weather === "sun") {
+        particleSystem.visible = false;
+        color = 0xd0f1ff
+    } else {
+        console.error('invalid weather: ', THREE.current_weather)
+    }
+    document.querySelectorAll(".active").forEach(function (el) {
+        el.className = '';
+    })
+    document.querySelector('[data-value="' + THREE.current_weather + '"]').className = 'active';
+    document.querySelector('[data-value="' + (THREE.is_daytime ? "day" : "night") + '"]').className = 'active';
 
+    if (THREE.is_daytime) {
+        day_light.visible = true
+        day_directionalLight2.visible = true
+        day_directionalLight3.visible = true
+        night_light.visible = false
+        night_directionalLight2.visible = false
+    } else {
+        color = 0x000066;
+        day_light.visible = false
+        day_directionalLight2.visible = false
+        day_directionalLight3.visible = false
+        night_light.visible = true
+        night_directionalLight2.visible = true
+    }
+    console.log(color);
+    renderer.setClearColor(color);
+    scene.fog = new THREE.FogExp2(color, 0.0025);
+}
 
+var set_weather = function (weather) {
+    THREE.current_weather = weather;
+    update_environment()
+}
+
+var set_night = function () {
+    THREE.is_daytime = false;
+    update_environment();
+}
+var set_day = function () {
+    THREE.is_daytime = true;
+    update_environment()
+}
+
+var day_light, day_directionalLight, day_directionalLight2, day_directionalLight3;
+var night_light, night_directionalLight2;
 var init = function () {
-    var light, directionalLight, directionalLight2, directionalLight3;
     /* Standard THREE.JS stuff */
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
     camera.position.x = 10;
@@ -17,27 +78,24 @@ var init = function () {
 
     scene = new THREE.Scene();
 
-    if (THREE.is_daytime) {
-        light = new THREE.HemisphereLight(0xffffee, 0x777788, 0.75);
-        light.position.set(0.5, 1, 0.75);
-        scene.add(light);
-        directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
-        directionalLight.position.set(1000, 1000, 1000);
-        scene.add(directionalLight);
-        directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.3);
-        directionalLight3.position.set(1000, 1000, -1000);
-        scene.add(directionalLight3);
-        directionalLight2 = new THREE.DirectionalLight(0xffffdd, 0.4);
-        directionalLight2.position.set(-1000, 1000, 1000);
-        scene.add(directionalLight2);
-    } else {
-        light = new THREE.HemisphereLight(0xaaaaff, 0x777788, 0.75);
-        light.position.set(0.5, 1, 0.75);
-        scene.add(light);
-        directionalLight2 = new THREE.DirectionalLight(0xccccff, 0.7);
-        directionalLight2.position.set(-1000, 1000, 1000);
-        scene.add(directionalLight2);
-    }
+    day_light = new THREE.HemisphereLight(0xffffee, 0x777788, 0.75);
+    day_light.position.set(0.5, 1, 0.75);
+    scene.add(day_light);
+    day_directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    day_directionalLight.position.set(1000, 1000, 1000);
+    scene.add(day_directionalLight);
+    day_directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.3);
+    day_directionalLight3.position.set(1000, 1000, -1000);
+    scene.add(day_directionalLight3);
+    day_directionalLight2 = new THREE.DirectionalLight(0xffffdd, 0.4);
+    day_directionalLight2.position.set(-1000, 1000, 1000);
+    scene.add(day_directionalLight2);
+    night_light = new THREE.HemisphereLight(0xaaaaff, 0x777788, 0.75);
+    night_light.position.set(0.5, 1, 0.75);
+    scene.add(night_light);
+    night_directionalLight2 = new THREE.DirectionalLight(0xccccff, 0.7);
+    night_directionalLight2.position.set(-1000, 1000, 1000);
+    scene.add(night_directionalLight2);
 
     renderer = new THREE.WebGLRenderer();
 
@@ -52,14 +110,7 @@ var init = function () {
 
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    if (THREE.is_daytime) {
-        renderer.setClearColor(0xddeeff);
-        scene.fog = new THREE.FogExp2(0xdef1f7, 0.0025);
-    } else {
-        // night.
-        renderer.setClearColor(0x000066);
-        scene.fog = new THREE.FogExp2(0x000066, 0.0015);
-    }
+
     document.body.appendChild(renderer.domElement);
 
     /* if (THREE.is_mobile) {
@@ -87,9 +138,9 @@ var init = function () {
     onWindowResize();
     window.addEventListener("resize", onWindowResize, false);
 
-    if (THREE.is_daytime) {
-        init_skyball();
-    }
+    init_skyball();
+
+
     init_ground();
 
     // init_burgers();
@@ -131,55 +182,84 @@ var init_geo = function (position) {
         })
         .then(function (result) {
             console.log(JSON.stringify(result));
-            document.getElementById("weather").innerHTML = result.location.name + " is " + result.current.temp_c + " &deg; C and " + result.current.condition.text
+            var condition = result.current.condition.text.toLowerCase();
+            document.getElementById("weather").innerHTML = result.location.name + " is " + result.current.temp_c + " &deg;C and " + condition
             window._ar_position = position;
             init_ar(lat, lng);
             init_burgler();
             init_mcd(lat, lng);
             init_snow();
             init_heart();
+
+            if (condition.indexOf("cloud") > -1
+                || condition.indexOf("overcast") > -1) {
+                set_weather("cloudy")
+            } else if (condition.indexOf("rain") > -1
+                || condition.indexOf("ice") > -1) {
+                set_weather("rain")
+            } else if (condition.indexOf("snow") > -1
+                || condition.indexOf('blizzard') > -1) {
+                set_weather("snow")
+            } else {
+                set_weather("sun")
+            }
+
             animate();
         });
 };
 
 var particleSystem;
-var snow;
+var precip;
+var snow_material, rain_material;
 var init_snow = function () {
 
-    snow = new THREE.Geometry();
+    precip = new THREE.Geometry();
     var vertices = [];
     var textureLoader = new THREE.TextureLoader();
 
     var sprite1 = textureLoader.load('disc.png');
+    var rain_sprite = textureLoader.load('rain.png');
 
     for (var i = 0; i < 1000; i++) {
 
         var x = Math.random() * 1000 - 500;
-        var y = Math.random() * 1000 - 500;
+        var y = Math.random() * 500
         var z = Math.random() * 1000 - 500;
         particle = new THREE.Vector3(x, y, z);
         particle.velocity = {};
-        particle.velocity.y = -1;
-        snow.vertices.push(particle);
+        particle.velocity.y = -4;
+        precip.vertices.push(particle);
 
     }
 
-    //geometry.addAttribute('position', new THREE.Float32BufferAttribute(snow_vertices, 3));
-
-    var mat = new THREE.PointsMaterial({
+    snow_material = new THREE.PointsMaterial({
         size: 10,
-        sizeAttenuation: true, map: sprite1, alphaTest: 0.5,
+        sizeAttenuation: true,
+        map: sprite1,
+        alphaTest: 0.5,
         opacity: 0.7,
-        transparent: true
+        transparent: true,
+        fog: false
     });
-    mat.color.setHSL(1, 1, 1);
+    snow_material.color.setHSL(1, 1, 1);
+    rain_material = new THREE.ParticleBasicMaterial({
+        size: 10,
+        transparent: true,
+        opacity: 0.7,
+        map: rain_sprite,
+        //blending: THREE.MultiplyBlending,
+        sizeAttenuation: true,
+        opacity: 1,
+        fog: false
+    });
+    //rain_material.color.setHSL(1, 0, 0.7);
 
     //var particles = new THREE.Points(geometry, mat);
-    particleSystem = new THREE.PointCloud(snow, mat);
+    particleSystem = new THREE.PointCloud(precip, rain_material);
 
-    particleSystem.rotation.x = Math.random() * 1 - 0.5;
-    particleSystem.rotation.y = Math.random() * 1 - 0.5;
-    particleSystem.rotation.z = Math.random() * 1 - 0.5;
+    // particleSystem.rotation.x = Math.random() * 1 - 0.5;
+    // particleSystem.rotation.y = Math.random() * 1 - 0.5;
+    // particleSystem.rotation.z = Math.random() * 1 - 0.5;
 
     scene.add(particleSystem);
 
@@ -196,8 +276,7 @@ var init_ground = function () {
     var geometry = new THREE.PlaneBufferGeometry(3000, 3000);
     geometry.rotateX(-Math.PI / 2);
     var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        // color: 0x55aa00,
+        color: 0x55aa00,
         // color: 0x448888,
         // map: logo_tex,
         side: THREE.DoubleSide,
@@ -385,7 +464,7 @@ var init_burgler = function () {
 };
 
 var sky_texture = new THREE.TextureLoader().load("imgpsh_fullsize.png");
-
+var sky;
 var init_skyball = function () {
     var geometry = new THREE.SphereGeometry(5000, 60, 40);
     geometry.scale(-1, 1, 1);
@@ -393,8 +472,8 @@ var init_skyball = function () {
         map: sky_texture,
         fog: false
     });
-    mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+    sky = new THREE.Mesh(geometry, material);
+    scene.add(sky);
 };
 
 var heart;
@@ -574,14 +653,14 @@ var animate = function () {
 
     var pCount = 1000;
     while (pCount--) {
-        var particle = snow.vertices[pCount];
+        var particle = precip.vertices[pCount];
         if (particle.y < -200) {
             particle.y = 200;
         }
 
         particle.y += particle.velocity.y;
     }
-    snow.verticesNeedUpdate = true;
+    precip.verticesNeedUpdate = true;
 
 
 

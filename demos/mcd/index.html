@@ -10,7 +10,16 @@
 
 <body>
   <div id="notice">Drag the screen to look <br>around at your location.</div>
-  <div id="weather">It's snowing in Vancouver, -3&deg C.</div>
+  <div id="weather_controls">
+    <div id="weather"></div>
+    <a onclick="set_weather('sun')" data-value="sun">clear</a>
+    <a onclick="set_weather('rain')" data-value="rain">rain</a>
+    <a onclick="set_weather('snow')" data-value="snow">snow</a>
+    <a onclick="set_weather('cloudy')" data-value="cloudy">cloudy</a> |
+    <a onclick="set_day()" data-value="day">day</a>
+    <a onclick="set_night()" data-value="night">night</a>
+
+  </div>
   <script>
     var startTime = performance.now();
   </script>
@@ -27,7 +36,7 @@
   <script src="../../src/geography.js"></script>
   <script src="../../src/styles.js"></script>
   <style>
-    #weather {
+    #weather_controls {
       background-color: rgba(255, 255, 255, 0.5);
       box-shadow: 1px 3px 3px rgba(0, 0, 0, 0.2);
       color: #222;
@@ -39,23 +48,34 @@
       -webkit-user-select: none;
       -ms-user-select: none;
       user-select: none;
-      height: 40px;
-      font-size: 30px;
-      top: 10px;
+      height: 50px;
+      top: 30px;
       left: 10px;
       right: 10px;
-      padding: 25px 25px;
+      padding: 10px 10px;
       border-radius: 5px;
+    }
+
+    #weather {
+      font-size: 20px;
+      padding-bottom: 10px;
+    }
+
+    .active {
+      text-decoration: underline;
     }
   </style>
   <script>
     var styles = {
       building: {
         //height_scale: 0.1,
-        extrude: "flat",
-        color: 0x00aa55,
-        material: "buildings"
+        //extrude: "flat",
+        //color: 0x00aa55,
+        //material: "buildings"
         //color: 0xEE4411
+        color: 0x00AA55,
+        opacity: 0.6,
+        height_scale: 0.6
       },
       landuse: {
         opacity: 0.9
@@ -91,9 +111,9 @@
   </script>
   <script src="index.js"></script>
 
-  <!--<a href='https://github.com/countable-web/threejs-go' class='forkme'>
+  <a href='https://github.com/countable-web/threejs-go' class='forkme'>
     Fork me on GitHub
-    <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABSUlEQVRYR+2X7U3DMBCGn27ACLAB3aDdoGxQNmET2IBuUDYoG8AGZQPQi+Iqss4fFztEqrg/ltqLnze+L2dFf/uOtlzlENk/J2r7F7DoCWyA45I58AzslxJgwT+Bu7+oAgsu7gNwmFtACv4CPJZKubUPNMElrkVAM7xFQBf4VAHd4FMEdIV7BdTC5ScrVoBHgAceOmG3MtwBr0Y9xwBLZJdG9AHcRgKst5utFcfjNXe0swyjWMAWeEu02FnGseeCcQOce49jjwCxXf41s8C14dUIsEovzrt3YD38eALuC7PfvB2lQmBlc7z/uBq8/pe9cjmQar96uLYRBVCyd+QEqKQUCq1j+xoumlrH5vX/fbZUBRosYboFmKac3sgyr39RgCD60FCMZeqAin3OXP6lExBIg0ihkOmOr2zOmcu/RoBgTwMxrAUN9f4/AutTIaZOHkoAAAAASUVORK5CYII='>-->
+    <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABSUlEQVRYR+2X7U3DMBCGn27ACLAB3aDdoGxQNmET2IBuUDYoG8AGZQPQi+Iqss4fFztEqrg/ltqLnze+L2dFf/uOtlzlENk/J2r7F7DoCWyA45I58AzslxJgwT+Bu7+oAgsu7gNwmFtACv4CPJZKubUPNMElrkVAM7xFQBf4VAHd4FMEdIV7BdTC5ScrVoBHgAceOmG3MtwBr0Y9xwBLZJdG9AHcRgKst5utFcfjNXe0swyjWMAWeEu02FnGseeCcQOce49jjwCxXf41s8C14dUIsEovzrt3YD38eALuC7PfvB2lQmBlc7z/uBq8/pe9cjmQar96uLYRBVCyd+QEqKQUCq1j+xoumlrH5vX/fbZUBRosYboFmKac3sgyr39RgCD60FCMZeqAin3OXP6lExBIg0ihkOmOr2zOmcu/RoBgTwMxrAUN9f4/AutTIaZOHkoAAAAASUVORK5CYII='>
   </a>
 
 </body>
