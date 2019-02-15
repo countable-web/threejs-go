@@ -99,7 +99,7 @@ var init = function () {
     day_directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
     day_directionalLight.position.set(1000, 1000, 1000);
     scene.add(day_directionalLight);
-    day_directionalLight3 = new THREE.DirectionalLight(0xffff88, 1.2);
+    day_directionalLight3 = new THREE.DirectionalLight(0xffff88, 0.8);
     day_directionalLight3.position.set(1000, 1000, -1000);
     scene.add(day_directionalLight3);
     day_directionalLight2 = new THREE.DirectionalLight(0xffffdd, 0.4);
