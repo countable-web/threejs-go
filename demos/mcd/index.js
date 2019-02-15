@@ -231,7 +231,7 @@ var init_weather = function (result) {
         sentiment = "nice";
         set_weather("sun")
     }
-    var desc = result.location.name + " is " + result.current.temp_c + " &deg;C and " + condition + ". ";
+    var desc = "Weather at your location is " /*result.location.name + " is "*/ /*+ result.current.temp_c + " &deg;C and "*/ + condition + ". ";
     if (sentiment === "nice") {
         desc += "It's a nice day to visit a McDonald's! "
     } else {
@@ -380,12 +380,12 @@ var shadow_material = new THREE.MeshLambertMaterial({
 var outlets = [];
 var init_mcd = function (lat, lng) {
     var mcds = [{
-        lat: lat + 0.0015,
-        lng: lng + 0.0015
+        lat: lat + 0.001,
+        lng: lng + 0.002
     },
     {
         lat: lat - 0.0015,
-        lng: lng + 0.0015
+        lng: lng + 0.0005
     },
     {
         lat: lat + 0.0015,
