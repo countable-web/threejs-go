@@ -1,4 +1,4 @@
-# threejs-go
+# Three.js Go
 
 Augmented reality, powered by real world map data near you.
 
