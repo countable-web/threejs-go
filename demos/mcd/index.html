@@ -9,21 +9,33 @@
 </head>
 
 <body>
-  <div id="intro">Look around to find Nearby McDonalds'</div>
-  <div id="controls">
-    <p>
-      Weather in <span id="weather"></span>
-    </p>
-    <p>
-      Change:
-      <a onclick="set_weather('sun')" data-value="sun">clear</a>
-      <a onclick="set_weather('rain')" data-value="rain">rain</a>
-      <a onclick="set_weather('snow')" data-value="snow">snow</a>
-      <a onclick="set_weather('cloudy')" data-value="cloudy">cloudy</a> |
-      <a onclick="set_day()" data-value="day">day</a>
-      <a onclick="set_night()" data-value="night">night</a>
-    </p>
+  <div id="intro">
+    <div id="weather"></div>
   </div>
+  <div class="controls weather-controls">
+    weather<br>
+    <a onclick="set_weather('sun')" data-value="sun"><img src="clear.svg"></a>
+    <a onclick="set_weather('rain')" data-value="rain"><img src="rain.svg"></a>
+    <a onclick="set_weather('snow')" data-value="snow"><img src="snow.svg"></a>
+    <a onclick="set_weather('cloudy')" data-value="cloudy"><img src="cloudy.svg"></a>
+  </div>
+  <div class="controls time-controls">
+    time of day<br>
+    <a onclick="set_day()" data-value="day"><img src="day.svg"></a>
+    <a onclick="set_night()" data-value="night"><img src="night.svg"></a>
+  </div>
+  <div class="rotate-your-phone">Please rotate your phone into landscape mode.</div>
+  <style>
+    .rotate-your-phone {
+      display: none
+    }
+
+    @media (orientation: landscape) {
+      .rotate-your-phone {
+        display: block;
+      }
+    }
+  </style>
   <script>
     var startTime = performance.now();
   </script>

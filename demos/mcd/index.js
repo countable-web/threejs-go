@@ -11,13 +11,19 @@ var update_environment = function () {
     if (THREE.current_weather === "snow") {
         particleSystem.visible = true;
         particleSystem.material = snow_material;
-        color = 0xffffff;
+        color = 0xdef1f7;
         precip_velocity = -1;
+        if (THREE.is_daytime) {
+            sky.visible = true;
+        }
     } else if (THREE.current_weather === "rain") {
         precip_velocity = -4;
         particleSystem.visible = true;
-        color = 0xccddee;
+        color = 0xdef1f7;
         particleSystem.material = rain_material;
+        if (THREE.is_daytime) {
+            sky.visible = true;
+        }
     } else if (THREE.current_weather === "cloudy") {
         particleSystem.visible = false;
         color = 0xdef1f7;
@@ -26,7 +32,7 @@ var update_environment = function () {
         }
     } else if (THREE.current_weather === "sun") {
         particleSystem.visible = false;
-        color = 0xd0f1ff
+        color = 0x90fefa
     } else {
         console.error('invalid weather: ', THREE.current_weather)
     }
@@ -46,7 +52,7 @@ var update_environment = function () {
     if (THREE.is_daytime) {
         day_light.visible = true
         day_directionalLight2.visible = true
-        day_directionalLight3.visible = true
+        day_directionalLight3.visible = (THREE.current_weather === "sun")
         night_light.visible = false
         night_directionalLight2.visible = false
     } else {
@@ -93,7 +99,7 @@ var init = function () {
     day_directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
     day_directionalLight.position.set(1000, 1000, 1000);
     scene.add(day_directionalLight);
-    day_directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.3);
+    day_directionalLight3 = new THREE.DirectionalLight(0xffff88, 1.2);
     day_directionalLight3.position.set(1000, 1000, -1000);
     scene.add(day_directionalLight3);
     day_directionalLight2 = new THREE.DirectionalLight(0xffffdd, 0.4);
@@ -122,11 +128,12 @@ var init = function () {
 
     document.body.appendChild(renderer.domElement);
 
-    /* if (THREE.is_mobile) {
-      //controls = new THREE.DragMouseControls(camera);
-      //controls.orientation.y = 5.3; //+ Math.PI;
-      controls = new THREE.DeviceOrientationControls(camera);
-    } else { */
+    if (!THREE.is_mobile) {
+        //controls = new THREE.DragMouseControls(camera);
+        //controls.orientation.y = 5.3; //+ Math.PI;
+        //controls = new THREE.DeviceOrientationControls(camera);
+        document.querySelector('.rotate-your-phone').style.display = 'none'
+    }
     controls = new THREE.OrbitControls(camera);
     controls.minDistance = 100;
     controls.maxDistance = 200;
@@ -136,7 +143,7 @@ var init = function () {
     controls.maxPolarAngle = Math.PI * 0.45;
     controls.minPolarAngle = Math.PI * 0.2;
     controls.target = new THREE.Vector3(0, 0, 0);
-    // }
+
     scene.add(camera);
 
     var onWindowResize = function () {
@@ -190,9 +197,6 @@ var init_geo = function (position) {
             return response.json();
         })
         .then(function (result) {
-            console.log(JSON.stringify(result));
-            var condition = result.current.condition.text.toLowerCase();
-            document.getElementById("weather").innerHTML = result.location.name + " is " + result.current.temp_c + " &deg;C and " + condition
             window._ar_position = position;
             init_ar(lat, lng);
             init_burgler();
@@ -200,23 +204,42 @@ var init_geo = function (position) {
             init_snow();
             init_heart();
 
-            if (condition.indexOf("cloud") > -1
-                || condition.indexOf("overcast") > -1) {
-                set_weather("cloudy")
-            } else if (condition.indexOf("rain") > -1
-                || condition.indexOf("ice") > -1) {
-                set_weather("rain")
-            } else if (condition.indexOf("snow") > -1
-                || condition.indexOf('blizzard') > -1) {
-                set_weather("snow")
-            } else {
-                set_weather("sun")
-            }
+            init_weather(result);
 
             animate();
         });
 };
 
+
+var init_weather = function (result) {
+    console.log(JSON.stringify(result));
+    var condition = result.current.condition.text.toLowerCase();
+    var sentiment;
+    if (condition.indexOf("cloud") > -1
+        || condition.indexOf("overcast") > -1) {
+        set_weather("cloudy")
+        sentiment = "nice";
+    } else if (condition.indexOf("rain") > -1
+        || condition.indexOf("ice") > -1) {
+        sentiment = "danger";
+        set_weather("rain")
+    } else if (condition.indexOf("snow") > -1
+        || condition.indexOf('blizzard') > -1) {
+        sentiment = "danger";
+        set_weather("snow")
+    } else {
+        sentiment = "nice";
+        set_weather("sun")
+    }
+    var desc = result.location.name + " is " + result.current.temp_c + " &deg;C and " + condition + ". ";
+    if (sentiment === "nice") {
+        desc += "It's a nice day to visit a McDonald's! "
+    } else {
+        desc += "Drive safe and visit a McDonad's near you!"
+    }
+    document.getElementById("weather").innerHTML = desc;
+
+}
 var particleSystem;
 var precip;
 var precip_velocity = -4;
@@ -247,7 +270,7 @@ var init_snow = function () {
         sizeAttenuation: true,
         map: sprite1,
         alphaTest: 0.5,
-        opacity: 0.7,
+        opacity: 0.85,
         transparent: true,
         fog: false
     });
