@@ -9,16 +9,20 @@
 </head>
 
 <body>
-  <div id="notice">Drag the screen. Tap a weather option above.</div>
-  <div id="weather_controls">
-    <div id="weather"></div>
-    <a onclick="set_weather('sun')" data-value="sun">clear</a>
-    <a onclick="set_weather('rain')" data-value="rain">rain</a>
-    <a onclick="set_weather('snow')" data-value="snow">snow</a>
-    <a onclick="set_weather('cloudy')" data-value="cloudy">cloudy</a> |
-    <a onclick="set_day()" data-value="day">day</a>
-    <a onclick="set_night()" data-value="night">night</a>
-
+  <div id="intro">Look around to find Nearby McDonalds'</div>
+  <div id="controls">
+    <p>
+      Weather in <span id="weather"></span>
+    </p>
+    <p>
+      Change:
+      <a onclick="set_weather('sun')" data-value="sun">clear</a>
+      <a onclick="set_weather('rain')" data-value="rain">rain</a>
+      <a onclick="set_weather('snow')" data-value="snow">snow</a>
+      <a onclick="set_weather('cloudy')" data-value="cloudy">cloudy</a> |
+      <a onclick="set_day()" data-value="day">day</a>
+      <a onclick="set_night()" data-value="night">night</a>
+    </p>
   </div>
   <script>
     var startTime = performance.now();
@@ -35,36 +39,7 @@
   <script src="../../src/arthree.js"></script>
   <script src="../../src/geography.js"></script>
   <script src="../../src/styles.js"></script>
-  <style>
-    #weather_controls {
-      background-color: rgba(255, 255, 255, 0.5);
-      box-shadow: 1px 3px 3px rgba(0, 0, 0, 0.2);
-      color: #222;
-      text-align: center;
-      position: fixed;
-      line-height: 1.3;
-      -moz-user-select: none;
-      -khtml-user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      height: 50px;
-      top: 30px;
-      left: 10px;
-      right: 10px;
-      padding: 10px 10px;
-      border-radius: 5px;
-    }
 
-    #weather {
-      font-size: 20px;
-      padding-bottom: 10px;
-    }
-
-    .active {
-      text-decoration: underline;
-    }
-  </style>
   <script>
     var styles = {
       building: {

@@ -45,20 +45,7 @@ body {
   text-align: center;
   cursor: pointer;
 }
-
-.arrow-marker {
-  position: relative;
-}
-.arrow-marker-inner {
-  position: absolute;
-  height: 40px;
-  width: 40px;
-  transform: rotateZ(90deg);
-  background: url(/assets/map-arrow.svg);
-  background-size: 40px 40px;
-}
-
-#notice {
+#intro, #controls {
   background-color: rgba(255, 255, 255, 0.5);
   box-shadow: 1px 3px 3px rgba(0, 0, 0, 0.2);
   color: #222;
@@ -71,16 +58,52 @@ body {
   -ms-user-select: none;
   user-select: none;
 }
-#notice {
+#intro {
   height: 40px;
   font-size: 16px;
-  bottom: 10px;
+  top: 20px;
   left: 50%;
   margin-left: -125px;
   width: 200px;
   padding: 15px 25px;
   border-radius: 5px;
 }
+#controls {
+  height: 60px;
+  bottom: 20px;
+  left: 10px;
+  right: 10px;
+  padding: 10px 10px;
+  border-radius: 5px;
+}
+#controls p {
+  padding: 5px 0;
+  margin: 0;
+}
+#controls p:first-child {
+  border-bottom: 1px solid #222
+}
+#controls a {
+  color: darkblue;
+}
+
+.active {
+  text-decoration: underline;
+}
+.arrow-marker {
+  position: relative;
+}
+.arrow-marker-inner {
+  position: absolute;
+  height: 40px;
+  width: 40px;
+  transform: rotateZ(90deg);
+  background: url(/assets/map-arrow.svg);
+  background-size: 40px 40px;
+}
+
+
+
 
 .forkme {
   position: fixed;
