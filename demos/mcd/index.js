@@ -220,6 +220,7 @@ var init_weather = function (result) {
         set_weather("cloudy")
         sentiment = "nice";
     } else if (condition.indexOf("rain") > -1
+        || condition.indexOf("shower") > -1
         || condition.indexOf("ice") > -1) {
         sentiment = "danger";
         set_weather("rain")
