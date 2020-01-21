@@ -192,7 +192,7 @@ var default_geo = function () {
 var init_geo = function (position) {
     var lat = position.coords.latitude;
     var lng = position.coords.longitude;
-    fetch('https://api.apixu.com/v1/current.json?key=b7718de366844ed98e465303191402&q=' + lat + ',' + lng)
+    fetch('https:///api.weatherstack.com/v1/current.json?key=5d23e8a87e9fc5d1270024af110ed75c&q=' + lat + ',' + lng)
         .then(function (response) {
             return response.json();
         })
