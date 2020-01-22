@@ -205,7 +205,7 @@ var init_geo = function (position) {
             init_heart();
 
 //            init_weather(result);
-
+document.getElementById("weather").innerHTML = '(Weather API disabled)'
             animate();
 //        });
 };
