@@ -204,7 +204,7 @@ var init_geo = function (position) {
             init_snow();
             init_heart();
 
-            init_weather(result);
+//            init_weather(result);
 
             animate();
 //        });
