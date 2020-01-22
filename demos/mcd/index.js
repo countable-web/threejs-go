@@ -192,11 +192,11 @@ var default_geo = function () {
 var init_geo = function (position) {
     var lat = position.coords.latitude;
     var lng = position.coords.longitude;
-    fetch('http:///api.weatherstack.com/v1/current.json?access_key=5d23e8a87e9fc5d1270024af110ed75c&q=' + lat + ',' + lng)
+    /*fetch('http:///api.weatherstack.com/v1/current.json?access_key=5d23e8a87e9fc5d1270024af110ed75c&q=' + lat + ',' + lng)
         .then(function (response) {
             return response.json();
         })
-        .then(function (result) {
+        .then(function (result) {*/
             window._ar_position = position;
             init_ar(lat, lng);
             init_burgler();
@@ -207,7 +207,7 @@ var init_geo = function (position) {
             init_weather(result);
 
             animate();
-        });
+//        });
 };
 
 
